@@ -1,7 +1,7 @@
-#include "Entity.h"
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 #include <gl/GLU.h>
+#include "Entity.h"
 
 #define GL_CLAMP_TO_EDGE 0x812F
 
@@ -16,6 +16,7 @@ Entity::~Entity()
 GLuint& Entity::load_texture(sf::String name)
 {
 	GLuint texture = 0;
+
 	sf::Image image;
 	image.loadFromFile(name);
 	image.flipVertically();

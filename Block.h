@@ -1,19 +1,16 @@
 #pragma once
-#include "Entity.h"
-#include <vector>
 #include <SFML/OpenGL.hpp>
+#include "Box.h"
 
-using std::vector;
-
+class World;
 class Block :
-	public Entity
+	public Box
 {
 public:
-	Block();
+	Block(World *world);
 	~Block();
-
-	void bind_textures(float size, const sf::Vector3f &pos, const sf::Vector3f &shift);
-protected:
-	vector<GLuint> m_box;
+	void bind_textures(const sf::Vector3f &pos);
+private:
+	GLuint m_buf[2];
 };
 
