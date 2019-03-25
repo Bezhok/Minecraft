@@ -26,7 +26,7 @@ void App::run()
 	m_player.init(&world);
 	m_player.god_on();
 	Renderer renderer;
-	ShowCursor(false);
+	//m_window.setMouseCursorVisible(false);
 
 	// text
 	sf::Text text;
@@ -45,7 +45,7 @@ void App::run()
 				world_list[i][j][k] = glGenLists(i + j * SUPER_CHUNK_SIZE + k * SUPER_CHUNK_SIZE * SUPER_CHUNK_SIZE+1);
 				glNewList(world_list[i][j][k], GL_COMPILE);
 
-				for (auto it = world.m_world[i][j][k].get_chunk().begin(); it != world.m_world[i][j][k].get_chunk().end(); ++it) {
+				for (auto it = world.m_world[i][j][k].chunk().begin(); it != world.m_world[i][j][k].chunk().end(); ++it) {
 					grass_block.bind_textures(
 						sf::Vector3f(it->second.x + i * CHUNK_SIZE + 0.5, it->second.y + j * CHUNK_SIZE+0.5, it->second.z + k * CHUNK_SIZE+0.5));
 				}
@@ -68,13 +68,34 @@ void App::run()
 			debug_data.start();
 
 			text.setString(
-				to_string(int(debug_data.fps)) + " " +
-				to_string(debug_data.frame_time) + "\n" +
+				"fps: " +
+				to_string(int(debug_data.fps)) + "\n" +
+				"ft: " +
+				to_string(int(debug_data.frame_time)) + "\n" +
+				"x, y, z: " +
 				to_string(m_player.get_position().x) + " " +
 				to_string(m_player.get_position().y) + " " +
 				to_string(m_player.get_position().z)
 			);
 			renderer.draw_SFML(text);
+		}
+
+		if (world.m_redraw_chunk) {
+			
+			sf::Vector3i c = world.m_edited_chunk_coord;
+			glDeleteLists(world_list[c.x][c.y][c.z], 1);
+
+			world_list[c.x][c.y][c.z] = glGenLists(c.x + c.y * SUPER_CHUNK_SIZE + c.z * SUPER_CHUNK_SIZE * SUPER_CHUNK_SIZE + 1);
+			glNewList(world_list[c.x][c.y][c.z], GL_COMPILE);
+
+			for (auto it = world.m_world[c.x][c.y][c.z].chunk().begin(); it != world.m_world[c.x][c.y][c.z].chunk().end(); ++it) {
+				grass_block.bind_textures(
+					sf::Vector3f(it->second.x + c.x * CHUNK_SIZE + 0.5, it->second.y + c.y * CHUNK_SIZE + 0.5, it->second.z + c.z * CHUNK_SIZE + 0.5));
+			}
+
+			glEndList();
+
+			world.m_redraw_chunk = false;
 		}
 
 		for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
@@ -117,22 +138,23 @@ void App::handle_events()
 	}
 
 
-	////camera//////
-	POINT mouse_xy;
+	//camera
+	sf::Vector2i mouse_xy;
 	if (m_handle_cursor) {
-		GetCursorPos(&mouse_xy);
+		// get global mouse position
+		mouse_xy = sf::Mouse::getPosition(m_window);
+		
 		// center coordinates
-		int x = m_window.getPosition().x + WINDOW_WIDTH / 2;
-		int y = m_window.getPosition().y + WINDOW_HEIGTH / 2;
+		int x = WINDOW_WIDTH / 2;
+		int y = WINDOW_HEIGTH / 2+5;
 
-		m_player.m_camera_angle.x += (x - mouse_xy.x) / 8;
-		m_player.m_camera_angle.y += (y - mouse_xy.y) / 8;
+		m_player.m_camera_angle.x += float(x - mouse_xy.x) / 8;
+		m_player.m_camera_angle.y += float(y - mouse_xy.y) / 8;
 
-		if (m_player.m_camera_angle.y < -89.9) { m_player.m_camera_angle.y = -89.9; }
-		if (m_player.m_camera_angle.y > 89.9) { m_player.m_camera_angle.y = 89.9; }
+		if (m_player.m_camera_angle.y < -88) { m_player.m_camera_angle.y = -88; }
+		if (m_player.m_camera_angle.y > 88) { m_player.m_camera_angle.y = 88; }
 
-		SetCursorPos(x, y);
-		//////////
+		sf::Mouse::setPosition(sf::Vector2i(x, y), m_window);
 	}
 }
 

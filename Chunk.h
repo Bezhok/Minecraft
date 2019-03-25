@@ -9,7 +9,7 @@ class Chunk
 public:
 	Chunk();
 	~Chunk();
-	unordered_map<int, sf::Vector3f>& get_chunk() { return m_chunk; };
+	unordered_map<int, sf::Vector3f>& chunk() { return m_chunk; };
 
 	int block_hash(int x, int y, int z);
 private:
