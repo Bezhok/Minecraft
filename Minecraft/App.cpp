@@ -1,15 +1,13 @@
-#include <cmath>
-#include <string>
-#include <SFML/Graphics.hpp>
-#include <SFML/OpenGL.hpp>
-#include <gl/GLU.h>
+#include "pch.h"
 #include "Renderer.h"
 #include "DebugData.h"
-#include "World.h"
+#include "Map.h"
 #include "Block.h"
 #include "App.h"
+#include "block_db.h"
 
 using std::to_string;
+using namespace World;
 
 App::App(sf::RenderWindow &window)
 	: m_window {window}
@@ -22,7 +20,7 @@ App::~App()
 
 void App::run()
 {
-	World world;
+	World::Map world;
 	m_player.init(&world);
 	m_player.god_on();
 	Renderer renderer;
@@ -31,13 +29,14 @@ void App::run()
 	// text
 	sf::Text text;
 	sf::Font font;
-	font.loadFromFile("arial.ttf");
+	font.loadFromFile("resources/arial.ttf");
 	text.setFont(font);
 	text.setCharacterSize(16);
 	text.setFillColor(sf::Color::Blue);
 
+	DB db; db.load_blocks();
 
-	Block grass_block(&world);
+	Block block(&world);
 	GLuint world_list[SUPER_CHUNK_SIZE][SUPER_CHUNK_SIZE][SUPER_CHUNK_SIZE];
 	for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
 		for (int j = 0; j < SUPER_CHUNK_SIZE; ++j) {
@@ -45,9 +44,16 @@ void App::run()
 				world_list[i][j][k] = glGenLists(i + j * SUPER_CHUNK_SIZE + k * SUPER_CHUNK_SIZE * SUPER_CHUNK_SIZE+1);
 				glNewList(world_list[i][j][k], GL_COMPILE);
 
+				
 				for (auto it = world.m_world[i][j][k].chunk().begin(); it != world.m_world[i][j][k].chunk().end(); ++it) {
-					grass_block.bind_textures(
-						sf::Vector3f(it->second.x + i * CHUNK_SIZE + 0.5, it->second.y + j * CHUNK_SIZE+0.5, it->second.z + k * CHUNK_SIZE+0.5));
+					block.bind_textures(
+						it->second.id,
+						sf::Vector3f(
+							it->second.x + i * CHUNK_SIZE + 0.5F,
+							it->second.y + j * CHUNK_SIZE + 0.5F,
+							it->second.z + k * CHUNK_SIZE + 0.5F
+						)
+					);
 				}
 
 				glEndList();
@@ -89,8 +95,14 @@ void App::run()
 			glNewList(world_list[c.x][c.y][c.z], GL_COMPILE);
 
 			for (auto it = world.m_world[c.x][c.y][c.z].chunk().begin(); it != world.m_world[c.x][c.y][c.z].chunk().end(); ++it) {
-				grass_block.bind_textures(
-					sf::Vector3f(it->second.x + c.x * CHUNK_SIZE + 0.5, it->second.y + c.y * CHUNK_SIZE + 0.5, it->second.z + c.z * CHUNK_SIZE + 0.5));
+				block.bind_textures(
+					it->second.id,
+					sf::Vector3f(
+						it->second.x + c.x * CHUNK_SIZE + 0.5F,
+						it->second.y + c.y * CHUNK_SIZE + 0.5F,
+						it->second.z + c.z * CHUNK_SIZE + 0.5F
+					)
+				);
 			}
 
 			glEndList();
@@ -137,7 +149,6 @@ void App::handle_events()
 		m_player.input(event);
 	}
 
-
 	//camera
 	sf::Vector2i mouse_xy;
 	if (m_handle_cursor) {
@@ -162,8 +173,8 @@ void App::update(sf::Clock &timer)
 {
 	float time = timer.getElapsedTime().asMilliseconds();
 	timer.restart();
-	time = time / 50;
-	if (time > 3) time = 3;
+	time = time / 50.F;
+	//if (time > 3) time = 3;
 
 	m_player.update(time);
 }

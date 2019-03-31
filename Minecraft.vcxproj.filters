@@ -13,78 +13,105 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Исходные файлы\World">
+      <UniqueIdentifier>{5eddfab8-5a62-46a7-bd36-2dcd326d2a6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\World">
+      <UniqueIdentifier>{cc6edff6-6b2c-4606-ac48-030880ecae7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Supporting">
+      <UniqueIdentifier>{d361c936-6273-437b-8911-2a2e837d50cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\Base">
+      <UniqueIdentifier>{37ae4432-ae85-4e8f-bce8-1d139dcc7b08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Base">
+      <UniqueIdentifier>{b7e7baf0-433b-4ba5-abf6-4735c06bbc28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Supporting">
+      <UniqueIdentifier>{aa716f3e-5036-43e5-a98f-0deedecb21a9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="Minecraft\App.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Entity.cpp">
+    <ClCompile Include="Minecraft\Block.cpp">
+      <Filter>Исходные файлы\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Minecraft\block_db.cpp">
+      <Filter>Исходные файлы\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Minecraft\Box.cpp">
+      <Filter>Исходные файлы\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Minecraft\Chunk.cpp">
+      <Filter>Исходные файлы\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Minecraft\DebugData.cpp">
+      <Filter>Исходные файлы\Supporting</Filter>
+    </ClCompile>
+    <ClCompile Include="Minecraft\Entity.cpp">
+      <Filter>Исходные файлы\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="Minecraft\main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Block.cpp">
+    <ClCompile Include="Minecraft\Player.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
+    <ClCompile Include="Minecraft\Renderer.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="SkyBox.cpp">
-      <Filter>Исходные файлы</Filter>
+    <ClCompile Include="Minecraft\SkyBox.cpp">
+      <Filter>Исходные файлы\World</Filter>
     </ClCompile>
-    <ClCompile Include="Box.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="World.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Chunk.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="DebugData.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="App.cpp">
-      <Filter>Исходные файлы</Filter>
+    <ClCompile Include="Minecraft\Map.cpp">
+      <Filter>Исходные файлы\World</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Entity.h">
+    <ClInclude Include="Minecraft\App.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Block.h">
+    <ClInclude Include="Minecraft\Block.h">
+      <Filter>Файлы заголовков\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\block_db.h">
+      <Filter>Файлы заголовков\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\Box.h">
+      <Filter>Файлы заголовков\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\Chunk.h">
+      <Filter>Файлы заголовков\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\DebugData.h">
+      <Filter>Файлы заголовков\Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\Entity.h">
+      <Filter>Файлы заголовков\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\game_constants.h">
+      <Filter>Файлы заголовков\Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\Maths.h">
+      <Filter>Файлы заголовков\Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\pch.h">
+      <Filter>Файлы заголовков\Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\Player.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
+    <ClInclude Include="Minecraft\Renderer.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="game_constants.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="Minecraft\SkyBox.h">
+      <Filter>Файлы заголовков\World</Filter>
     </ClInclude>
-    <ClInclude Include="Maths.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="SkyBox.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Box.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="World.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Chunk.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="DebugData.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="App.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="Minecraft\Map.h">
+      <Filter>Файлы заголовков\World</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

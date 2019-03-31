@@ -131,31 +131,34 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="App.cpp" />
-    <ClCompile Include="Block.cpp" />
-    <ClCompile Include="Box.cpp" />
-    <ClCompile Include="Chunk.cpp" />
-    <ClCompile Include="DebugData.cpp" />
-    <ClCompile Include="Entity.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Renderer.cpp" />
-    <ClCompile Include="SkyBox.cpp" />
-    <ClCompile Include="World.cpp" />
+    <ClCompile Include="Minecraft\App.cpp" />
+    <ClCompile Include="Minecraft\Block.cpp" />
+    <ClCompile Include="Minecraft\block_db.cpp" />
+    <ClCompile Include="Minecraft\Box.cpp" />
+    <ClCompile Include="Minecraft\Chunk.cpp" />
+    <ClCompile Include="Minecraft\DebugData.cpp" />
+    <ClCompile Include="Minecraft\Entity.cpp" />
+    <ClCompile Include="Minecraft\main.cpp" />
+    <ClCompile Include="Minecraft\Player.cpp" />
+    <ClCompile Include="Minecraft\Renderer.cpp" />
+    <ClCompile Include="Minecraft\SkyBox.cpp" />
+    <ClCompile Include="Minecraft\Map.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="App.h" />
-    <ClInclude Include="Block.h" />
-    <ClInclude Include="Box.h" />
-    <ClInclude Include="Chunk.h" />
-    <ClInclude Include="DebugData.h" />
-    <ClInclude Include="Entity.h" />
-    <ClInclude Include="game_constants.h" />
-    <ClInclude Include="Maths.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Renderer.h" />
-    <ClInclude Include="SkyBox.h" />
-    <ClInclude Include="World.h" />
+    <ClInclude Include="Minecraft\App.h" />
+    <ClInclude Include="Minecraft\Block.h" />
+    <ClInclude Include="Minecraft\block_db.h" />
+    <ClInclude Include="Minecraft\Box.h" />
+    <ClInclude Include="Minecraft\Chunk.h" />
+    <ClInclude Include="Minecraft\DebugData.h" />
+    <ClInclude Include="Minecraft\Entity.h" />
+    <ClInclude Include="Minecraft\game_constants.h" />
+    <ClInclude Include="Minecraft\Maths.h" />
+    <ClInclude Include="Minecraft\pch.h" />
+    <ClInclude Include="Minecraft\Player.h" />
+    <ClInclude Include="Minecraft\Renderer.h" />
+    <ClInclude Include="Minecraft\SkyBox.h" />
+    <ClInclude Include="Minecraft\Map.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

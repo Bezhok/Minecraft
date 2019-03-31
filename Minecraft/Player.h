@@ -1,17 +1,22 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+#include "pch.h"
 #include "Entity.h"
-#include "World.h"
+#include "Map.h"
 #include "game_constants.h"
+#include "block_db.h"
+
+using namespace Base;
+using namespace World;
 
 class Player :
 	public Entity
 {
 public:
+	DB::block_id m_curr_block;
 	sf::Vector2f m_camera_angle;
 	float m_speed = STANDART_PLAYER_SPEED;
 	Player();
-	void init(World *world);
+	void init(World::Map *world);
 	~Player();
 	void input(sf::Event &e);
 	void update(float time);

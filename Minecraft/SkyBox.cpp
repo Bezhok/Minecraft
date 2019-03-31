@@ -1,6 +1,8 @@
 #include "game_constants.h"
 #include "SkyBox.h"
 
+using namespace World;
+
 SkyBox::SkyBox()
 {
 }

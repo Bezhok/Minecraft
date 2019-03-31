@@ -1,5 +1,5 @@
 #pragma once
-#include <SFML/Graphics.hpp>
+#include "pch.h"
 #include "Player.h"
 
 class App

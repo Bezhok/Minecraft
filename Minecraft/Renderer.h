@@ -1,6 +1,5 @@
 #pragma once
-#include <queue>
-#include <SFML/Graphics.hpp>
+#include "pch.h"
 #include "SkyBox.h"
 #include "Chunk.h"
 #include "Player.h"

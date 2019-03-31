@@ -1,6 +1,6 @@
 #include "Box.h"
 
-using std::vector;
+using namespace Base;
 
 Box::Box()
 {

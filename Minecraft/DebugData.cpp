@@ -1,6 +1,5 @@
-#include <SFML/Graphics.hpp>
+#include "pch.h"
 #include "DebugData.h"
-
 
 void DebugData::start()
 {

@@ -1,9 +1,7 @@
-#include <SFML/Graphics.hpp>
-#include <SFML/OpenGL.hpp>
-#include <gl/GLU.h>
+#include "pch.h"
 #include "Entity.h"
 
-#define GL_CLAMP_TO_EDGE 0x812F
+using namespace Base;
 
 Entity::Entity()
 {
@@ -13,7 +11,7 @@ Entity::~Entity()
 {
 }
 
-GLuint& Entity::load_texture(sf::String name)
+GLuint Entity::load_texture(sf::String name)
 {
 	GLuint texture = 0;
 

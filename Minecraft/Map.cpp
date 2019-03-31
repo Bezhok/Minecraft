@@ -1,11 +1,12 @@
-#include <unordered_map>
-#include <SFML/Graphics.hpp>
-#include "World.h"
+#include "pch.h"
+#include "Map.h"
 #include "Chunk.h"
+#include "block_db.h"
 
 using std::unordered_map;
+using namespace World;
 
-World::World()
+Map::Map()
 {
 	for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
 		for (int j = 0; j < SUPER_CHUNK_SIZE; ++j) {
@@ -16,11 +17,11 @@ World::World()
 	}
 }
 
-World::~World()
+Map::~Map()
 {
 }
 
-bool World::is_block(int x, int y, int z)//block x,y,z in chunk
+bool Map::is_block(int x, int y, int z)//block x,y,z in chunk
 {
 	if (x < 0 || y < 0 || z < 0
 		|| x / CHUNK_SIZE >= SUPER_CHUNK_SIZE
@@ -28,7 +29,7 @@ bool World::is_block(int x, int y, int z)//block x,y,z in chunk
 		|| z / CHUNK_SIZE >= SUPER_CHUNK_SIZE) return false;
 
 	Chunk &e = m_world[x / CHUNK_SIZE][y / CHUNK_SIZE][z / CHUNK_SIZE];
-	unordered_map<int, sf::Vector3f>::iterator it = e.chunk().find(e.block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
+	auto it = e.chunk().find(e.block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
 
 	if (e.chunk().end() == it)
 		return false;
@@ -36,7 +37,7 @@ bool World::is_block(int x, int y, int z)//block x,y,z in chunk
 		return true;
 }
 
-bool World::create_block(int x, int y, int z)
+bool Map::create_block(int x, int y, int z, DB::block_id id)
 {
 	if (x < 0 || y < 0 || z < 0
 		|| x / CHUNK_SIZE >= SUPER_CHUNK_SIZE
@@ -44,14 +45,20 @@ bool World::create_block(int x, int y, int z)
 		|| z / CHUNK_SIZE >= SUPER_CHUNK_SIZE) return false;
 
 	Chunk &e = m_world[x / CHUNK_SIZE][y / CHUNK_SIZE][z / CHUNK_SIZE];
+	auto it = e.chunk().find(e.block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
 
-	e.chunk()[e.block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE)] = sf::Vector3f(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE);
-
-	m_edited_chunk_coord = { x / CHUNK_SIZE, y / CHUNK_SIZE, z / CHUNK_SIZE };
-	m_redraw_chunk = true;
+	if (e.chunk().end() == it) {
+		e.chunk()[e.block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE)] = { x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE, id };
+		m_edited_chunk_coord = { x / CHUNK_SIZE, y / CHUNK_SIZE, z / CHUNK_SIZE };
+		m_redraw_chunk = true;
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
-bool World::delete_block(int x, int y, int z)
+bool Map::delete_block(int x, int y, int z)
 {
 	if (x < 0 || y < 0 || z < 0
 		|| x / CHUNK_SIZE >= SUPER_CHUNK_SIZE
@@ -59,12 +66,14 @@ bool World::delete_block(int x, int y, int z)
 		|| z / CHUNK_SIZE >= SUPER_CHUNK_SIZE) return false;
 
 	Chunk &e = m_world[x / CHUNK_SIZE][y / CHUNK_SIZE][z / CHUNK_SIZE];
-	unordered_map<int, sf::Vector3f>::iterator it = e.chunk().find(e.block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
+	auto it = e.chunk().find(e.block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
 
 	if (e.chunk().end() == it)
 		return false;
-	else
+	else {
 		m_edited_chunk_coord = { x / CHUNK_SIZE, y / CHUNK_SIZE, z / CHUNK_SIZE };
 		e.chunk().erase(it);
 		m_redraw_chunk = true;
+		return true;
+	}
 }

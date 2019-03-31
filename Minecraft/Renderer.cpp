@@ -1,8 +1,5 @@
-#include <SFML/Graphics.hpp>
-#include <SFML/OpenGL.hpp>
-#include <gl/GLU.h>
+#include "pch.h"
 #include "Renderer.h"
-#include "Maths.h"
 #include "Player.h"
 #include "SkyBox.h"
 

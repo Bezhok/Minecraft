@@ -1,15 +1,19 @@
+#include "pch.h"
 #include "Player.h"
-#include "Maths.h"
 #include "game_constants.h"
-#include "World.h"
+#include "Map.h"
+#include "block_db.h"
+
+using namespace World;
 
 Player::Player()
 {
 	m_size = {BLOCK_SIZE/4, BLOCK_SIZE, BLOCK_SIZE/4};
 	m_pos = {100, 100, 100};
+	m_curr_block = DB::block_id::Stone;
 }
 
-void Player::init(World * world)
+void Player::init(Map * world)
 {
 	m_world = world;
 }
@@ -41,7 +45,7 @@ void Player::update(float time)
 		m_dpos.x = m_dpos.y = m_dpos.z = 0;
 	} else {
 		if (!m_on_ground)
-			m_dpos.y -= 1.5*time;
+			m_dpos.y -= 1.5F*time;
 
 		m_on_ground = false; //reset
 
@@ -81,27 +85,23 @@ void Player::put_block()
 		y = m_pos.y,
 		z = m_pos.z;
 
-	//x += -sin(m_camera_angle.x / 180 * PI)*10;
-	//y += tan(m_camera_angle.y / 180 * PI)*10;
-	//z += -cos(m_camera_angle.x / 180 * PI)*10;
-
 	prev_x = x; prev_y = y; prev_z = z;
 	bool able_create = false;
 	for (int distance = 0; distance < 10 * BLOCK_SIZE; ++distance) {
 		
-		x += -sin(m_camera_angle.x / 180 * PI);
-		y += tan(m_camera_angle.y / 180 * PI);
-		z += -cos(m_camera_angle.x / 180 * PI);
+		x += -sinf(m_camera_angle.x / 180 * PI);
+		y += tanf(m_camera_angle.y / 180 * PI);
+		z += -cosf(m_camera_angle.x / 180 * PI);
 
 		if (m_world->is_block(x/BLOCK_SIZE, y/BLOCK_SIZE, z/BLOCK_SIZE)) {
 			// is we in this block
 			for (int matrix_x = (m_pos.x - m_size.x) / BLOCK_SIZE; matrix_x < (m_pos.x + m_size.x) / BLOCK_SIZE; matrix_x++) {
 				for (int matrix_y = (m_pos.y - m_size.y) / BLOCK_SIZE; matrix_y < (m_pos.y + m_size.y) / BLOCK_SIZE; matrix_y++) {
 					for (int matrix_z = (m_pos.z - m_size.z) / BLOCK_SIZE; matrix_z < (m_pos.z + m_size.z) / BLOCK_SIZE; matrix_z++) {
-						int a = prev_x / BLOCK_SIZE;
-						int b = prev_y / BLOCK_SIZE;
-						int c = prev_z / BLOCK_SIZE;
-						if (matrix_x == a && matrix_y == b && matrix_z == c) {
+						int x = prev_x / BLOCK_SIZE;
+						int y = prev_y / BLOCK_SIZE;
+						int z = prev_z / BLOCK_SIZE;
+						if (matrix_x == x && matrix_y == y && matrix_z == z) {
 							able_create = false;
 							break;
 						}
@@ -113,7 +113,8 @@ void Player::put_block()
 				m_world->create_block(
 					prev_x / BLOCK_SIZE,
 					prev_y / BLOCK_SIZE,
-					prev_z / BLOCK_SIZE
+					prev_z / BLOCK_SIZE,
+					m_curr_block
 				);
 				break;
 			}
@@ -132,9 +133,9 @@ void Player::delete_block()
 
 	bool able_create = false;
 	for (int distance = 0; distance < 6 * BLOCK_SIZE; ++distance) {
-		x += -sin(m_camera_angle.x / 180 * PI);
-		y += tan(m_camera_angle.y / 180 * PI);
-		z += -cos(m_camera_angle.x / 180 * PI);
+		x += -sinf(m_camera_angle.x / 180 * PI);
+		y += tanf(m_camera_angle.y / 180 * PI);
+		z += -cosf(m_camera_angle.x / 180 * PI);
 		if (m_world->is_block(
 			x / BLOCK_SIZE,
 			y / BLOCK_SIZE,
@@ -178,29 +179,29 @@ void Player::keyboard_input(sf::Event &e)
 	// forward
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
 	{
-		m_dpos.x = -sin(m_camera_angle.x / 180 * PI) * m_speed;
-		m_dpos.z = -cos(m_camera_angle.x / 180 * PI) * m_speed;
+		m_dpos.x = -sinf(m_camera_angle.x / 180 * PI) * m_speed;
+		m_dpos.z = -cosf(m_camera_angle.x / 180 * PI) * m_speed;
 	}
 
 	// back
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
 	{
-		m_dpos.x = +sin(m_camera_angle.x / 180 * PI) * m_speed;
-		m_dpos.z = +cos(m_camera_angle.x / 180 * PI) * m_speed;
+		m_dpos.x = +sinf(m_camera_angle.x / 180 * PI) * m_speed;
+		m_dpos.z = +cosf(m_camera_angle.x / 180 * PI) * m_speed;
 	}
 
 	// left
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
 	{
-		m_dpos.x = +sin((m_camera_angle.x - 90) / 180 * PI) * m_speed;
-		m_dpos.z = +cos((m_camera_angle.x - 90) / 180 * PI) * m_speed;
+		m_dpos.x = +sinf((m_camera_angle.x - 90) / 180 * PI) * m_speed;
+		m_dpos.z = +cosf((m_camera_angle.x - 90) / 180 * PI) * m_speed;
 	}
 
 	//rigth
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
 	{
-		m_dpos.x = +sin((m_camera_angle.x + 90) / 180 * PI) * m_speed;
-		m_dpos.z = +cos((m_camera_angle.x + 90) / 180 * PI) * m_speed;
+		m_dpos.x = +sinf((m_camera_angle.x + 90) / 180 * PI) * m_speed;
+		m_dpos.z = +cosf((m_camera_angle.x + 90) / 180 * PI) * m_speed;
 	}
 
 	// up(jump)
@@ -237,6 +238,20 @@ void Player::keyboard_input(sf::Event &e)
 					flight_on();
 			}
 		}
+		else if (e.key.code == sf::Keyboard::Right) {
+			if (m_curr_block == 3) m_curr_block = (DB::block_id)(1);
+			else m_curr_block = (DB::block_id)(m_curr_block + 1);
+		}
+		else if (e.key.code == sf::Keyboard::Left) {
+			if (m_curr_block == 1) m_curr_block = (DB::block_id)(3);
+			else m_curr_block = (DB::block_id)(m_curr_block - 1);
+		}
+	} else if (e.type == sf::Event::MouseWheelMoved) {
+		// todo
+		if (m_curr_block + e.mouseWheel.delta > 3) m_curr_block = (DB::block_id)(1);
+		else if (m_curr_block + e.mouseWheel.delta < 1) m_curr_block = (DB::block_id)(3);
+		else m_curr_block = (DB::block_id)(m_curr_block + e.mouseWheel.delta);
+		
 	}
 }
 
