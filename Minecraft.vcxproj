@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Minecraft\Menu.cpp" />
     <ClCompile Include="Minecraft\App.cpp" />
     <ClCompile Include="Minecraft\Block.cpp" />
     <ClCompile Include="Minecraft\block_db.cpp" />
@@ -145,6 +146,7 @@
     <ClCompile Include="Minecraft\Map.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Minecraft\Menu.h" />
     <ClInclude Include="Minecraft\App.h" />
     <ClInclude Include="Minecraft\Block.h" />
     <ClInclude Include="Minecraft\block_db.h" />

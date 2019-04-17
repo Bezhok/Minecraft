@@ -8,6 +8,8 @@
 using namespace Base;
 using namespace World;
 
+using std::vector;
+using std::pair;
 class Player :
 	public Entity
 {
@@ -15,6 +17,8 @@ public:
 	DB::block_id m_curr_block;
 	sf::Vector2f m_camera_angle;
 	float m_speed = STANDART_PLAYER_SPEED;
+	vector<pair<DB::block_id, int>> m_inventory;
+
 	Player();
 	void init(World::Map *world);
 	~Player();

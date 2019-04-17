@@ -8,14 +8,20 @@ using namespace World;
 
 Player::Player()
 {
-	m_size = {BLOCK_SIZE/4, BLOCK_SIZE, BLOCK_SIZE/4};
-	m_pos = {100, 100, 100};
-	m_curr_block = DB::block_id::Stone;
+
 }
 
 void Player::init(Map * world)
 {
 	m_world = world;
+
+	m_size = { BLOCK_SIZE / 4, BLOCK_SIZE, BLOCK_SIZE / 4 };
+	m_pos = { 100, 100, 100 };
+
+	for (auto &e : DB::blocks_db)
+		m_inventory.push_back(std::make_pair(e.first, 1));
+
+	m_curr_block = m_inventory[0].first;
 }
 
 Player::~Player()
@@ -227,6 +233,7 @@ void Player::keyboard_input(sf::Event &e)
 		}
 	}
 
+
 	// rshift
 	if (e.type == sf::Event::KeyReleased)
 	{
@@ -238,31 +245,33 @@ void Player::keyboard_input(sf::Event &e)
 					flight_on();
 			}
 		}
-		else if (e.key.code == sf::Keyboard::Right) {
-			if (m_curr_block == 3) m_curr_block = (DB::block_id)(1);
-			else m_curr_block = (DB::block_id)(m_curr_block + 1);
-		}
-		else if (e.key.code == sf::Keyboard::Left) {
-			if (m_curr_block == 1) m_curr_block = (DB::block_id)(3);
-			else m_curr_block = (DB::block_id)(m_curr_block - 1);
-		}
-	} else if (e.type == sf::Event::MouseWheelMoved) {
-		// todo
-		if (m_curr_block + e.mouseWheel.delta > 3) m_curr_block = (DB::block_id)(1);
-		else if (m_curr_block + e.mouseWheel.delta < 1) m_curr_block = (DB::block_id)(3);
-		else m_curr_block = (DB::block_id)(m_curr_block + e.mouseWheel.delta);
-		
 	}
 }
 
 void Player::mouse_input(sf::Event &e)
 {
-	// rshift
+	static int curr_block_index = 0;
+
 	if (e.type == sf::Event::MouseButtonReleased) {
 		if (e.key.code == sf::Mouse::Left) {
 			put_block();
 		} else if (e.key.code == sf::Mouse::Right) {
 			delete_block();
 		}
+	} else if (e.type == sf::Event::MouseWheelMoved) {
+		// todo
+		if (curr_block_index + e.mouseWheel.delta >= m_inventory.size()) { 
+			m_curr_block = m_inventory[0].first;
+			curr_block_index = 0;
+		}
+		else if (curr_block_index + e.mouseWheel.delta < 0) {
+			m_curr_block = m_inventory.back().first;
+			curr_block_index = m_inventory.size()-1;
+		}
+		else { 
+			m_curr_block = m_inventory[curr_block_index + e.mouseWheel.delta].first;
+			curr_block_index += e.mouseWheel.delta;
+		}
+
 	}
 }

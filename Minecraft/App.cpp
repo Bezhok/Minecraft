@@ -5,6 +5,7 @@
 #include "Block.h"
 #include "App.h"
 #include "block_db.h"
+#include "Menu.h"
 
 using std::to_string;
 using namespace World;
@@ -18,11 +19,14 @@ App::~App()
 {
 }
 
+Menu *menu_ref;
+
 void App::run()
 {
 	World::Map world;
-	m_player.init(&world);
-	m_player.god_on();
+
+
+
 	Renderer renderer;
 	//m_window.setMouseCursorVisible(false);
 
@@ -35,6 +39,14 @@ void App::run()
 	text.setFillColor(sf::Color::Blue);
 
 	DB db; db.load_blocks();
+	// after !!!
+	m_player.init(&world);
+	m_player.god_on();
+
+	Menu menu(m_window);
+	menu.update_players_blocks(m_player);
+	menu_ref = &menu;
+
 
 	Block block(&world);
 	GLuint world_list[SUPER_CHUNK_SIZE][SUPER_CHUNK_SIZE][SUPER_CHUNK_SIZE];
@@ -61,6 +73,13 @@ void App::run()
 		}
 	}
 
+	sf::Texture tex;
+	sf::Sprite spr;
+
+	tex.loadFromFile("resources/textures/gui/tool_bar.png");
+	spr.setTexture(tex);
+
+	spr.setPosition(WINDOW_WIDTH / 2, WINDOW_HEIGTH / 2);
 
 	sf::Clock clock;
 	DebugData debug_data;
@@ -85,6 +104,15 @@ void App::run()
 			);
 			renderer.draw_SFML(text);
 		}
+
+		for (auto &e : menu.m_sprites) {
+			renderer.draw_SFML(e.second);
+		}
+
+		for (auto &e : menu.m_side_sprites) {
+			renderer.draw_SFML(e.second);
+		}
+
 
 		if (world.m_redraw_chunk) {
 			
@@ -147,6 +175,7 @@ void App::handle_events()
 			}
 		}
 		m_player.input(event);
+		menu_ref->input(event);
 	}
 
 	//camera

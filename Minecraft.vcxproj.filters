@@ -69,6 +69,9 @@
     <ClCompile Include="Minecraft\Map.cpp">
       <Filter>Исходные файлы\World</Filter>
     </ClCompile>
+    <ClCompile Include="Minecraft\Menu.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minecraft\App.h">
@@ -112,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="Minecraft\Map.h">
       <Filter>Файлы заголовков\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\Menu.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

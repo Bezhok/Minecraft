@@ -7,6 +7,9 @@ using std::string;
 using namespace World;
 
 unordered_map<enum DB::block_id, array<GLuint, 6>> DB::blocks_db;
+unordered_map<enum DB::block_id, sf::Texture> DB::side_textures;
+static const string PATH2BLOCKS_TEXTURES = "resources/textures/blocks/";
+
 
 GLuint DB::load_texture(string name)
 {
@@ -42,14 +45,21 @@ GLuint DB::load_texture(string name)
 
 GLuint DB::load_block_texture(string name)
 {
-	static const string PATH2BLOCKS_TEXTURES = "resources/textures/blocks/";
 	return load_texture(PATH2BLOCKS_TEXTURES + name);
+}
+
+void DB::load_block(block_id id, string name)
+{
+	for (auto &e : blocks_db[id]) {
+		e = load_block_texture(name);
+	}
+	side_textures[id].loadFromFile(PATH2BLOCKS_TEXTURES + name);
 }
 
 void DB::load_blocks()
 {
 
-	DB::blocks_db[DB::block_id::Grass] = {
+	blocks_db[Grass] = {
 		load_block_texture("grass_side_carried.png"), //front
 		load_block_texture("grass_side_carried.png"), //back
 		load_block_texture("grass_side_carried.png"), //left
@@ -57,12 +67,14 @@ void DB::load_blocks()
 		load_block_texture("dirt.png"), //bottom
 		load_block_texture("grass_carried.png") //top
 	};
+	side_textures[Grass].loadFromFile(PATH2BLOCKS_TEXTURES + "grass_side_carried.png");
 
-	for (auto &e : DB::blocks_db[DB::block_id::Stone]) {
-		e = load_block_texture("stone.png");
-	}
-
-	for (auto &e : DB::blocks_db[DB::block_id::Dirt]) {
-		e = load_block_texture("dirt.png");
-	}
+	load_block(Stone, "stone.png");
+	load_block(Dirt, "dirt.png");
+	load_block(concrete_black, "concrete_black.png");
+	load_block(concrete_blue, "concrete_blue.png");
+	load_block(concrete_brown, "concrete_brown.png");
+	load_block(concrete_cyan, "concrete_cyan.png");
+	load_block(concrete_gray, "concrete_gray.png");
+	load_block(concrete_green, "concrete_green.png");
 }
