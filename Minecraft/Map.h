@@ -15,6 +15,8 @@ namespace World {
 		bool is_block(int mx, int my, int mz);
 		bool create_block(int x, int y, int z, DB::block_id type);
 		bool delete_block(int x, int y, int z);
+		bool save();
+		bool load();
 
 		const sf::Vector3f m_world_size;
 

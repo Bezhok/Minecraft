@@ -12,6 +12,7 @@ public:
 private:
 	sf::RenderWindow &m_window;
 	Player m_player;
+	World::Map m_map;
 
 	void handle_events();
 	void update(sf::Clock &timer);

@@ -1,11 +1,11 @@
 #pragma once
-static const int WINDOW_WIDTH = 800;
-static const int WINDOW_HEIGTH = 600;
-static const float RENDER_DISTANCE = 100000.0;
+extern const int WINDOW_WIDTH;
+extern const int WINDOW_HEIGTH;
+extern const float RENDER_DISTANCE;
+
+extern const float STANDART_PLAYER_SPEED;
 
 static const float BLOCK_SIZE = 16.0; // coordinates and image resolution
 
-static const int CHUNK_SIZE = 16*1; // blocks
+static const int CHUNK_SIZE = 16 * 1; // blocks
 static const int SUPER_CHUNK_SIZE = 3; // chunks
-
-static const float STANDART_PLAYER_SPEED = BLOCK_SIZE/4; // coordinates

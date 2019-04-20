@@ -23,7 +23,7 @@ Menu *menu_ref;
 
 void App::run()
 {
-	World::Map world;
+
 
 
 
@@ -40,7 +40,7 @@ void App::run()
 
 	DB db; db.load_blocks();
 	// after !!!
-	m_player.init(&world);
+	m_player.init(&m_map);
 	m_player.god_on();
 
 	Menu menu(m_window);
@@ -48,7 +48,7 @@ void App::run()
 	menu_ref = &menu;
 
 
-	Block block(&world);
+	Block block(&m_map);
 	GLuint world_list[SUPER_CHUNK_SIZE][SUPER_CHUNK_SIZE][SUPER_CHUNK_SIZE];
 	for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
 		for (int j = 0; j < SUPER_CHUNK_SIZE; ++j) {
@@ -57,7 +57,7 @@ void App::run()
 				glNewList(world_list[i][j][k], GL_COMPILE);
 
 				
-				for (auto it = world.m_world[i][j][k].chunk().begin(); it != world.m_world[i][j][k].chunk().end(); ++it) {
+				for (auto it = m_map.m_world[i][j][k].chunk().begin(); it != m_map.m_world[i][j][k].chunk().end(); ++it) {
 					block.bind_textures(
 						it->second.id,
 						sf::Vector3f(
@@ -87,7 +87,7 @@ void App::run()
 	{
 		handle_events();
 		update(clock);
-
+		//world.save();
 		// draw
 		if (m_debug_info) {
 			debug_data.start();
@@ -114,15 +114,15 @@ void App::run()
 		}
 
 
-		if (world.m_redraw_chunk) {
+		if (m_map.m_redraw_chunk) {
 			
-			sf::Vector3i c = world.m_edited_chunk_coord;
+			sf::Vector3i c = m_map.m_edited_chunk_coord;
 			glDeleteLists(world_list[c.x][c.y][c.z], 1);
 
 			world_list[c.x][c.y][c.z] = glGenLists(c.x + c.y * SUPER_CHUNK_SIZE + c.z * SUPER_CHUNK_SIZE * SUPER_CHUNK_SIZE + 1);
 			glNewList(world_list[c.x][c.y][c.z], GL_COMPILE);
 
-			for (auto it = world.m_world[c.x][c.y][c.z].chunk().begin(); it != world.m_world[c.x][c.y][c.z].chunk().end(); ++it) {
+			for (auto it = m_map.m_world[c.x][c.y][c.z].chunk().begin(); it != m_map.m_world[c.x][c.y][c.z].chunk().end(); ++it) {
 				block.bind_textures(
 					it->second.id,
 					sf::Vector3f(
@@ -135,7 +135,7 @@ void App::run()
 
 			glEndList();
 
-			world.m_redraw_chunk = false;
+			m_map.m_redraw_chunk = false;
 		}
 
 		for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
@@ -174,8 +174,64 @@ void App::handle_events()
 				break;
 			}
 		}
-		m_player.input(event);
-		menu_ref->input(event);
+
+		if (event.key.code == sf::Keyboard::RControl && sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+			m_debug_info = !m_debug_info;
+		}
+
+		static bool player_input_ability = true;
+
+
+		//if (event.type == sf::Event::KeyPressed )
+		//{
+		//	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
+		//		sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)) &&
+		//		sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+		//	{
+		//		player_input_ability = false;
+		//	}
+		//}
+
+		//if (event.type == sf::Event::KeyReleased &&
+		//	event.key.code == sf::Keyboard::S )
+		//{
+		//	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
+		//		sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+		//	{
+
+		//		m_debug_info = !m_debug_info;
+		//		player_input_ability = true;
+
+
+
+		//	}
+		//}
+
+		// save
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
+			sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
+		{
+			player_input_ability = false;
+			if (event.type == sf::Event::KeyReleased)
+			{
+				if (event.key.code == sf::Keyboard::S) {
+					m_debug_info = !m_debug_info;
+					m_map.save();
+					player_input_ability = true;
+				}
+			}
+		}
+		else {
+			player_input_ability = true;
+		}
+
+
+		if (player_input_ability) {
+			m_player.input(event);
+			menu_ref->input(event);
+		}
+
+
 	}
 
 	//camera
@@ -202,7 +258,7 @@ void App::update(sf::Clock &timer)
 {
 	float time = timer.getElapsedTime().asMilliseconds();
 	timer.restart();
-	time = time / 50.F;
+	time = time / 40.F;
 	//if (time > 3) time = 3;
 
 	m_player.update(time);

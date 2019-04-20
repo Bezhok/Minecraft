@@ -272,6 +272,5 @@ void Player::mouse_input(sf::Event &e)
 			m_curr_block = m_inventory[curr_block_index + e.mouseWheel.delta].first;
 			curr_block_index += e.mouseWheel.delta;
 		}
-
 	}
 }

@@ -6,6 +6,8 @@
 #include <array>
 #include <queue>
 #include <unordered_map>
+#include <fstream>
+#include <sstream>
 
 //libs
 #include <SFML/Graphics.hpp>

@@ -4,17 +4,26 @@
 #include "block_db.h"
 
 using std::unordered_map;
+using std::ifstream;
+using std::ofstream;
+using std::stringstream;
+using std::getline;
+using std::to_string;
+
 using namespace World;
 
 Map::Map()
 {
-	for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
-		for (int j = 0; j < SUPER_CHUNK_SIZE; ++j) {
-			for (int k = 0; k < SUPER_CHUNK_SIZE; ++k) {
-				m_world[i][j][k] = Chunk();
-			}
-		}
-	}
+	//for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
+	//	for (int j = 0; j < SUPER_CHUNK_SIZE; ++j) {
+	//		for (int k = 0; k < SUPER_CHUNK_SIZE; ++k) {
+	//			m_world[i][j][k] = Chunk();
+	//		}
+	//	}
+	//}
+
+	//save();
+	load();
 }
 
 Map::~Map()
@@ -76,4 +85,76 @@ bool Map::delete_block(int x, int y, int z)
 		m_redraw_chunk = true;
 		return true;
 	}
+}
+
+bool Map::save()
+{
+	// read
+	ofstream fout;
+	fout.open("Map.txt");
+
+	for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
+		for (int j = 0; j < SUPER_CHUNK_SIZE; ++j) {
+			for (int k = 0; k < SUPER_CHUNK_SIZE; ++k) {
+				for (auto &e : m_world[i][j][k].chunk()) {
+					fout << i << ' '
+						<< j << ' '
+						<< k << ' '
+						<< e.first << ' '
+						<< e.second.id << ' '
+						<< e.second.x << ' '
+						<< e.second.y << ' '
+						<< e.second.z << '\n';
+				}
+			}
+		}
+	}
+	fout.close();
+
+	return true;
+}
+
+int get_int_from_stringstream(stringstream &line_stream)
+{
+	string integer;
+	line_stream >> integer;
+
+	return stoi(integer);
+}
+
+bool World::Map::load()
+{
+	ifstream fin;
+	fin.open("Map.txt");
+	if (fin.is_open() && fin.peek() != std::ifstream::traits_type::eof()) {
+		string line;
+		stringstream line_stream;
+		while (getline(fin, line))
+		{
+			line_stream.clear();
+			line_stream.str(line);
+
+			int i, j, k, hash, id, x, y, z;
+
+			i = get_int_from_stringstream(line_stream);
+			j = get_int_from_stringstream(line_stream);
+			k = get_int_from_stringstream(line_stream);
+
+			hash = get_int_from_stringstream(line_stream);
+			id = get_int_from_stringstream(line_stream);
+			x = get_int_from_stringstream(line_stream);
+			y = get_int_from_stringstream(line_stream);
+			z = get_int_from_stringstream(line_stream);
+
+			DB::block_data block = { x, y, z, (DB::block_id)id };
+			m_world[i][j][k].chunk().insert(std::make_pair(hash, block));
+		}
+		fin.close();
+	}
+	else {
+		fin.close();
+		return false;
+	}
+
+	return true;
 }
