@@ -4,8 +4,6 @@
 #include "Chunk.h"
 #include "Player.h"
 
-using std::queue;
-
 class Renderer
 {
 public:
@@ -17,8 +15,8 @@ public:
 	void finish_render(sf::RenderWindow &window, const Player &player);
 
 private:
-	queue<const sf::Drawable*> m_SFML;
-	queue<const GLuint*> m_chunk_gl_lists;
+	std::queue<const sf::Drawable*> m_SFML;
+	std::queue<const GLuint*> m_chunk_gl_lists;
 	SkyBox m_sky_box;
 };
 

@@ -15,7 +15,7 @@ void Player::init(Map * world)
 {
 	m_world = world;
 
-	m_size = { BLOCK_SIZE / 4, BLOCK_SIZE, BLOCK_SIZE / 4 };
+	m_size = { BLOCK_SIZE / 4.F, BLOCK_SIZE, BLOCK_SIZE / 4.F };
 	m_pos = { 100, 100, 100 };
 
 	for (auto &e : DB::blocks_db)
@@ -260,7 +260,7 @@ void Player::mouse_input(sf::Event &e)
 		}
 	} else if (e.type == sf::Event::MouseWheelMoved) {
 		// todo
-		if (curr_block_index + e.mouseWheel.delta >= m_inventory.size()) { 
+		if (curr_block_index + e.mouseWheel.delta >= (int)m_inventory.size()) { 
 			m_curr_block = m_inventory[0].first;
 			curr_block_index = 0;
 		}

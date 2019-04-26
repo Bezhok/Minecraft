@@ -2,10 +2,6 @@
 #include "pch.h"
 
 namespace World {
-	using std::array;
-	using std::unordered_map;
-	using std::string;
-
 	struct DB {
 		enum block_id : signed int
 		{
@@ -26,13 +22,13 @@ namespace World {
 			enum block_id id;
 		};
 
-		static unordered_map<enum block_id, array<GLuint, 6>> blocks_db;
-		static unordered_map<enum block_id, sf::Texture> side_textures;
+		static std::unordered_map<enum block_id, std::array<GLuint, 6>> blocks_db;
+		static std::unordered_map<enum block_id, sf::Texture> side_textures;
 
 		void load_blocks();
 	private:
-		void load_block(block_id id, string name);
+		void load_block(block_id id, std::string name);
 		GLuint load_texture(std::string name);
-		GLuint load_block_texture(string name);
+		GLuint load_block_texture(std::string name);
 	};
 }

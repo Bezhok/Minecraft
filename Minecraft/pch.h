@@ -3,11 +3,15 @@
 // standart
 #include <cmath>
 #include <string>
+#include <functional>
 #include <array>
+#include <iterator> 
+#include <algorithm> 
 #include <queue>
 #include <unordered_map>
 #include <fstream>
 #include <sstream>
+#include <memory>
 
 //libs
 #include <SFML/Graphics.hpp>

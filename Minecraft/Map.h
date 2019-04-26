@@ -5,9 +5,10 @@
 #include "Chunk.h"
 
 namespace World {
-	using std::unordered_map;
 	class Map
 	{
+		typedef std::array<std::array<std::array<Chunk, SUPER_CHUNK_SIZE>, SUPER_CHUNK_SIZE_HEIGHT>, SUPER_CHUNK_SIZE> map_type;
+		typedef std::shared_ptr<map_type> map_ref;
 	public:
 		Map();
 		~Map();
@@ -22,7 +23,11 @@ namespace World {
 
 		bool m_redraw_chunk = false;
 		sf::Vector3i m_edited_chunk_coord;
-		Chunk m_world[SUPER_CHUNK_SIZE][SUPER_CHUNK_SIZE][SUPER_CHUNK_SIZE];
+		// 3-d array of world
+		map_ref m_world;
+
+	private:
+		int get_int_from_stringstream(std::stringstream &line_stream);
 	};
 }
 

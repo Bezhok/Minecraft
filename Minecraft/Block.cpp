@@ -4,6 +4,7 @@
 #include "game_constants.h"
 #include "block_db.h"
 
+using std::array;
 using namespace World;
 
 Block::Block(World::Map *world) 

@@ -13,16 +13,16 @@ Menu::Menu(sf::RenderWindow &window)
 	m_sprites[tool_bar].setTexture(m_textures[tool_bar]);
 
 	m_sprites[tool_bar].setPosition(
-		WINDOW_WIDTH/2 - m_textures[tool_bar].getSize().x/2,
-		WINDOW_HEIGTH - m_textures[tool_bar].getSize().y
+		float(WINDOW_WIDTH/2 - int(m_textures[tool_bar].getSize().x)/2),
+		float(WINDOW_HEIGTH - int(m_textures[tool_bar].getSize().y))
 	);
 
 	m_textures[curr_tool].loadFromFile("resources/textures/gui/curr_tool.png");
 	m_sprites[curr_tool].setTexture(m_textures[curr_tool]);
 
 	m_sprites[curr_tool].setPosition(
-		m_sprites[tool_bar].getPosition().x - 2,
-		WINDOW_HEIGTH - m_textures[curr_tool].getSize().y + 2
+		float(m_sprites[tool_bar].getPosition().x - 2),
+		float(WINDOW_HEIGTH - m_textures[curr_tool].getSize().y + 2)
 	);
 
 }
@@ -72,20 +72,19 @@ void Menu::mouse_input(sf::Event &e)
 			
 		}
 	} else if (e.type == sf::Event::MouseWheelMoved) {
-		// todo
+		// toolbar
 		sf::Vector2f pos = m_sprites[curr_tool].getPosition();
 
 		float dx = e.mouseWheel.delta * float(m_textures[tool_bar].getSize().x-2)/9.F;
 		float tool_bar_block_size_x = float(m_textures[tool_bar].getSize().x - 2) / 9.F;
 		float curr_tool_x = m_sprites[curr_tool].getPosition().x;
 		float tool_bar_x = m_sprites[tool_bar].getPosition().x;
-		float tool_bar_size_x = m_textures[tool_bar].getSize().x;
+		int tool_bar_size_x = m_textures[tool_bar].getSize().x;
 
-		// todo
-		if (curr_tool_x + dx >= tool_bar_x + tool_bar_size_x - tool_bar_block_size_x / 2) {
+		if (curr_tool_x + dx >= tool_bar_x + tool_bar_size_x - tool_bar_block_size_x / 2.F) {
 			pos.x = tool_bar_x - 2;
 		}
-		else if (curr_tool_x + dx <= tool_bar_x - tool_bar_block_size_x / 2) {
+		else if (curr_tool_x + dx <= tool_bar_x - tool_bar_block_size_x / 2.F) {
 			pos.x = tool_bar_x + tool_bar_size_x - tool_bar_block_size_x - 4;
 		}
 		else {
@@ -98,13 +97,9 @@ void Menu::mouse_input(sf::Event &e)
 
 bool Menu::is_on_sprite(sf::Sprite obj)
 {
-	if ((obj.getGlobalBounds().contains(
-		sf::Touch::getPosition(0, m_window).x,
-		sf::Touch::getPosition(0, m_window).y) ||
-
-		obj.getGlobalBounds().contains(
-			sf::Mouse::getPosition(m_window).x,
-			sf::Mouse::getPosition(m_window).y))
+	if (obj.getGlobalBounds().contains(
+			(float)sf::Mouse::getPosition(m_window).x,
+			(float)sf::Mouse::getPosition(m_window).y)
 		) {
 		return true;
 	}
@@ -114,13 +109,9 @@ bool Menu::is_on_sprite(sf::Sprite obj)
 
 bool Menu::is_on_rect(sf::RectangleShape obj)
 {
-	if ((obj.getGlobalBounds().contains(
-		sf::Touch::getPosition(0, m_window).x,
-		sf::Touch::getPosition(0, m_window).y) ||
-
-		obj.getGlobalBounds().contains(
-			sf::Mouse::getPosition(m_window).x,
-			sf::Mouse::getPosition(m_window).y))
+	if (obj.getGlobalBounds().contains(
+			(float)sf::Mouse::getPosition(m_window).x,
+			(float)sf::Mouse::getPosition(m_window).y)
 		) {
 		return true;
 	}

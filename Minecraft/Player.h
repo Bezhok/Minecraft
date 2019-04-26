@@ -28,10 +28,10 @@ public:
 	void god_on() { m_god = true; }
 	void god_off() { m_god = false; }
 
-private:
-	void collision(float dx, float dy, float dz);
 	void flight_on();
 	void flight_off();
+private:
+	void collision(float dx, float dy, float dz);
 	void put_block();
 	void delete_block();
 

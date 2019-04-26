@@ -9,20 +9,35 @@ using std::ofstream;
 using std::stringstream;
 using std::getline;
 using std::to_string;
+using std::string;
 
 using namespace World;
 
 Map::Map()
 {
+	m_world = std::make_shared<map_type>();
+
 	//for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
-	//	for (int j = 0; j < SUPER_CHUNK_SIZE; ++j) {
+	//	for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
 	//		for (int k = 0; k < SUPER_CHUNK_SIZE; ++k) {
-	//			m_world[i][j][k] = Chunk();
+	//			for (int x = 0; x < CHUNK_SIZE; ++x) {
+	//				for (int y = 0; y < CHUNK_SIZE; ++y) {
+	//					for (int z = 0; z < CHUNK_SIZE; ++z) {
+	//						if (y == 1 && j == 1) {
+	//							DB::block_data block = { x, y, z, DB::block_id::Grass };
+	//							m_world->at(i)[j][k].chunk().insert(std::make_pair(m_world->at(i)[j][k].block_hash(x, y, z), block));
+	//						}
+	//					}
+	//				}
+	//			}
 	//		}
 	//	}
 	//}
 
+
 	//save();
+
+
 	load();
 }
 
@@ -37,7 +52,7 @@ bool Map::is_block(int x, int y, int z)//block x,y,z in chunk
 		|| y / CHUNK_SIZE >= SUPER_CHUNK_SIZE
 		|| z / CHUNK_SIZE >= SUPER_CHUNK_SIZE) return false;
 
-	Chunk &e = m_world[x / CHUNK_SIZE][y / CHUNK_SIZE][z / CHUNK_SIZE];
+	Chunk &e = m_world->at(x / CHUNK_SIZE)[y / CHUNK_SIZE][z / CHUNK_SIZE];
 	auto it = e.chunk().find(e.block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
 
 	if (e.chunk().end() == it)
@@ -53,7 +68,7 @@ bool Map::create_block(int x, int y, int z, DB::block_id id)
 		|| y / CHUNK_SIZE >= SUPER_CHUNK_SIZE
 		|| z / CHUNK_SIZE >= SUPER_CHUNK_SIZE) return false;
 
-	Chunk &e = m_world[x / CHUNK_SIZE][y / CHUNK_SIZE][z / CHUNK_SIZE];
+	Chunk &e = m_world->at(x / CHUNK_SIZE)[y / CHUNK_SIZE][z / CHUNK_SIZE];
 	auto it = e.chunk().find(e.block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
 
 	if (e.chunk().end() == it) {
@@ -74,7 +89,7 @@ bool Map::delete_block(int x, int y, int z)
 		|| y / CHUNK_SIZE >= SUPER_CHUNK_SIZE
 		|| z / CHUNK_SIZE >= SUPER_CHUNK_SIZE) return false;
 
-	Chunk &e = m_world[x / CHUNK_SIZE][y / CHUNK_SIZE][z / CHUNK_SIZE];
+	Chunk &e = m_world->at(x / CHUNK_SIZE)[y / CHUNK_SIZE][z / CHUNK_SIZE];
 	auto it = e.chunk().find(e.block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
 
 	if (e.chunk().end() == it)
@@ -96,7 +111,7 @@ bool Map::save()
 	for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
 		for (int j = 0; j < SUPER_CHUNK_SIZE; ++j) {
 			for (int k = 0; k < SUPER_CHUNK_SIZE; ++k) {
-				for (auto &e : m_world[i][j][k].chunk()) {
+				for (auto &e : m_world->at(i)[j][k].chunk()) {
 					fout << i << ' '
 						<< j << ' '
 						<< k << ' '
@@ -114,7 +129,7 @@ bool Map::save()
 	return true;
 }
 
-int get_int_from_stringstream(stringstream &line_stream)
+int Map::get_int_from_stringstream(stringstream &line_stream)
 {
 	string integer;
 	line_stream >> integer;
@@ -122,7 +137,7 @@ int get_int_from_stringstream(stringstream &line_stream)
 	return stoi(integer);
 }
 
-bool World::Map::load()
+bool Map::load()
 {
 	ifstream fin;
 	fin.open("Map.txt");
@@ -147,7 +162,7 @@ bool World::Map::load()
 			z = get_int_from_stringstream(line_stream);
 
 			DB::block_data block = { x, y, z, (DB::block_id)id };
-			m_world[i][j][k].chunk().insert(std::make_pair(hash, block));
+			m_world->at(i)[j][k].chunk().insert(std::make_pair(hash, block));
 		}
 		fin.close();
 	}

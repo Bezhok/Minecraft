@@ -3,11 +3,8 @@
 #include "Box.h"
 
 namespace World {
-	using std::array;
-	using namespace Base;
-
 	class SkyBox :
-		public Box
+		public Base::Box
 	{
 	public:
 		SkyBox();
@@ -15,6 +12,6 @@ namespace World {
 		void bind_textures();
 		void load_textures();
 	private:
-		array<GLuint, 6> m_box;
+		std::array<GLuint, 6> m_box;
 	};
 }
