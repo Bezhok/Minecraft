@@ -21,6 +21,7 @@ public:
 	/* handle input */
 	void input(sf::Event &e);
 
+	void update();
 	void update_players_blocks(Player &player);
 
 	std::unordered_map<enum World::DB::block_id, sf::Sprite> m_side_sprites;

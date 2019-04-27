@@ -3,7 +3,7 @@
 
 namespace World {
 	struct DB {
-		enum block_id : signed int
+		enum block_id : unsigned char
 		{
 			Air = 0,
 			Grass = 1,
@@ -18,7 +18,7 @@ namespace World {
 		};
 
 		struct block_data {
-			int x, y, z;
+			unsigned char x, y, z;
 			enum block_id id;
 		};
 

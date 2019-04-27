@@ -14,7 +14,7 @@ SkyBox::~SkyBox()
 
 void SkyBox::bind_textures()
 {
-	float half_size = RENDER_DISTANCE / 2;
+	float half_size = RENDER_DISTANCE/2;
 	glBindTexture(GL_TEXTURE_2D, m_box[0]);
 	glBegin(GL_QUADS);
 	//front

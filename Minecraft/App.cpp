@@ -16,7 +16,6 @@ using std::back_inserter;
 using std::to_string;
 using namespace World;
 
-const int RENDER_DISTANCE_CHUNKS = 5;
 
 void App::update_gllist(
 	Block &block,
@@ -167,7 +166,7 @@ Menu *menu_ref;
 
 void App::run()
 {
-	Renderer renderer;
+
 	//m_window.setMouseCursorVisible(false);
 
 	// text
@@ -200,7 +199,7 @@ void App::run()
 	tex.loadFromFile("resources/textures/gui/tool_bar.png");
 	spr.setTexture(tex);
 
-	spr.setPosition(WINDOW_WIDTH / 2.F, WINDOW_HEIGTH / 2.F);
+	spr.setPosition(m_window.getSize().x / 2.F, m_window.getSize().y / 2.F);
 
 	sf::Clock clock;
 	DebugData debug_data;
@@ -236,15 +235,15 @@ void App::run()
 				to_string(m_player.get_position().y) + " " +
 				to_string(m_player.get_position().z)
 			);
-			renderer.draw_SFML(text);
+			m_renderer.draw_SFML(text);
 		}
 
 		for (auto &e : menu.m_sprites) {
-			renderer.draw_SFML(e.second);
+			m_renderer.draw_SFML(e.second);
 		}
 
 		for (auto &e : menu.m_side_sprites) {
-			renderer.draw_SFML(e.second);
+			m_renderer.draw_SFML(e.second);
 		}
 
 
@@ -286,10 +285,10 @@ void App::run()
 
 		for (auto &e : world_list) {
 			if (e.second)
-			renderer.draw_chunk_gl_list(e.second);
+				m_renderer.draw_chunk_gl_list(e.second);
 		}
 
-		renderer.finish_render(m_window, m_player);
+		m_renderer.finish_render(m_window, m_player);
 
 		if (m_debug_info) {
 			debug_data.count();
@@ -302,9 +301,13 @@ void App::handle_events()
 	sf::Event event;
 	while (m_window.pollEvent(event))
 	{
-		if (event.type == sf::Event::Closed)
+		switch (event.type)
+		{
+		case sf::Event::Closed:
 			m_window.close();
-		if (event.type == sf::Event::KeyPressed) {
+
+			break;
+		case sf::Event::KeyPressed: {
 			switch (event.key.code)
 			{
 			case sf::Keyboard::Escape:
@@ -316,39 +319,23 @@ void App::handle_events()
 			default:
 				break;
 			}
+			break;
 		}
+		case sf::Event::Resized:
+			sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+			m_window.setView(sf::View(visibleArea));
+
+			m_renderer.reset_view({ static_cast<float>(event.size.width), static_cast<float>(event.size.height) });
+			menu_ref->update();
+			break;
+		}
+
 
 		if (event.key.code == sf::Keyboard::RControl && sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
 			m_debug_info = !m_debug_info;
 		}
 
 		static bool player_input_ability = true;
-
-
-		//if (event.type == sf::Event::KeyPressed )
-		//{
-		//	if ((sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
-		//		sf::Keyboard::isKeyPressed(sf::Keyboard::RControl)) &&
-		//		sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-		//	{
-		//		player_input_ability = false;
-		//	}
-		//}
-
-		//if (event.type == sf::Event::KeyReleased &&
-		//	event.key.code == sf::Keyboard::S )
-		//{
-		//	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
-		//		sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
-		//	{
-
-		//		m_debug_info = !m_debug_info;
-		//		player_input_ability = true;
-
-
-
-		//	}
-		//}
 
 		// save
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
@@ -389,8 +376,8 @@ void App::handle_events()
 		mouse_xy = sf::Mouse::getPosition(m_window);
 		
 		// center coordinates
-		int x = WINDOW_WIDTH / 2;
-		int y = WINDOW_HEIGTH / 2+5;
+		int x = m_window.getSize().x / 2;
+		int y = m_window.getSize().y / 2+5;
 
 		m_player.m_camera_angle.x += float(x - mouse_xy.x) / 8;
 		m_player.m_camera_angle.y += float(y - mouse_xy.y) / 8;

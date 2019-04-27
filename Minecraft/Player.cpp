@@ -16,7 +16,7 @@ void Player::init(Map * world)
 	m_world = world;
 
 	m_size = { BLOCK_SIZE / 4.F, BLOCK_SIZE, BLOCK_SIZE / 4.F };
-	m_pos = { 100, 100, 100 };
+	m_pos = { 1800, 2900, 1800 };
 
 	for (auto &e : DB::blocks_db)
 		m_inventory.push_back(std::make_pair(e.first, 1));

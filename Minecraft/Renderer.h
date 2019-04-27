@@ -9,6 +9,8 @@ class Renderer
 public:
 	Renderer();
 	~Renderer();
+
+	void reset_view(sf::Vector2f size);
 	void draw_chunk_gl_list(const GLuint& chunk);
 	void draw_SFML(const sf::Drawable& drawable);
 

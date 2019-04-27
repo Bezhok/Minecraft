@@ -2,6 +2,7 @@
 #include "pch.h"
 #include "Player.h"
 #include "Block.h"
+#include "Renderer.h"
 
 class App
 {
@@ -14,6 +15,7 @@ private:
 	sf::RenderWindow &m_window;
 	Player m_player;
 	World::Map m_map;
+	Renderer m_renderer;
 
 	void handle_events();
 	void update(sf::Clock &timer);
