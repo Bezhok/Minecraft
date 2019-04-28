@@ -9,10 +9,10 @@ namespace World {
 		public Base::Box
 	{
 	public:
-		Block(Map *world);
-		~Block();
+		/* init var */
+		Block(Map *map);
+
+		/* eponymous. pos in blocks coordinates */
 		void bind_textures(DB::block_id id, const sf::Vector3f &pos);
-	private:
-		GLuint m_buf[2];
 	};
 }

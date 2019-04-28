@@ -3,6 +3,7 @@
 
 namespace World {
 	struct DB {
+	public:
 		enum block_id : unsigned char
 		{
 			Air = 0,
@@ -22,13 +23,15 @@ namespace World {
 			enum block_id id;
 		};
 
-		static std::unordered_map<enum block_id, std::array<GLuint, 6>> blocks_db;
-		static std::unordered_map<enum block_id, sf::Texture> side_textures;
+		static std::unordered_map<enum block_id, std::array<sf::Texture, 6>> s_blocks_db;
+		static std::unordered_map<enum block_id, sf::Texture> s_side_textures;
 
+	public:
+		/* eponymous */
 		void load_blocks();
 	private:
+		/* eponymous */
+		void load_block_side(int i, block_id id, std::string name);
 		void load_block(block_id id, std::string name);
-		GLuint load_texture(std::string name);
-		GLuint load_block_texture(std::string name);
 	};
 }

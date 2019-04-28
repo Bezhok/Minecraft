@@ -4,6 +4,8 @@
 class DebugData
 {
 private:
+	float fps = 0;
+	float frame_time = 0;
 	int start_time = 0;
 	int end_time = 0;
 	int update_frequency_time;
@@ -11,10 +13,12 @@ private:
 	sf::Clock timer;
 
 public:
-	float fps = 0;
-	float frame_time = 0;
+	float get_fps() { return fps; };
+	float get_frame_time() { return frame_time; };
 
+	/* counting delta time */
 	void start();
 
+	/* update data if need */
 	void count();
 };

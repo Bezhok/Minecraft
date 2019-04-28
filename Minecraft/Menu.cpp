@@ -8,10 +8,7 @@ using namespace World;
 Menu::Menu(sf::RenderWindow &window)
 	: m_window{ window }
 {
-	//MenuElement
-	auto &bar = m_textures[tool_bar];
-	auto &border = m_textures[curr_tool];
-
+	//tool bar
 	m_textures[tool_bar].loadFromFile("resources/textures/gui/tool_bar.png");
 	m_sprites[tool_bar].setTexture(m_textures[tool_bar]);
 
@@ -20,6 +17,7 @@ Menu::Menu(sf::RenderWindow &window)
 		float(m_window.getSize().y - int(m_textures[tool_bar].getSize().y))
 	);
 
+	// curr tool
 	m_textures[curr_tool].loadFromFile("resources/textures/gui/curr_tool.png");
 	m_sprites[curr_tool].setTexture(m_textures[curr_tool]);
 
@@ -27,7 +25,6 @@ Menu::Menu(sf::RenderWindow &window)
 		float(m_sprites[tool_bar].getPosition().x - 2),
 		float(m_window.getSize().y - m_textures[curr_tool].getSize().y + 2)
 	);
-
 }
 
 Menu::~Menu()
@@ -42,12 +39,10 @@ void Menu::update()
 		float(m_window.getSize().x / 2 - int(m_textures[tool_bar].getSize().x) / 2),
 		float(m_window.getSize().y - int(m_textures[tool_bar].getSize().y))
 	};
-
 	m_sprites[tool_bar].setPosition(bar_new_pos);
 
 	sf::Vector2f tool_old_pos = m_sprites[curr_tool].getPosition();
 	m_sprites[curr_tool].setPosition(tool_old_pos + bar_new_pos - bar_old_pos);
-
 
 	for (auto &e : m_side_sprites) {
 		e.second.setPosition(e.second.getPosition() + bar_new_pos - bar_old_pos);
@@ -65,8 +60,8 @@ void Menu::update_players_blocks(Player & player)
 	m_side_sprites.clear();
 
 	int i = 0;
-	for (auto &e : player.m_inventory) {
-		m_side_sprites[e.first].setTexture(DB::side_textures[e.first]);
+	for (auto &e : player.get_inventory()) {
+		m_side_sprites[e.first].setTexture(DB::s_side_textures[e.first]);
 		sf::Vector2f pos = m_sprites[tool_bar].getPosition();
 		pos.y += 8; pos.x += 8;
 
@@ -85,17 +80,7 @@ void Menu::keyboard_input(sf::Event &e)
 
 void Menu::mouse_input(sf::Event &e)
 {
-	// rshift
-	if (e.type == sf::Event::MouseButtonReleased) {
-		if (e.key.code == sf::Mouse::Left) {
-			//if (is_on_rect()) {
-
-			//}
-		}
-		else if (e.key.code == sf::Mouse::Right) {
-			
-		}
-	} else if (e.type == sf::Event::MouseWheelMoved) {
+	if (e.type == sf::Event::MouseWheelMoved) {
 		// toolbar
 		sf::Vector2f pos = m_sprites[curr_tool].getPosition();
 
@@ -118,28 +103,4 @@ void Menu::mouse_input(sf::Event &e)
 
 		m_sprites[curr_tool].setPosition(pos);
 	}
-}
-
-bool Menu::is_on_sprite(sf::Sprite obj)
-{
-	if (obj.getGlobalBounds().contains(
-			(float)sf::Mouse::getPosition(m_window).x,
-			(float)sf::Mouse::getPosition(m_window).y)
-		) {
-		return true;
-	}
-
-	return false;
-}
-
-bool Menu::is_on_rect(sf::RectangleShape obj)
-{
-	if (obj.getGlobalBounds().contains(
-			(float)sf::Mouse::getPosition(m_window).x,
-			(float)sf::Mouse::getPosition(m_window).y)
-		) {
-		return true;
-	}
-
-	return false;
 }

@@ -6,26 +6,18 @@
 
 using namespace World;
 
-Player::Player()
+void Player::init(Map *map)
 {
-
-}
-
-void Player::init(Map * world)
-{
-	m_world = world;
+	m_map = map;
 
 	m_size = { BLOCK_SIZE / 4.F, BLOCK_SIZE, BLOCK_SIZE / 4.F };
-	m_pos = { 1800, 2900, 1800 };
-
-	for (auto &e : DB::blocks_db)
-		m_inventory.push_back(std::make_pair(e.first, 1));
+	m_pos = { 100 * BLOCK_SIZE, 200*BLOCK_SIZE, 100 * BLOCK_SIZE };
+	//m_pos = { 1800, 2900, 1800 };
+	//m_pos = { 0, 20, 0 };
+	for (auto &e : DB::s_side_textures)
+		m_inventory.push_back({ e.first, 1 });
 
 	m_curr_block = m_inventory[0].first;
-}
-
-Player::~Player()
-{
 }
 
 void Player::input(sf::Event &e)
@@ -36,6 +28,7 @@ void Player::input(sf::Event &e)
 
 void Player::update(float time)
 {
+	if (time > 1.F) time = 1.F;
 	if (m_flying) {
 		m_on_ground = false;
 
@@ -51,7 +44,7 @@ void Player::update(float time)
 		m_dpos.x = m_dpos.y = m_dpos.z = 0;
 	} else {
 		if (!m_on_ground)
-			m_dpos.y -= 1.5F*time;
+			m_dpos.y -= 1.5F/16.F*BLOCK_SIZE*time;
 
 		m_on_ground = false; //reset
 
@@ -95,11 +88,11 @@ void Player::put_block()
 	bool able_create = false;
 	for (int distance = 0; distance < 10 * BLOCK_SIZE; ++distance) {
 		
-		x += -sinf(m_camera_angle.x / 180 * PI);
-		y += tanf(m_camera_angle.y / 180 * PI);
-		z += -cosf(m_camera_angle.x / 180 * PI);
+		x += -sinf(m_camera_angle.x / 180 * PI)/2.F;
+		y += tanf(m_camera_angle.y / 180 * PI)/2.F;
+		z += -cosf(m_camera_angle.x / 180 * PI)/2.F;
 
-		if (m_world->is_block(x/BLOCK_SIZE, y/BLOCK_SIZE, z/BLOCK_SIZE)) {
+		if (m_map->is_block(x/BLOCK_SIZE, y/BLOCK_SIZE, z/BLOCK_SIZE)) {
 			// is we in this block
 			for (int matrix_x = (m_pos.x - m_size.x) / BLOCK_SIZE; matrix_x < (m_pos.x + m_size.x) / BLOCK_SIZE; matrix_x++) {
 				for (int matrix_y = (m_pos.y - m_size.y) / BLOCK_SIZE; matrix_y < (m_pos.y + m_size.y) / BLOCK_SIZE; matrix_y++) {
@@ -116,7 +109,7 @@ void Player::put_block()
 			}
 
 			if (able_create) {
-				m_world->create_block(
+				m_map->create_block(
 					prev_x / BLOCK_SIZE,
 					prev_y / BLOCK_SIZE,
 					prev_z / BLOCK_SIZE,
@@ -138,16 +131,16 @@ void Player::delete_block()
 		z = m_pos.z;
 
 	bool able_create = false;
-	for (int distance = 0; distance < 6 * BLOCK_SIZE; ++distance) {
-		x += -sinf(m_camera_angle.x / 180 * PI);
-		y += tanf(m_camera_angle.y / 180 * PI);
-		z += -cosf(m_camera_angle.x / 180 * PI);
-		if (m_world->is_block(
+	for (int distance = 0; distance < 10 * BLOCK_SIZE; ++distance) {
+		x += -sinf(m_camera_angle.x / 180 * PI)/2.F;
+		y += tanf(m_camera_angle.y / 180 * PI)/2.F;
+		z += -cosf(m_camera_angle.x / 180 * PI)/2.F;
+		if (m_map->is_block(
 			x / BLOCK_SIZE,
 			y / BLOCK_SIZE,
 			z / BLOCK_SIZE
 		)) {
-			m_world->delete_block(
+			m_map->delete_block(
 				x / BLOCK_SIZE,
 				y / BLOCK_SIZE,
 				z / BLOCK_SIZE
@@ -163,7 +156,7 @@ void Player::collision(float dx, float dy, float dz)
 	for (int matrix_x = (m_pos.x - m_size.x) / BLOCK_SIZE; matrix_x < (m_pos.x + m_size.x) / BLOCK_SIZE; matrix_x++) {
 		for (int matrix_y = (m_pos.y - m_size.y) / BLOCK_SIZE; matrix_y < (m_pos.y + m_size.y) / BLOCK_SIZE; matrix_y++) {
 			for (int matrix_z = (m_pos.z - m_size.z) / BLOCK_SIZE; matrix_z < (m_pos.z + m_size.z) / BLOCK_SIZE; matrix_z++) {
-				if (m_world->is_block(matrix_x, matrix_y, matrix_z)) { //if collided with block
+				if (m_map->is_block(matrix_x, matrix_y, matrix_z)) { //if collided with block
 					if (dx > 0)  m_pos.x = matrix_x * BLOCK_SIZE - m_size.x;
 					if (dx < 0)  m_pos.x = matrix_x * BLOCK_SIZE + BLOCK_SIZE + m_size.x;
 					if (dy > 0)  m_pos.y = matrix_y * BLOCK_SIZE- m_size.y;
@@ -219,20 +212,19 @@ void Player::keyboard_input(sf::Event &e)
 		}
 		else {
 			if (m_on_ground) {
-				m_dpos.y = 10;
+				m_dpos.y = 5.F/8.F * BLOCK_SIZE;
 				m_on_ground = false;
 			}
 		}
 	}
 
-	// shift
+	// lshift
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
 	{
 		if (m_flying) {
 			m_dpos.y = -m_speed;
 		}
 	}
-
 
 	// rshift
 	if (e.type == sf::Event::KeyReleased)

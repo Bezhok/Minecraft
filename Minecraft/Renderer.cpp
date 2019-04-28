@@ -5,7 +5,7 @@
 
 Renderer::Renderer()
 {
-	//m_sky_box.load_textures();
+	m_sky_box.load_textures();
 
 	glFrontFace(GL_CW); // way around
 	glEnable(GL_DEPTH_TEST); glDepthFunc(GL_LESS);
@@ -28,8 +28,10 @@ Renderer::Renderer()
 	glHint(GL_FOG_HINT, GL_DONT_CARE); // way to calculate
 	glFogf(GL_FOG_START, 2*RENDER_DISTANCE/5); // start
 	glFogf(GL_FOG_END, RENDER_DISTANCE / 2); // end
-}
 
+	
+	glDisable(GL_FOG); // during debugging
+}
 
 Renderer::~Renderer()
 {
@@ -82,9 +84,9 @@ void Renderer::finish_render(sf::RenderWindow &window, const Player &player)
 	glDisable(GL_CULL_FACE);
 
 	//draw skybox
-	//glTranslatef(player.get_position().x, player.get_position().y, player.get_position().z);
-	//m_sky_box.bind_textures();
-	//glTranslatef(-player.get_position().x, -player.get_position().y, -player.get_position().z);
+	glTranslatef(player.get_position().x, player.get_position().y, player.get_position().z);
+	m_sky_box.bind_textures();
+	glTranslatef(-player.get_position().x, -player.get_position().y, -player.get_position().z);
 
 	//sfml render
 	window.pushGLStates();

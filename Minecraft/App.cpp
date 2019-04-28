@@ -9,112 +9,104 @@
 
 using std::unordered_map;
 using std::string;
-using std::hash;
 using std::pair;
-using std::set_difference;
-using std::back_inserter;
 using std::to_string;
 using namespace World;
 
-
-void App::update_gllist(
-	Block &block,
-	unordered_map<size_t, GLuint> &world_list,
-	int old_chunk_x,
-	int old_chunk_z,
-	int new_chunk_x,
-	int new_chunk_z
-)
+void App::update_gllist(Block & block, const sf::Vector3i &c)
 {
-	// old
-	int old_sx = old_chunk_x - RENDER_DISTANCE_CHUNKS / 2 < 0 ? 0 : old_chunk_x - RENDER_DISTANCE_CHUNKS / 2;
-	int old_sz = old_chunk_z - RENDER_DISTANCE_CHUNKS / 2 < 0 ? 0 : old_chunk_z - RENDER_DISTANCE_CHUNKS / 2;
+	// c - chunk_pos
+	size_t hash = c.x + (c.y * SUPER_CHUNK_SIZE_HEIGHT) + (c.z * SUPER_CHUNK_SIZE_HEIGHT * SUPER_CHUNK_SIZE);
 
-	int old_ex = old_chunk_x + RENDER_DISTANCE_CHUNKS / 2 > SUPER_CHUNK_SIZE ? SUPER_CHUNK_SIZE : old_chunk_x + RENDER_DISTANCE_CHUNKS / 2;
-	int old_ez = old_chunk_z + RENDER_DISTANCE_CHUNKS / 2 > SUPER_CHUNK_SIZE ? SUPER_CHUNK_SIZE : old_chunk_z + RENDER_DISTANCE_CHUNKS / 2;
+	glDeleteLists(m_world_list[hash], 1);
+	m_world_list.erase(hash);
 
-	//new
-	int new_sx = new_chunk_x - RENDER_DISTANCE_CHUNKS / 2 < 0 ? 0 : new_chunk_x - RENDER_DISTANCE_CHUNKS / 2;
-	int new_sz = new_chunk_z - RENDER_DISTANCE_CHUNKS / 2 < 0 ? 0 : new_chunk_z - RENDER_DISTANCE_CHUNKS / 2;
+	create_gllist(block, c, hash);
+}
 
-	int new_ex = new_chunk_x + RENDER_DISTANCE_CHUNKS / 2 > SUPER_CHUNK_SIZE ? SUPER_CHUNK_SIZE : new_chunk_x + RENDER_DISTANCE_CHUNKS / 2;
-	int new_ez = new_chunk_z + RENDER_DISTANCE_CHUNKS / 2 > SUPER_CHUNK_SIZE ? SUPER_CHUNK_SIZE : new_chunk_z + RENDER_DISTANCE_CHUNKS / 2;
+void App::create_gllist(Block &block, const sf::Vector3i &c, size_t hash)
+{
+	m_world_list.insert(std::pair<size_t, GLuint>(hash, glGenLists(1)));
 
-	int x_diff = new_chunk_x - old_chunk_x;
-	int z_diff = new_chunk_z - old_chunk_z;
+	glNewList(m_world_list[hash], GL_COMPILE);
 
-	if (abs(x_diff) == 1 || abs(z_diff) == 1) {
+	for (const auto &e : m_map.get_chunk(c.x, c.y, c.z)) {
+		block.bind_textures(
+			e.second.id,
+			sf::Vector3f(
+				e.second.x + c.x * CHUNK_SIZE + 0.5F,
+				e.second.y + c.y * CHUNK_SIZE + 0.5F,
+				e.second.z + c.z * CHUNK_SIZE + 0.5F
+			)
+		);
+	}
+	//for (auto it = m_map.get_chunk(c.x, c.y, c.z).begin(); it != m_map.get_chunk(c.x, c.y, c.z).end(); ++it) {
+	//	block.bind_textures(
+	//		it->second.id,
+	//		sf::Vector3f(
+	//			it->second.x + c.x * CHUNK_SIZE + 0.5F,
+	//			it->second.y + c.y * CHUNK_SIZE + 0.5F,
+	//			it->second.z + c.z * CHUNK_SIZE + 0.5F
+	//		)
+	//	);
+	//}
 
-		// old chunks for rendering
-		vector<pair<int, int>> old_chunks_set;
-		for (int oi = old_sx; oi < old_ex; ++oi) {
-			for (int ok = old_sz; ok < old_ez; ++ok) {
-				old_chunks_set.push_back({ oi, ok });
-			}
-		}
+	glEndList();
+}
 
-		////  new chunks for rendering
-		vector<pair<int, int>> new_chunks_set;
-		for (int i = new_sx; i < new_ex; ++i) {
-			for (int k = new_sz; k < new_ez; ++k) {
-				new_chunks_set.push_back({ i, k });
-			}
-		}
+void App::create_all_gllists(Block &block)
+{
+	for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
+		for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
+			for (int k = 0; k < SUPER_CHUNK_SIZE; ++k) {
+				size_t hash = i + (j * SUPER_CHUNK_SIZE_HEIGHT) + (k * SUPER_CHUNK_SIZE_HEIGHT * SUPER_CHUNK_SIZE);
 
-		vector<pair<int, int>> diff;
-		// dont rednder it
-		set_difference(old_chunks_set.begin(), old_chunks_set.end(), new_chunks_set.begin(), new_chunks_set.end(), back_inserter(diff));
-		for (auto &e : diff) {
-			for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
-				string coord_str = to_string(e.first) + string(" ") + to_string(j) + string(" ") + to_string(e.second);
-				hash<string> hash_fn;
-				size_t str_hash = hash_fn(coord_str);
-
-				
-				glDeleteLists(world_list[str_hash], 1);
-				world_list.erase(str_hash);
-			}
-		}
-
-		diff.clear();
-		// and render it
-		set_difference(new_chunks_set.begin(), new_chunks_set.end(), old_chunks_set.begin(), old_chunks_set.end(), back_inserter(diff));
-		for (auto &e : diff) {
-			for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
-				string coord_str = to_string(e.first) + string(" ") + to_string(j) + string(" ") + to_string(e.second);
-				hash<string> hash_fn;
-				size_t str_hash = hash_fn(coord_str);
-
-				world_list.insert(std::pair<size_t, GLuint>(str_hash, glGenLists(1)));
-				glNewList(world_list[str_hash], GL_COMPILE);
-
-
-				for (auto it = m_map.m_world->at(e.first)[j][e.second].chunk().begin(); it != m_map.m_world->at(e.first)[j][e.second].chunk().end(); ++it) {
-					block.bind_textures(
-						it->second.id,
-						sf::Vector3f(
-							it->second.x + e.first * CHUNK_SIZE + 0.5F,
-							it->second.y + j * CHUNK_SIZE + 0.5F,
-							it->second.z + e.second * CHUNK_SIZE + 0.5F
-						)
-					);
-				}
-
-				glEndList();
+				sf::Vector3i pos = {i, j, k};
+				create_gllist(block, pos, hash);
 			}
 		}
 	}
 }
 
-
-void App::recreate_gllist(Block &block, unordered_map<size_t, GLuint> &world_list)
+App::App(sf::RenderWindow &window)
+	: m_window {window}
 {
-	for (auto &e : world_list) {
-		glDeleteLists(e.second, 1);
+	m_font.loadFromFile("resources/arial.ttf");
+	m_text.setFont(m_font);
+	m_text.setCharacterSize(20);
+	m_text.setFillColor(sf::Color::Color(sf::Color(0, 0, 0, 200)));
+
+	//m_window.setMouseCursorVisible(false);
+}
+
+void App::draw_SFML()
+{
+	// draw sfml
+	if (m_debug_info) {
+		m_text.setString(
+			"fps: " +
+			to_string(int(m_debug_data.get_fps())) + "\n" +
+			"ft: " +
+			to_string(int(m_debug_data.get_frame_time())) + "\n" +
+			"x, y, z: " +
+			to_string(m_player.get_position().x) + " " +
+			to_string(m_player.get_position().y) + " " +
+			to_string(m_player.get_position().z)
+		);
+		m_renderer.draw_SFML(m_text);
 	}
 
-	world_list.clear();
+	for (auto &e : m_menu->get_spites()) {
+		m_renderer.draw_SFML(e.second);
+	}
 
+	for (auto &e : m_menu->get_top_spites()) {
+		m_renderer.draw_SFML(e.second);
+	}
+}
+
+void App::draw_openGL()
+{
 	int sx, sz, ex, ez, cx, cz;// start x, end x, current x ...
 	cx = m_player.get_position().x / BLOCK_SIZE / CHUNK_SIZE;
 	cz = m_player.get_position().z / BLOCK_SIZE / CHUNK_SIZE;
@@ -128,55 +120,19 @@ void App::recreate_gllist(Block &block, unordered_map<size_t, GLuint> &world_lis
 	for (int i = sx; i < ex; ++i) {
 		for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
 			for (int k = sz; k < ez; ++k) {
-				string coord_str = to_string(i) + string(" ") + to_string(j) + string(" ") + to_string(k);
-				hash<string> hash_fn;
-				size_t str_hash = hash_fn(coord_str);
-
-				world_list.insert(std::pair<size_t, GLuint>(str_hash, glGenLists(1)));
-				glNewList(world_list[str_hash], GL_COMPILE);
-
-
-				for (auto it = m_map.m_world->at(i)[j][k].chunk().begin(); it != m_map.m_world->at(i)[j][k].chunk().end(); ++it) {
-					block.bind_textures(
-						it->second.id,
-						sf::Vector3f(
-							it->second.x + i * CHUNK_SIZE + 0.5F,
-							it->second.y + j * CHUNK_SIZE + 0.5F,
-							it->second.z + k * CHUNK_SIZE + 0.5F
-						)
-					);
+				size_t hash = i + (j * SUPER_CHUNK_SIZE_HEIGHT) + (k * SUPER_CHUNK_SIZE_HEIGHT * SUPER_CHUNK_SIZE);
+				if (m_world_list.find(hash) != m_world_list.end()) {
+					m_renderer.draw_chunk_gl_list(m_world_list[hash]);
 				}
-
-				glEndList();
 			}
 		}
 	}
 }
 
-App::App(sf::RenderWindow &window)
-	: m_window {window}
-{
-}
 
-App::~App()
-{
-}
-
-Menu *menu_ref;
 
 void App::run()
 {
-
-	//m_window.setMouseCursorVisible(false);
-
-	// text
-	sf::Text text;
-	sf::Font font;
-	font.loadFromFile("resources/arial.ttf");
-	text.setFont(font);
-	text.setCharacterSize(20);
-	text.setFillColor(sf::Color::Color(sf::Color(0, 0, 0, 200)));
-
 	DB db; db.load_blocks();
 	// after !!!
 	m_player.init(&m_map);
@@ -185,118 +141,64 @@ void App::run()
 
 	Menu menu(m_window);
 	menu.update_players_blocks(m_player);
-	menu_ref = &menu;
+	m_menu = &menu;
 
 	Block block(&m_map);
 
-	unordered_map<size_t, GLuint> world_list;
-
-	//recreate_gllist(block, world_list);
-
-	sf::Texture tex;
-	sf::Sprite spr;
-
-	tex.loadFromFile("resources/textures/gui/tool_bar.png");
-	spr.setTexture(tex);
-
-	spr.setPosition(m_window.getSize().x / 2.F, m_window.getSize().y / 2.F);
-
 	sf::Clock clock;
-	DebugData debug_data;
 
-	recreate_gllist(block, world_list);
-
-	int current_chunk_x;
-	int current_chunk_z;
-	int prev_chunk_x = -1;
-	int prev_chunk_z = -1;
-
+	create_all_gllists(block);
 	while (m_window.isOpen())
 	{
+		m_debug_data.start();
+
+		// update
 		handle_events();
 		update(clock);
 
-		current_chunk_x = m_player.get_position().x / BLOCK_SIZE / CHUNK_SIZE;
-		current_chunk_z = m_player.get_position().z / BLOCK_SIZE / CHUNK_SIZE;
+		if (m_map.is_chunk_edited()) {
+			const sf::Vector3i &chunk_pos = m_map.get_edited_chunk_pos();
+			update_gllist(block, chunk_pos);
 
-
+			m_map.cancel_chunk_editing_state();
+		}
 
 		// draw
-		if (m_debug_info) {
-			debug_data.start();
-
-			text.setString(
-				"fps: " +
-				to_string(int(debug_data.fps)) + "\n" +
-				"ft: " +
-				to_string(int(debug_data.frame_time)) + "\n" +
-				"x, y, z: " +
-				to_string(m_player.get_position().x) + " " +
-				to_string(m_player.get_position().y) + " " +
-				to_string(m_player.get_position().z)
-			);
-			m_renderer.draw_SFML(text);
-		}
-
-		for (auto &e : menu.m_sprites) {
-			m_renderer.draw_SFML(e.second);
-		}
-
-		for (auto &e : menu.m_side_sprites) {
-			m_renderer.draw_SFML(e.second);
-		}
-
-
-		if (m_map.m_redraw_chunk) {
-			
-			sf::Vector3i c = m_map.m_edited_chunk_coord;
-
-			string coord_str = to_string(c.x) + string(" ") + to_string(c.y) + string(" ") + to_string(c.z);
-			hash<string> hash_fn;
-			size_t str_hash = hash_fn(coord_str);
-
-			glDeleteLists(world_list[str_hash], 1);
-			world_list.erase(str_hash);
-			world_list.insert(std::pair<size_t, GLuint>(str_hash, glGenLists(1)));
-			glNewList(world_list[str_hash], GL_COMPILE);
-
-			for (auto it = m_map.m_world->at(c.x)[c.y][c.z].chunk().begin(); it != m_map.m_world->at(c.x)[c.y][c.z].chunk().end(); ++it) {
-				block.bind_textures(
-					it->second.id,
-					sf::Vector3f(
-						it->second.x + c.x * CHUNK_SIZE + 0.5F,
-						it->second.y + c.y * CHUNK_SIZE + 0.5F,
-						it->second.z + c.z * CHUNK_SIZE + 0.5F
-					)
-				);
-			}
-
-			glEndList();
-
-			m_map.m_redraw_chunk = false;
-		}
-
-		if (prev_chunk_x != current_chunk_x || prev_chunk_z != current_chunk_z) {
-			update_gllist(block, world_list, prev_chunk_x, prev_chunk_z, current_chunk_x, current_chunk_z);
-		}
-
-		prev_chunk_x = current_chunk_x;
-		prev_chunk_z = current_chunk_z;
-
-		for (auto &e : world_list) {
-			if (e.second)
-				m_renderer.draw_chunk_gl_list(e.second);
-		}
-
+		draw_SFML();
+		draw_openGL();
 		m_renderer.finish_render(m_window, m_player);
 
+
 		if (m_debug_info) {
-			debug_data.count();
+			m_debug_data.count();
 		}
 	}
 }
 
 void App::handle_events()
+{
+	input();
+
+	//camera
+	sf::Vector2i mouse_xy;
+	if (m_handle_cursor) {
+		mouse_xy = sf::Mouse::getPosition(m_window);
+		
+		// center coordinates
+		int x = m_window.getSize().x / 2;
+		int y = m_window.getSize().y / 2;
+
+		m_player.m_camera_angle.x += float(x - mouse_xy.x) / 8;
+		m_player.m_camera_angle.y += float(y - mouse_xy.y) / 8;
+
+		if (m_player.m_camera_angle.y < -88) { m_player.m_camera_angle.y = -88; }
+		if (m_player.m_camera_angle.y > 88) { m_player.m_camera_angle.y = 88; }
+
+		sf::Mouse::setPosition(sf::Vector2i(x, y), m_window);
+	}
+}
+
+void App::input()
 {
 	sf::Event event;
 	while (m_window.pollEvent(event))
@@ -305,7 +207,6 @@ void App::handle_events()
 		{
 		case sf::Event::Closed:
 			m_window.close();
-
 			break;
 		case sf::Event::KeyPressed: {
 			switch (event.key.code)
@@ -321,71 +222,45 @@ void App::handle_events()
 			}
 			break;
 		}
-		case sf::Event::Resized:
+		case sf::Event::Resized: {
 			sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
 			m_window.setView(sf::View(visibleArea));
 
 			m_renderer.reset_view({ static_cast<float>(event.size.width), static_cast<float>(event.size.height) });
-			menu_ref->update();
+			m_menu->update();
 			break;
 		}
-
-
-		if (event.key.code == sf::Keyboard::RControl && sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
-			m_debug_info = !m_debug_info;
 		}
 
-		static bool player_input_ability = true;
 
-		// save
+		// block input while ctrl pressed
+		static bool input_ability = true;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl) ||
 			sf::Keyboard::isKeyPressed(sf::Keyboard::RControl))
 		{
-			player_input_ability = false;
+			input_ability = false;
 			if (event.type == sf::Event::KeyReleased)
 			{
 				if (event.key.code == sf::Keyboard::S) {
 					m_debug_info = !m_debug_info;
 					m_map.save();
-					player_input_ability = true;
+					input_ability = true;
 				}
 				else if (event.key.code == sf::Keyboard::L) {
 					m_debug_info = !m_debug_info;
 					m_map.load();
-					player_input_ability = true;
+					input_ability = true;
 				}
 			}
 		}
 		else {
-			player_input_ability = true;
+			input_ability = true;
 		}
 
-
-		if (player_input_ability) {
+		if (input_ability) {
 			m_player.input(event);
-			menu_ref->input(event);
+			m_menu->input(event);
 		}
-
-
-	}
-
-	//camera
-	sf::Vector2i mouse_xy;
-	if (m_handle_cursor) {
-		// get global mouse position
-		mouse_xy = sf::Mouse::getPosition(m_window);
-		
-		// center coordinates
-		int x = m_window.getSize().x / 2;
-		int y = m_window.getSize().y / 2+5;
-
-		m_player.m_camera_angle.x += float(x - mouse_xy.x) / 8;
-		m_player.m_camera_angle.y += float(y - mouse_xy.y) / 8;
-
-		if (m_player.m_camera_angle.y < -88) { m_player.m_camera_angle.y = -88; }
-		if (m_player.m_camera_angle.y > 88) { m_player.m_camera_angle.y = 88; }
-
-		sf::Mouse::setPosition(sf::Vector2i(x, y), m_window);
 	}
 }
 
@@ -393,8 +268,6 @@ void App::update(sf::Clock &timer)
 {
 	int time = timer.getElapsedTime().asMilliseconds();
 	timer.restart();
-	//time = time / 50.F;
-	//if (time > 3) time = 3;
 
 	m_player.update(time / 50.F);
 }

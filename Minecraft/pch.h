@@ -12,6 +12,7 @@
 #include <fstream>
 #include <sstream>
 #include <memory>
+#include <functional>
 
 //libs
 #include <SFML/Graphics.hpp>

@@ -8,26 +8,36 @@ namespace World {
 	class Map
 	{
 		typedef std::array<std::array<std::array<Chunk, SUPER_CHUNK_SIZE>, SUPER_CHUNK_SIZE_HEIGHT>, SUPER_CHUNK_SIZE> map_type;
-		typedef std::shared_ptr<map_type> map_ref;
-	public:
-		Map();
-		~Map();
+		typedef std::shared_ptr<map_type> map_ptr;
 
+	private:
+		sf::Vector3i m_edited_chunk_pos;
+		bool m_redraw_chunk = false;
+
+		map_ptr m_map;
+
+	public:
+		/* load world */
+		Map();
+
+		/* eponymous */
 		bool is_block(int mx, int my, int mz);
 		bool create_block(int x, int y, int z, DB::block_id type);
 		bool delete_block(int x, int y, int z);
+
+		/* eponymous */ //TODO rewrite to binary
 		bool save();
 		bool load();
 
-		const sf::Vector3f m_world_size;
+		/* when you add/delete block */
+		bool is_chunk_edited() { return m_redraw_chunk; };
+		void cancel_chunk_editing_state() { m_redraw_chunk = false; };
 
-		bool m_redraw_chunk = false;
-		sf::Vector3i m_edited_chunk_coord;
-		// 3-d array of world
-		map_ref m_world;
-
+		/* getters */
+		const sf::Vector3i& get_edited_chunk_pos() { return m_edited_chunk_pos; };
+		const auto& get_chunk(int i, int j, int k) { return m_map->operator[](i)[j][k].chunk(); };
 	private:
-		int get_int_from_stringstream(std::stringstream &line_stream);
+		bool is_chunk_in_map(const int &x, const int &y, const int &z);
 	};
 }
 
