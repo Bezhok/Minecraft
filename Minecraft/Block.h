@@ -1,8 +1,11 @@
 #pragma once
 #include "pch.h"
 #include "Box.h"
-#include "Map.h"
+//#include "Map.h"
 #include "block_db.h"
+
+//namespace Base { class Box; }
+namespace World { class Map; }
 
 namespace World {
 	class Block :

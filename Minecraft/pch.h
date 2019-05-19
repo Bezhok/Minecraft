@@ -9,15 +9,23 @@
 #include <algorithm> 
 #include <queue>
 #include <unordered_map>
+#include <unordered_set>
 #include <fstream>
 #include <sstream>
 #include <memory>
-#include <functional>
+#include <utility> 
 
 //libs
+#include <glew.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
-#include <gl/GLU.h>
+#include <SFML/System.hpp>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+
 
 // local
 #include "Maths.h"

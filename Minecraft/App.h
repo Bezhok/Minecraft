@@ -1,10 +1,17 @@
 #pragma once
 #include "pch.h"
 #include "Player.h"
-#include "Block.h"
+//#include "Block.h"
 #include "Renderer.h"
 #include "DebugData.h"
-#include "Menu.h"
+//#include "Menu.h"
+
+class Menu;
+//class Player;
+////class Block;
+//class Renderer;
+//class DebugData;
+namespace World { class Map; }
 
 class App
 {
@@ -16,12 +23,22 @@ private:
 	Menu *m_menu;
 	sf::RenderWindow &m_window;
 	Player m_player;
-	World::Map m_map;
+	
 	Renderer m_renderer;
-	std::unordered_map<size_t, GLuint> m_world_list;
+	World::Map m_map;
+	std::unordered_map<size_t, std::pair<GLuint, sf::Vector3i>> m_world_list;
 
-	bool m_debug_info = false;
+
+	std::vector<GLuint> m_vao_list;
+	bool m_debug_info = true;
 	bool m_handle_cursor = true;
+
+	void update_gllist(
+		int old_chunk_x,
+		int old_chunk_z,
+		int new_chunk_x,
+		int new_chunk_z
+	);
 
 public:
 	/* init some objects */
@@ -40,16 +57,18 @@ private:
 	void update(sf::Clock &timer);
 
 	/* create all gllists from memory */
-	void create_all_gllists(Block &block);
+	void create_all_gllists();
 
 	/* send data to render */
 	void draw_SFML();
 	void draw_openGL();
 
 	/* eponymous */
-	void update_gllist(Block &block, const sf::Vector3i &c);
+	void update_gllist(const sf::Vector3i &c);
 
 	/* eponymous */
-	void create_gllist(Block &block, const sf::Vector3i &c, size_t hash);
+	void create_gllist(const sf::Vector3i &c, size_t hash);
+
+	void update_vao_list();
 };
 

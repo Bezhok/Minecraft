@@ -76,11 +76,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\c++\vs\Minecraft\glm;C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-audio-d.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\CppLibs\SFML-2.5.1x86x64\libx86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-audio-d.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\CppLibs\glew-2.1.0\lib\Release\Win32;C:\CppLibs\SFML-2.5.1x86x64\libx86</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -89,11 +89,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\c++\vs\Minecraft\glm;C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-audio-d.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\CppLibs\SFML-2.5.1x86x64\libx64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-audio-d.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\CppLibs\glew-2.1.0\lib\Release\x64;C:\CppLibs\SFML-2.5.1x86x64\libx64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -104,13 +104,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\c++\vs\Minecraft\glm;C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;sfml-audio.lib;sfml-main.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\CppLibs\SFML-2.5.1x86x64\libx86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;sfml-audio.lib;sfml-main.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\CppLibs\glew-2.1.0\lib\Release\Win32;C:\CppLibs\SFML-2.5.1x86x64\libx86</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -121,13 +121,13 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\c++\vs\Minecraft\glm;C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>opengl32.lib;glu32.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;sfml-audio.lib;sfml-main.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\CppLibs\SFML-2.5.1x86x64\libx64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;sfml-graphics.lib;sfml-window.lib;sfml-system.lib;sfml-audio.lib;sfml-main.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\CppLibs\glew-2.1.0\lib\Release\x64;C:\CppLibs\SFML-2.5.1x86x64\libx64</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

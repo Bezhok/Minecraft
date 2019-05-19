@@ -1,7 +1,9 @@
 #pragma once
 #include "pch.h"
 #include "block_db.h"
-#include "Player.h"
+//#include "Player.h"
+
+class Player;
 
 class Menu
 {

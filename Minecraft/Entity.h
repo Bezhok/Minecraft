@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
-#include "Map.h"
+
+namespace World { class Map; }
 
 namespace Base {
 	class Entity

@@ -17,19 +17,50 @@ Map::Map()
 {
 	m_map = std::make_shared<map_type>();
 
-		
+
+	//for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
+	//	for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
+	//		for (int k = 0; k < SUPER_CHUNK_SIZE; ++k) {
+	//			for (int x = 0; x < CHUNK_SIZE; ++x) {
+	//				for (int y = 0; y < CHUNK_SIZE; ++y) {
+	//					for (int z = 0; z < CHUNK_SIZE; ++z) {
+	//						if (y == 1 && j == 1 && i < 10 && k < 10) {
+	//							DB::block_data block = { x, y, z, DB::block_id::Grass };
+	//							m_map->at(i)[j][k].chunk().insert(std::make_pair(m_map->at(i)[j][k].block_hash(x, y, z), block));
+	//							m_map->at(i)[j][k].set_pos({ i,j,k });
+	//						}
+	//					}
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+
+	int chunks_count = RENDER_DISTANCE_CHUNKS * RENDER_DISTANCE_CHUNKS*SUPER_CHUNK_SIZE_HEIGHT;
+	m_global_vao_vbo_buffers.resize(chunks_count);
+	int i = 0;
+	for (auto &e : m_global_vao_vbo_buffers) {
+		//GLuint temp;
+		glGenVertexArrays(1, &e.first);
+		//e.first = temp;
+		glGenBuffers(1, &e.second);
+		//e.second = temp;
+
+		++i;
+	}
+	int k = 0;
 	sf::Image height_map;
 	height_map.loadFromFile("resources/hmp.bmp");
 
 	size_t x = 0, y = 0;
 	sf::Vector2u size = height_map.getSize();
 
-	for (size_t x = 0; x < size.x/4; ++x) {
-		for (size_t y = 0; y < size.y/4; ++y) {
+	for (size_t x = 0; x < size.x / 4; ++x) {
+		for (size_t y = 0; y < size.y / 4; ++y) {
 
-			int h = height_map.getPixel(x, y).r;
+			int h = height_map.getPixel(x, y).r/5;
 
-			for (int ss=0; ss < 5; ++ss, --h) {
+			for (int ss = 0; ss < 5; ++ss, --h) {
 				if (h / CHUNK_SIZE < SUPER_CHUNK_SIZE &&
 					x / CHUNK_SIZE < SUPER_CHUNK_SIZE &&
 					y / CHUNK_SIZE < SUPER_CHUNK_SIZE_HEIGHT
@@ -46,11 +77,22 @@ Map::Map()
 							block
 						)
 					);
+
+					m_map->at(x / CHUNK_SIZE)[h / CHUNK_SIZE][y / CHUNK_SIZE].set_pos({ int(x) / CHUNK_SIZE, int(h) / CHUNK_SIZE, int(y) / CHUNK_SIZE });
 				}
 			}
 
 		}
 	}
+
+	//load();
+}
+
+bool Map::is_block_without_checking_range(const int &x, const int &y, const int &z) {
+	Chunk &e = m_map->operator[](x / CHUNK_SIZE)[y / CHUNK_SIZE][z / CHUNK_SIZE];
+	const auto &block = e.chunk().find(Chunk::block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
+
+	return e.chunk().end() != block;
 }
 
 bool Map::is_block(int x, int y, int z)//block x,y,z in chunk
@@ -149,10 +191,10 @@ bool Map::save()
 						<< j << ' '
 						<< k << ' '
 						<< e.first << ' '
-						<< e.second.id << ' '
-						<< e.second.x << ' '
-						<< e.second.y << ' '
-						<< e.second.z << '\n';
+						<< (int)e.second.id << ' '
+						<< (int)e.second.x << ' '
+						<< (int)e.second.y << ' '
+						<< (int)e.second.z << '\n';
 				}
 			}
 		}
@@ -189,13 +231,14 @@ bool Map::load()
 			k = get_int_from_stringstream(line_stream);
 
 			hash = get_int_from_stringstream(line_stream);
-			id = get_int_from_stringstream(line_stream);
-			x = get_int_from_stringstream(line_stream);
-			y = get_int_from_stringstream(line_stream);
-			z = get_int_from_stringstream(line_stream);
+			id =(unsigned char) get_int_from_stringstream(line_stream);
+			x= (unsigned char)get_int_from_stringstream(line_stream);
+			y= (unsigned char)get_int_from_stringstream(line_stream);
+			z = (unsigned char)get_int_from_stringstream(line_stream);
 
 			DB::block_data block = { x, y, z, (DB::block_id)id };
 			m_map->at(i)[j][k].chunk().insert(std::make_pair(hash, block));
+			m_map->at(i)[j][k].set_pos({ i,j,k });
 		}
 		fin.close();
 	}

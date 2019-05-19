@@ -2,6 +2,7 @@
 #include "Menu.h"
 #include "game_constants.h"
 #include "block_db.h"
+#include "Player.h"
 
 using namespace World;
 
