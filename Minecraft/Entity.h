@@ -14,6 +14,6 @@ namespace Base {
 
 	public:
 		/* eponymous */
-		const sf::Vector3f &get_position() const { return m_pos; }
+		const sf::Vector3f& get_position() const { return m_pos; }
 	};
 }

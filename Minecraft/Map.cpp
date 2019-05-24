@@ -38,17 +38,12 @@ Map::Map()
 
 	int chunks_count = RENDER_DISTANCE_CHUNKS * RENDER_DISTANCE_CHUNKS*SUPER_CHUNK_SIZE_HEIGHT;
 	m_global_vao_vbo_buffers.resize(chunks_count);
-	int i = 0;
-	for (auto &e : m_global_vao_vbo_buffers) {
-		//GLuint temp;
-		glGenVertexArrays(1, &e.first);
-		//e.first = temp;
-		glGenBuffers(1, &e.second);
-		//e.second = temp;
 
-		++i;
+	for (auto& e : m_global_vao_vbo_buffers) {
+		glGenVertexArrays(1, &e.first);
+		glGenBuffers(1, &e.second);
 	}
-	int k = 0;
+
 	sf::Image height_map;
 	height_map.loadFromFile("resources/hmp.bmp");
 
@@ -58,9 +53,9 @@ Map::Map()
 	for (size_t x = 0; x < size.x / 4; ++x) {
 		for (size_t y = 0; y < size.y / 4; ++y) {
 
-			int h = height_map.getPixel(x, y).r/5;
+			int h = height_map.getPixel(x, y).r/2+80;
 
-			for (int ss = 0; ss < 5; ++ss, --h) {
+			for (int ss = 0; ss < 80; ++ss, --h) {
 				if (h / CHUNK_SIZE < SUPER_CHUNK_SIZE &&
 					x / CHUNK_SIZE < SUPER_CHUNK_SIZE &&
 					y / CHUNK_SIZE < SUPER_CHUNK_SIZE_HEIGHT
@@ -71,12 +66,8 @@ Map::Map()
 						block_z = y % CHUNK_SIZE;
 
 					DB::block_data block = { block_x, block_y, block_z, DB::block_id::Grass };
-					m_map->at(x / CHUNK_SIZE)[h / CHUNK_SIZE][y / CHUNK_SIZE].chunk().insert(
-						std::make_pair(
-							Chunk::block_hash(block_x, block_y, block_z),
-							block
-						)
-					);
+					m_map->at(x / CHUNK_SIZE)[h / CHUNK_SIZE][y / CHUNK_SIZE].chunk()(block_x, block_y, block_z) = block.id;
+
 
 					m_map->at(x / CHUNK_SIZE)[h / CHUNK_SIZE][y / CHUNK_SIZE].set_pos({ int(x) / CHUNK_SIZE, int(h) / CHUNK_SIZE, int(y) / CHUNK_SIZE });
 				}
@@ -88,14 +79,14 @@ Map::Map()
 	//load();
 }
 
-bool Map::is_block_without_checking_range(const int &x, const int &y, const int &z) {
-	Chunk &e = m_map->operator[](x / CHUNK_SIZE)[y / CHUNK_SIZE][z / CHUNK_SIZE];
-	const auto &block = e.chunk().find(Chunk::block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
+bool Map::is_block_without_checking_range(const int& x, const int& y, const int& z) {
+	Chunk& e = m_map->operator[](x / CHUNK_SIZE)[y / CHUNK_SIZE][z / CHUNK_SIZE];
+	//const auto& block = e.chunk()(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE);
 
-	return e.chunk().end() != block;
+	return e.chunk()(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE);
 }
 
-bool Map::is_block(int x, int y, int z)//block x,y,z in chunk
+bool Map::is_block(int x, int y, int z) //block x,y,z in chunk
 {
 	int chunk_x = x / CHUNK_SIZE,
 		chunk_y = y / CHUNK_SIZE,
@@ -106,13 +97,11 @@ bool Map::is_block(int x, int y, int z)//block x,y,z in chunk
 		|| chunk_y >= SUPER_CHUNK_SIZE_HEIGHT
 		|| chunk_z >= SUPER_CHUNK_SIZE) return false;
 
-	Chunk &e = m_map->operator[](chunk_x)[chunk_y][chunk_z];
-	auto block = e.chunk().find(Chunk::block_hash(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE));
-
-	return e.chunk().end() != block;
+	Chunk& e = m_map->operator[](x / CHUNK_SIZE)[y / CHUNK_SIZE][z / CHUNK_SIZE];
+	return e.chunk()(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE);
 }
 
-bool Map::is_chunk_in_map(const int & x, const int & y, const int & z)
+bool Map::is_chunk_in_map(const int&  x, const int&  y, const int&  z)
 {
 	return (x >= 0 || y >= 0 || z >= 0
 		|| x < SUPER_CHUNK_SIZE
@@ -131,17 +120,12 @@ bool Map::create_block(int x, int y, int z, DB::block_id id)
 
 	if (!is_chunk_in_map(chunk_x, chunk_y, chunk_z)) return false;
 
-	Chunk &e = m_map->operator[](chunk_x)[chunk_y][chunk_z];
-	auto block = e.chunk().find(Chunk::block_hash(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z));
+	Chunk& e = m_map->operator[](chunk_x)[chunk_y][chunk_z];
+	auto old_id = e.chunk()(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z);
 
-	if (e.chunk().end() == block) {
-		e.chunk()[e.block_hash(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z)] =
-		{ 
-			static_cast<unsigned char>(block_in_chunk_x),
-			static_cast<unsigned char>(block_in_chunk_y),
-			static_cast<unsigned char>(block_in_chunk_z),
-			id 
-		};
+	if (!old_id) {
+		e.chunk()(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z) = id;
+
 
 		m_edited_chunk_pos = { chunk_x, chunk_y, chunk_z };
 		m_redraw_chunk = true;
@@ -163,15 +147,15 @@ bool Map::delete_block(int x, int y, int z)
 
 	if (!is_chunk_in_map(chunk_x, chunk_y, chunk_z)) return false;
 
-	Chunk &e = m_map->operator[](chunk_x)[chunk_y][chunk_z];
-	auto block = e.chunk().find(Chunk::block_hash(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z));
+	Chunk& e = m_map->operator[](chunk_x)[chunk_y][chunk_z];
+	auto old_id = e.chunk()(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z);
 
-	if (e.chunk().end() == block) {
+	if (!old_id) {
 		return false;
 	}
 	else {
 		m_edited_chunk_pos = { chunk_x, chunk_y, chunk_z};
-		e.chunk().erase(block);
+		e.chunk()(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z) = DB::block_id::Air;
 		m_redraw_chunk = true;
 		return true;
 	}
@@ -180,31 +164,31 @@ bool Map::delete_block(int x, int y, int z)
 bool Map::save()
 {
 	// read
-	ofstream fout;
-	fout.open("Map.txt");
+	//ofstream fout;
+	//fout.open("Map.txt");
 
-	for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
-		for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
-			for (int k = 0; k < SUPER_CHUNK_SIZE; ++k) {
-				for (auto &e : m_map->at(i)[j][k].chunk()) {
-					fout << i << ' '
-						<< j << ' '
-						<< k << ' '
-						<< e.first << ' '
-						<< (int)e.second.id << ' '
-						<< (int)e.second.x << ' '
-						<< (int)e.second.y << ' '
-						<< (int)e.second.z << '\n';
-				}
-			}
-		}
-	}
-	fout.close();
+	//for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
+	//	for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
+	//		for (int k = 0; k < SUPER_CHUNK_SIZE; ++k) {
+	//			for (auto& e : m_map->at(i)[j][k].chunk()) {
+	//				fout << i << ' '
+	//					<< j << ' '
+	//					<< k << ' '
+	//					<< e.first << ' '
+	//					<< (int)e.second.id << ' '
+	//					<< (int)e.second.x << ' '
+	//					<< (int)e.second.y << ' '
+	//					<< (int)e.second.z << '\n';
+	//			}
+	//		}
+	//	}
+	//}
+	//fout.close();
 
 	return true;
 }
 
-int get_int_from_stringstream(stringstream &line_stream)
+int get_int_from_stringstream(stringstream& line_stream)
 {
 	string integer;
 	line_stream >> integer;
@@ -214,38 +198,38 @@ int get_int_from_stringstream(stringstream &line_stream)
 
 bool Map::load()
 {
-	ifstream fin;
-	fin.open("Map.txt");
-	if (fin.is_open() && fin.peek() != std::ifstream::traits_type::eof()) {
-		string line;
-		stringstream line_stream;
-		while (getline(fin, line))
-		{
-			line_stream.clear();
-			line_stream.str(line);
+	//ifstream fin;
+	//fin.open("Map.txt");
+	//if (fin.is_open() && fin.peek() != std::ifstream::traits_type::eof()) {
+	//	string line;
+	//	stringstream line_stream;
+	//	while (getline(fin, line))
+	//	{
+	//		line_stream.clear();
+	//		line_stream.str(line);
 
-			int i, j, k, hash, id, x, y, z;
+	//		int i, j, k, hash, id, x, y, z;
 
-			i = get_int_from_stringstream(line_stream);
-			j = get_int_from_stringstream(line_stream);
-			k = get_int_from_stringstream(line_stream);
+	//		i = get_int_from_stringstream(line_stream);
+	//		j = get_int_from_stringstream(line_stream);
+	//		k = get_int_from_stringstream(line_stream);
 
-			hash = get_int_from_stringstream(line_stream);
-			id =(unsigned char) get_int_from_stringstream(line_stream);
-			x= (unsigned char)get_int_from_stringstream(line_stream);
-			y= (unsigned char)get_int_from_stringstream(line_stream);
-			z = (unsigned char)get_int_from_stringstream(line_stream);
+	//		hash = get_int_from_stringstream(line_stream);
+	//		id =(unsigned char) get_int_from_stringstream(line_stream);
+	//		x= (unsigned char)get_int_from_stringstream(line_stream);
+	//		y= (unsigned char)get_int_from_stringstream(line_stream);
+	//		z = (unsigned char)get_int_from_stringstream(line_stream);
 
-			DB::block_data block = { x, y, z, (DB::block_id)id };
-			m_map->at(i)[j][k].chunk().insert(std::make_pair(hash, block));
-			m_map->at(i)[j][k].set_pos({ i,j,k });
-		}
-		fin.close();
-	}
-	else {
-		fin.close();
-		return false;
-	}
+	//		DB::block_data block = { x, y, z, (DB::block_id)id };
+	//		m_map->at(i)[j][k].chunk().insert(std::make_pair(hash, block));
+	//		m_map->at(i)[j][k].set_pos({ i,j,k });
+	//	}
+	//	fin.close();
+	//}
+	//else {
+	//	fin.close();
+	//	return false;
+	//}
 
 	return true;
 }

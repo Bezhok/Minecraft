@@ -75,6 +75,9 @@
     <ClCompile Include="Minecraft\game_constants.cpp">
       <Filter>Исходные файлы\Supporting</Filter>
     </ClCompile>
+    <ClCompile Include="Minecraft\Maths.cpp">
+      <Filter>Исходные файлы\Supporting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minecraft\App.h">

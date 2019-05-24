@@ -21,7 +21,7 @@ namespace World {
 		Map();
 
 		/* eponymous */
-		bool is_block_without_checking_range(const int &x, const int &y, const int &z);
+		bool is_block_without_checking_range(const int& x, const int& y, const int& z);
 		bool is_block(int mx, int my, int mz);
 		bool create_block(int x, int y, int z, DB::block_id type);
 		bool delete_block(int x, int y, int z);
@@ -41,7 +41,7 @@ namespace World {
 		std::list<std::pair<GLuint, GLuint>> m_global_vao_vbo_buffers;
 		std::unordered_set<Chunk*> m_free_vbo_chunks;
 	private:
-		bool is_chunk_in_map(const int &x, const int &y, const int &z);
+		bool is_chunk_in_map(const int& x, const int& y, const int& z);
 	};
 }
 

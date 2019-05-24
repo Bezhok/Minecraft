@@ -16,6 +16,6 @@ namespace World {
 		Block(Map *map);
 
 		/* eponymous. pos in blocks coordinates */
-		void bind_textures(DB::block_id id, const sf::Vector3f &pos);
+		void bind_textures(DB::block_id id, const sf::Vector3f& pos);
 	};
 }

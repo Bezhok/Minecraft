@@ -13,7 +13,7 @@ static const string PATH2BLOCKS_TEXTURES = "resources/textures/blocks/";
 
 void DB::load_block(block_id id, string name)
 {
-	for (auto &e : s_blocks_db[id]) {
+	for (auto& e : s_blocks_db[id]) {
 		sf::Image image;
 
 		image.loadFromFile(PATH2BLOCKS_TEXTURES + name);

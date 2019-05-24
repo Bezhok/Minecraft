@@ -7,19 +7,7 @@
 
 using std::array;
 
-
-sf::Shader shaderProgram;
-
-
-
 GLfloat halfSideLength = BLOCK_SIZE * 0.5f;
-
-
-
-
-
-sf::Image image;
-sf::Texture texture;
 
 
 Renderer::Renderer()
@@ -32,20 +20,17 @@ Renderer::Renderer()
 	glDepthMask(GL_TRUE);
 	glClearDepth(1.f);
 
-	shaderProgram.loadFromFile("D:\\c++\\vs\\Minecraft\\shaders\\shader.vert.glsl", "D:\\c++\\vs\\Minecraft\\shaders\\shader.frag.glsl");
-	image.loadFromFile("resources/atlas.png");
-	//image.loadFromFile("resources/textures/blocks/grass_side_carried.png");
-	//image.loadFromFile("resources/row.png");
-	image.flipVertically();
+	m_shader_program.loadFromFile("D:\\c++\\vs\\Minecraft\\shaders\\shader.vert.glsl", "D:\\c++\\vs\\Minecraft\\shaders\\shader.frag.glsl");
+	m_image_atlas.loadFromFile("resources/atlas.png");
+	m_image_atlas.flipVertically();
 
 	// Bind the texture
 	glEnable(GL_TEXTURE_2D);
 
-	texture.loadFromImage(image);
-	texture.generateMipmap();
+	m_texture_atlas.loadFromImage(m_image_atlas);
+	m_texture_atlas.generateMipmap();
 
-
-	
+	glEnable(GL_CULL_FACE);
 }
 
 Renderer::~Renderer()
@@ -56,19 +41,20 @@ void Renderer::reset_view(sf::Vector2f size)
 {
 }
 
-void Renderer::draw_chunk_gl_list(std::pair<GLuint, sf::Vector3i>& chunk)
+void Renderer::draw_chunk(Chunk* chunk)
 {
-	m_chunk_gl_lists.push(&chunk);
+	//m_chunks.push(chunk);
 }
 
-void Renderer::draw_SFML(const sf::Drawable & drawable)
+void Renderer::draw_SFML(const sf::Drawable& drawable)
 {
 	m_SFML.push(&drawable);
 }
 
-float SPHERE_DIAMETER = std::sqrtf(3*BLOCK_SIZE*BLOCK_SIZE);
-//sf::Vector3i 
-void Renderer::finish_render(sf::RenderWindow &window, const Player &player, World::Map &m_map)
+float SPHERE_DIAMETER = std::sqrtf(3 * BLOCK_SIZE*BLOCK_SIZE);
+
+
+void Renderer::finish_render(sf::RenderWindow& window, const Player& player, World::Map& m_map, std::unordered_map<size_t, Chunk*> &m_chunks4rendering)
 {
 
 	static glm::mat4 model = glm::mat4(1.0f);
@@ -78,72 +64,77 @@ void Renderer::finish_render(sf::RenderWindow &window, const Player &player, Wor
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
 
 
-	sf::Shader::bind(&shaderProgram);
-	sf::Texture::bind(&texture);
+	sf::Shader::bind(&m_shader_program);
+	sf::Texture::bind(&m_texture_atlas);
+
 	projection = glm::perspective(45.0f, (GLfloat)window.getSize().x / (GLfloat)window.getSize().y, 0.1f, RENDER_DISTANCE);
-	view = glm::lookAt(glm::vec3(player.get_position().x, player.get_position().y, player.get_position().z),
+	view = glm::lookAt(
+		glm::vec3(
+			player.get_position().x,
+			player.get_position().y+0.0F,
+			player.get_position().z
+		),
 		glm::vec3(
 			player.get_position().x - sin(player.m_camera_angle.x / 180 * PI),
 			player.get_position().y + tan(player.m_camera_angle.y / 180 * PI),
 			player.get_position().z - cos(player.m_camera_angle.x / 180 * PI)
 		),
-		glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::vec3(0.0f, 1.0f, 0.0f)
+	);
 
 
-	shaderProgram.setUniform("view", sf::Glsl::Mat4(glm::value_ptr(view)));
-	shaderProgram.setUniform("projection", sf::Glsl::Mat4(glm::value_ptr(projection)));
+	m_shader_program.setUniform("view", sf::Glsl::Mat4(glm::value_ptr(view)));
+	m_shader_program.setUniform("projection", sf::Glsl::Mat4(glm::value_ptr(projection)));
+
+	GLint model_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "model");
+
+
+	float mat[] = {
+		1.f, 0, 0, 0,
+		0, 1.f, 0, 0,
+		0, 0, 1.f, 0,
+		0, 0, 0, 1.f,
+	};
 
 
 
-
-	//model = glm::translate(model, glm::vec3(
-	//	BLOCK_SIZE*(0 * CHUNK_SIZE + 0.5F),
-	//	BLOCK_SIZE*(0 * CHUNK_SIZE + 0.5F),
-	//	BLOCK_SIZE*(0 * CHUNK_SIZE + 0.5F)
-	//));
-	//shaderProgram.setUniform("model", sf::Glsl::Mat4(glm::value_ptr(model)));
-	//glEnable(GL_CULL_FACE);
-	int i, j, k;
-	while (!m_chunk_gl_lists.empty()) {
+	glm::vec4 norm_coords;
+	glEnable(GL_CULL_FACE);
+	for (auto &e : m_chunks4rendering) {
+		Chunk* chunk = e.second;
+		auto &pos = chunk->get_pos();
 
 
-		i = m_chunk_gl_lists.front()->second.x;
-		j = m_chunk_gl_lists.front()->second.y;
-		k = m_chunk_gl_lists.front()->second.z;
+		mat[12] = pos.x * CHUNK_SIZE;
+		mat[13] = pos.y * CHUNK_SIZE;
+		mat[14] = pos.z * CHUNK_SIZE;
 
-		model = glm::translate(model, glm::vec3(
-			BLOCK_SIZE*(i * CHUNK_SIZE + 0.0F),
-			BLOCK_SIZE*(j * CHUNK_SIZE + 0.0F),
-			BLOCK_SIZE*(k * CHUNK_SIZE + 0.0F)
-		));
 
 		//glm::mat4 mvp = glm::mat4(1.0F);
 		//mvp *= projection * view * model;
 
-		glm::vec4 norm_coords = (projection * view * model) * glm::vec4(1.F);
+		//norm_coords = (projection * view * model) * glm::vec4(1.F);
 
-		norm_coords.x /= norm_coords.w;
-		norm_coords.y /= norm_coords.w;
+		//norm_coords.x /= norm_coords.w;
+		//norm_coords.y /= norm_coords.w;
 
-		if (norm_coords.z >= -80* BLOCK_SIZE / std::fabsf(norm_coords.w)
-			&& std::fabsf(norm_coords.x) <= 1 + 60* BLOCK_SIZE / std::fabsf(norm_coords.w)
-			&&  std::fabsf(norm_coords.y) <= 1 + 90* BLOCK_SIZE / std::fabsf(norm_coords.w)
-			) {
-			shaderProgram.setUniform("model", sf::Glsl::Mat4(glm::value_ptr(model)));
+		////TODO invalid "rendering sphere"
+		//if (norm_coords.z >= -80 * BLOCK_SIZE / std::fabsf(norm_coords.w)
+		//	&& std::fabsf(norm_coords.x) <= 1 + 60 * BLOCK_SIZE / std::fabsf(norm_coords.w)
+		//	&& std::fabsf(norm_coords.y) <= 1 + 90 * BLOCK_SIZE / std::fabsf(norm_coords.w)
+		//	) {
+			//m_shader_program.setUniform("model", sf::Glsl::Mat4(glm::value_ptr(model)));
 
-			glBindVertexArray(m_chunk_gl_lists.front()->first);
-			glDrawArrays(GL_TRIANGLES, 0, m_map.get_chunk(i, j, k).get_points_count());
+			glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
+
+			glBindVertexArray(chunk->get_VAO());
+			glDrawArrays(GL_TRIANGLES, 0, chunk->get_points_count());
 			glBindVertexArray(0);
+		//}
 
-
-		}
-		model = glm::mat4(1.0f);
-		m_chunk_gl_lists.pop();
 	}
-
 	glDisable(GL_CULL_FACE);
 
 	//sfml render
@@ -156,3 +147,43 @@ void Renderer::finish_render(sf::RenderWindow &window, const Player &player, Wor
 
 	window.display(); // swap buffers
 }
+
+
+/*
+	glm::vec4 norm_coords;
+	//glEnable(GL_CULL_FACE);
+	while (!m_chunks.empty()) {
+		Chunk* chunk = m_chunks.front();
+		auto &pos = chunk->get_pos();
+
+
+		model = glm::translate(model, glm::vec3(
+			BLOCK_SIZE*(pos.x * CHUNK_SIZE + 0.0F),
+			BLOCK_SIZE*(pos.y * CHUNK_SIZE + 0.0F),
+			BLOCK_SIZE*(pos.z * CHUNK_SIZE + 0.0F)
+		));
+
+		//glm::mat4 mvp = glm::mat4(1.0F);
+		//mvp *= projection * view * model;
+
+		norm_coords = (projection * view * model) * glm::vec4(1.F);
+
+		norm_coords.x /= norm_coords.w;
+		norm_coords.y /= norm_coords.w;
+
+		//TODO invalid "rendering sphere"
+		if (norm_coords.z >= -80 * BLOCK_SIZE / std::fabsf(norm_coords.w)
+			&& std::fabsf(norm_coords.x) <= 1 + 60 * BLOCK_SIZE / std::fabsf(norm_coords.w)
+			&& std::fabsf(norm_coords.y) <= 1 + 90 * BLOCK_SIZE / std::fabsf(norm_coords.w)
+			) {
+			m_shader_program.setUniform("model", sf::Glsl::Mat4(glm::value_ptr(model)));
+
+			glBindVertexArray(chunk->get_VAO());
+			glDrawArrays(GL_TRIANGLES, 0, chunk->get_points_count());
+			glBindVertexArray(0);
+		}
+
+		model = glm::mat4(1.0f);
+		m_chunks.pop();
+	}
+*/

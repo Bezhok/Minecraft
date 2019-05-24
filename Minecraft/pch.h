@@ -14,6 +14,7 @@
 #include <sstream>
 #include <memory>
 #include <utility> 
+#include <stack>
 
 //libs
 #include <glew.h>

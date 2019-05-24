@@ -31,7 +31,7 @@ public:
 
 	/* calculate movement */
 	void update(float time);
-	void input(sf::Event &e);
+	void input(sf::Event& e);
 
 	/* eponymous */
 	void god_on() { m_god = true; }
@@ -47,7 +47,7 @@ private:
 	void put_block();
 	void delete_block();
 
-	void keyboard_input(sf::Event &e);
-	void mouse_input(sf::Event &e);
+	void keyboard_input(sf::Event& e);
+	void mouse_input(sf::Event& e);
 };
 

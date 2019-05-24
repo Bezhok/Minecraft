@@ -6,16 +6,24 @@
 #include "App.h"
 #include "block_db.h"
 #include "Menu.h"
+#include "Maths.h"
 
 using std::unordered_map;
 using std::string;
 using std::pair;
+using std::stack;
+using std::pair;
+using std::vector;
 using std::to_string;
 using namespace World;
 
-unordered_map < size_t, std::vector < std::pair<size_t, Chunk*> >> m_update_order;
-unordered_map<size_t, Chunk*> local_update_order;
-sf::Mutex mutex;
+// x, z hash, (VAO, Chunk*)
+unordered_map<size_t, vector<pair<size_t, Chunk*>>> m_columns4updating;
+
+// x, y, z hash, Chunk*
+stack<pair<size_t, Chunk*>> m_chunks4vbo_generation;
+sf::Mutex mutex, mutex_columns4updating;
+
 
 
 void App::update_gllist(
@@ -60,109 +68,53 @@ void App::update_gllist(
 			}
 		}
 
-		/*
-		for (auto &e : m_world_list) {
-			bool should_delete = true;
-				
-			for (auto &xz : new_chunks_set) {
-				//if (!should_delete) break;
-				
-					//string coord_str = to_string(e.first) + string(" ") + to_string(j) + string(" ") + to_string(e.second);
-					//std::hash<string> hash_fn;
-					//size_t str_hash = hash_fn(coord_str);
 
-					//bool is_founded = m_world_list.find(str_hash) != m_world_list.end();
 
-					//if (m_map.get_chunk(e.first, j, e.second).chunk().size() && is_founded) {
+		//
+		for (auto it = m_chunks4rendering.begin(); it != m_chunks4rendering.end();) {
+			auto &pos = it->second->get_pos();
+			if (pos.x < new_sx || pos.z < new_sz || pos.x > new_ex || pos.z > new_ez) {
 
-					//	m_map.m_free_vbo_chunks.insert(&m_map.get_chunk(e.first, j, e.second));
-
-					//	m_world_list.erase(str_hash);
-
-					//	//m_update_order.erase(str_hash);
-					//}
-
-					if (e.second.second.x == xz.first && e.second.second.z == xz.second) {
-						should_delete = false;
-						break;
-					}
-				
-			}
-			if (should_delete) {
-				for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
-					string coord_str = to_string(e.second.second.x) + string(" ") + to_string(j) + string(" ") + to_string(e.second.second.z);
-					std::hash<string> hash_fn;
-					size_t str_hash = hash_fn(coord_str);
-
-					bool is_founded = m_world_list.find(str_hash) != m_world_list.end();
-					if (is_founded) {
-						m_map.m_free_vbo_chunks.insert(&m_map.get_chunk(e.second.second.x, j, e.second.second.z));
-
-						m_world_list.erase(str_hash);
-					}
+				Chunk *chunk = &m_map.get_chunk(pos.x, pos.y, pos.z);
+				if (!chunk->is_empty()) {
+					m_map.m_free_vbo_chunks.insert(chunk);
 				}
+
+				it = m_chunks4rendering.erase(it);
 			}
-			auto prev = e.second;
-		}*/
-
-
-				for (auto it = m_world_list.begin(); it != m_world_list.end();) {
-					if (it->second.second.x < new_sx || it->second.second.z < new_sz || it->second.second.x > new_ex || it->second.second.z > new_ez) {
-						m_map.m_free_vbo_chunks.insert(&m_map.get_chunk(it->second.second.x, it->second.second.y, it->second.second.z));
-
-						it = m_world_list.erase(it);
-					}
-					else
-						it++;
-				}
+			else
+				it++;
+		}
 
 
 		// and render it
 		vector<pair<int, int>> diff;
 		set_difference(new_chunks_set.begin(), new_chunks_set.end(), old_chunks_set.begin(), old_chunks_set.end(), back_inserter(diff));
 
-		//mutex.lock();
-		for (auto &e : diff) {
+		//mutex_columns4updating.lock();
+		for (auto& e : diff) {
 			for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
 
-				string coord_str = to_string(e.first) + string(" ") + to_string(j) + string(" ") + to_string(e.second);
-				std::hash<string> hash_fn;
-				size_t str_hash = hash_fn(coord_str);
+				size_t hash_3d = calculate_3D_hash(e.first, j, e.second);
 
-				bool is_founded = m_world_list.find(str_hash) != m_world_list.end();
-				if (m_map.get_chunk(e.first, j, e.second).chunk().size() && !is_founded) {
+				bool is_founded = m_chunks4rendering.find(hash_3d) != m_chunks4rendering.end();
+				if (!m_map.get_chunk(e.first, j, e.second).is_empty() && !is_founded) {
 
-					m_world_list.erase(str_hash);
+					m_chunks4rendering.erase(hash_3d);
 
-					string coord_str = to_string(e.first) + string(" ") + to_string(e.second);
-					std::hash<string> hash_fn;
-					size_t str_hash2 = hash_fn(coord_str);
+					size_t hash_2d = calculate_2D_hash(e.first, e.second);
 
-
-					m_update_order[str_hash2].push_back({ str_hash, &m_map.get_chunk(e.first, j, e.second) });// = &m_map.get_chunk(e.first, j, e.second);
-
-					//m_map.get_chunk(e.first, j, e.second).update(m_map);
-					//m_world_list[str_hash] = { m_map.get_chunk(e.first, j, e.second).VAO, {e.first, j, e.second} };
+					m_columns4updating[hash_2d].push_back({ hash_3d,&m_map.get_chunk(e.first, j, e.second) });
 				}
 			}
 		}
-		//mutex.unlock();
+		//mutex_columns4updating.unlock();
 	}
 }
 
-void App::create_gllist(const sf::Vector3i &c, size_t hash)
-{
 
-}
-	
-
-void App::create_all_gllists()
-{
-
-}
-
-App::App(sf::RenderWindow &window)
-	: m_window {window}
+App::App(sf::RenderWindow& window)
+	: m_window{ window }
 {
 	m_font.loadFromFile("resources/arial.ttf");
 	m_text.setFont(m_font);
@@ -185,70 +137,61 @@ void App::draw_SFML()
 			to_string(m_player.get_position().x) + " " +
 			to_string(m_player.get_position().y) + " " +
 			to_string(m_player.get_position().z) + "\n" +
-			to_string(m_world_list.size()) + " " +
+
+			to_string(m_chunks4rendering.size()) + " " +
 			to_string(m_map.m_free_vbo_chunks.size()) + " " +
-			to_string(m_update_order.size()) + " " +
-			to_string(m_map.m_global_vao_vbo_buffers.size()) + "\n"
+			to_string(m_columns4updating.size()) + " " +
+			to_string(m_map.m_global_vao_vbo_buffers.size()) + " " +
+			"- chunks rendering, local buffer, updates(columns), global buffer\n" +
+
+			to_string(verticies_wasnt_free) + " - chunks which veticies memory is not freed"
 		);
 		m_renderer.draw_SFML(m_text);
 	}
 
-	for (auto &e : m_menu->get_spites()) {
+	for (auto& e : m_menu->get_spites()) {
 		m_renderer.draw_SFML(e.second);
 	}
 
-	for (auto &e : m_menu->get_top_spites()) {
+	for (auto& e : m_menu->get_top_spites()) {
 		m_renderer.draw_SFML(e.second);
 	}
 }
 
 void App::draw_openGL()
 {
-	for (auto &e: m_world_list)
-		m_renderer.draw_chunk_gl_list(e.second);
+	//for (auto& e : m_chunks4rendering)
+	//	m_renderer.draw_chunk(e.second);
 }
-#include <stack>
-std::stack<std::pair<size_t, Chunk*>> update_vao_chunks;
-//#include <iostream>
+
+
 void App::update_vao_list()
 {
 	//sf::Context context;
 	while (m_window.isOpen()) {
 		mutex.lock();
-		auto local_update_order = m_update_order;
+		auto local_update_order = m_columns4updating;
 		mutex.unlock();
 
 		while (local_update_order.size()) {
-			
+
 			auto it = local_update_order.begin();
 			auto column_chunks = it->second;
-			
-			//int i = local_update_order.begin()->second->get_pos().x;
-			//int k = local_update_order.begin()->second->get_pos().z;
 
-			//unordered_map<size_t, Chunk*> column_chunks;
-			
-			for (auto &e : column_chunks) {
-				//if (i == e.second->get_pos().x && k == e.second->get_pos().z) {
-				//	e.second->update(m_map);
 
-				//	column_chunks.insert(e);
-				//	local_update_order.erase(e.first);
-				//}
-
-				e.second->update(m_map);
+			for (auto& e : column_chunks) {
+				e.second->update_vertices(m_map);
 			}
-
 
 
 			mutex.lock();
 
-			for (auto &e : column_chunks) {
-				
-				update_vao_chunks.push(e);
+			for (auto& e : column_chunks) {
+
+				m_chunks4vbo_generation.push(e);
 			}
 
-			m_update_order.erase(it->first);
+			m_columns4updating.erase(it->first);
 			mutex.unlock();
 
 			local_update_order.erase(it);
@@ -273,7 +216,7 @@ void App::run()
 
 	sf::Clock clock;
 
-	
+
 	int sx, sz, ex, ez, cx, cz;// start x, end x, current x ...
 	cx = m_player.get_position().x / BLOCK_SIZE / CHUNK_SIZE;
 	cz = m_player.get_position().z / BLOCK_SIZE / CHUNK_SIZE;
@@ -287,23 +230,21 @@ void App::run()
 	for (int i = sx; i < ex; ++i) {
 		for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
 			for (int k = sz; k < ez; ++k) {
-				string coord_str = to_string(i) + string(" ") + to_string(j) + string(" ") + to_string(k);
-				std::hash<string> hash_fn;
-				size_t str_hash = hash_fn(coord_str);
+				size_t hash_3d = calculate_3D_hash(i, j, k);
 
-				bool is_founded = m_world_list.find(str_hash) != m_world_list.end();
-				if (m_map.get_chunk(i, j, k).chunk().size() && !is_founded) {
+				bool is_founded = m_chunks4rendering.find(hash_3d) != m_chunks4rendering.end();
+				if (!m_map.get_chunk(i, j, k).is_empty() && !is_founded) {
 
-					m_map.get_chunk(i, j, k).update(m_map);
+					m_map.get_chunk(i, j, k).update_vertices(m_map);
 					m_map.get_chunk(i, j, k).upate_vao();
-					m_world_list[str_hash] = { m_map.get_chunk(i, j, k).VAO, {i,j,k} };
+					m_chunks4rendering[hash_3d] = &m_map.get_chunk(i, j, k);
 				}
 			}
 		}
 	}
 
-	sf::Thread vbo_thread(&App::update_vao_list, this);
-	vbo_thread.launch();
+	sf::Thread verticies_generator_thread(&App::update_vao_list, this);
+	verticies_generator_thread.launch();
 
 	int current_chunk_x;
 	int current_chunk_z;
@@ -313,40 +254,38 @@ void App::run()
 	//sf::Context context;
 	//m_window.setActive(true);
 	//m_window.setActive(true);
-	
+
 
 	while (m_window.isOpen())
 	{
-		
+
 		//m_window.setActive(true);
 		m_debug_data.start();
-		
+
 		// update
 		handle_events();
 		update(clock);
 
 		if (m_map.is_chunk_edited()) {
-			const sf::Vector3i &chunk_pos = m_map.get_edited_chunk_pos();
+			const sf::Vector3i& chunk_pos = m_map.get_edited_chunk_pos();
 
 			int i = chunk_pos.x;
 			int j = chunk_pos.y;
 			int k = chunk_pos.z;
 
 			//update
-			string coord_str = to_string(i) + string(" ") + to_string(j) + string(" ") + to_string(k);
-			std::hash<string> hash_fn;
-			size_t str_hash = hash_fn(coord_str);
-			
+			size_t hash_3d = calculate_3D_hash(i, j, k);
+
 
 			// if buffer wasn't generated
-			if (m_map.get_chunk(i, j, k).VAO && m_map.get_chunk(i, j, k).VBO) {
+			if (m_map.get_chunk(i, j, k).get_VAO()) {
 				m_map.m_free_vbo_chunks.insert(&m_map.get_chunk(i, j, k));
 			}
 
-			m_map.get_chunk(i, j, k).update(m_map);
+			m_map.get_chunk(i, j, k).update_vertices(m_map);
 			m_map.get_chunk(i, j, k).upate_vao();
 			//TODO
-			m_world_list[str_hash] = { m_map.get_chunk(i, j, k).VAO , {i, j, k} };
+			m_chunks4rendering[hash_3d] = &m_map.get_chunk(i, j, k);
 
 			m_map.cancel_chunk_editing_state();
 		}
@@ -356,34 +295,38 @@ void App::run()
 		current_chunk_x = m_player.get_position().x / BLOCK_SIZE / CHUNK_SIZE;
 		current_chunk_z = m_player.get_position().z / BLOCK_SIZE / CHUNK_SIZE;
 
-		
+
 
 		mutex.lock();
-		while (update_vao_chunks.size()) {
+		while (m_chunks4vbo_generation.size()) {
 
-			auto &e = update_vao_chunks.top();
+			auto& e = m_chunks4vbo_generation.top();
 
 			e.second->upate_vao();
-			m_world_list[e.first] = { e.second->VAO, e.second->get_pos() };
+			m_chunks4rendering[e.first] = e.second;
 
-			update_vao_chunks.pop();
+			m_chunks4vbo_generation.pop();
 		}
 
 		if (prev_chunk_x != current_chunk_x || prev_chunk_z != current_chunk_z) {
 			update_gllist(prev_chunk_x, prev_chunk_z, current_chunk_x, current_chunk_z);
 		}
-
-
-
 		// draw
 		draw_SFML();
 		draw_openGL();
 
-		
-		m_renderer.finish_render(m_window, m_player, m_map);
 
 
 		mutex.unlock();
+
+		m_renderer.finish_render(m_window, m_player, m_map, m_chunks4rendering);
+
+
+
+
+
+
+
 
 		prev_chunk_x = current_chunk_x;
 		prev_chunk_z = current_chunk_z;
@@ -402,7 +345,7 @@ void App::handle_events()
 	sf::Vector2i mouse_xy;
 	if (m_handle_cursor) {
 		mouse_xy = sf::Mouse::getPosition(m_window);
-		
+
 		// center coordinates
 		int x = m_window.getSize().x / 2;
 		int y = m_window.getSize().y / 2;
@@ -410,8 +353,8 @@ void App::handle_events()
 		m_player.m_camera_angle.x += float(x - mouse_xy.x) / 8;
 		m_player.m_camera_angle.y += float(y - mouse_xy.y) / 8;
 
-		if (m_player.m_camera_angle.y < -88) { m_player.m_camera_angle.y = -88; }
-		if (m_player.m_camera_angle.y > 88) { m_player.m_camera_angle.y = 88; }
+		if (m_player.m_camera_angle.y < -89) { m_player.m_camera_angle.y = -89; }
+		if (m_player.m_camera_angle.y > 89) { m_player.m_camera_angle.y = 89; }
 
 		sf::Mouse::setPosition(sf::Vector2i(x, y), m_window);
 	}
@@ -486,7 +429,7 @@ void App::input()
 	}
 }
 
-void App::update(sf::Clock &timer)
+void App::update(sf::Clock& timer)
 {
 	int time = timer.getElapsedTime().asMilliseconds();
 	timer.restart();

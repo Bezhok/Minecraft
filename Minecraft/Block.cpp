@@ -17,7 +17,7 @@ Block::Block(World::Map *map)
 
 }
 
-void Block::bind_textures(DB::block_id id, const sf::Vector3f &pos)
+void Block::bind_textures(DB::block_id id, const sf::Vector3f& pos)
 {
 
 }

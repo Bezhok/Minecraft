@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Minecraft\game_constants.cpp" />
+    <ClCompile Include="Minecraft\Maths.cpp" />
     <ClCompile Include="Minecraft\Menu.cpp" />
     <ClCompile Include="Minecraft\App.cpp" />
     <ClCompile Include="Minecraft\Block.cpp" />

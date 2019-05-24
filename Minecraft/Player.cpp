@@ -15,13 +15,13 @@ void Player::init(Map *map)
 	//m_pos = { 10,10,10 };
 	//m_pos = { 1800, 2900, 1800 };
 	//m_pos = { 0, 20, 0 };
-	for (auto &e : DB::s_side_textures)
+	for (auto& e : DB::s_side_textures)
 		m_inventory.push_back({ e.first, 1 });
 
 	m_curr_block = m_inventory[0].first;
 }
 
-void Player::input(sf::Event &e)
+void Player::input(sf::Event& e)
 {
 	keyboard_input(e);
 	mouse_input(e);
@@ -29,7 +29,7 @@ void Player::input(sf::Event &e)
 
 void Player::update(float time)
 {
-	if (time > 1.F) time = 1.F;
+	//if (time > 1.F) time = 1.F;
 	if (m_flying) {
 		m_on_ground = false;
 
@@ -174,7 +174,7 @@ void Player::collision(float dx, float dy, float dz)
 	}
 }
 
-void Player::keyboard_input(sf::Event &e)
+void Player::keyboard_input(sf::Event& e)
 {
 	// forward
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
@@ -241,7 +241,7 @@ void Player::keyboard_input(sf::Event &e)
 	}
 }
 
-void Player::mouse_input(sf::Event &e)
+void Player::mouse_input(sf::Event& e)
 {
 	static int curr_block_index = 0;
 

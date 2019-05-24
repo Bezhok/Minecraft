@@ -21,12 +21,12 @@ private:
 	DebugData m_debug_data;
 
 	Menu *m_menu;
-	sf::RenderWindow &m_window;
+	sf::RenderWindow& m_window;
 	Player m_player;
 	
 	Renderer m_renderer;
 	World::Map m_map;
-	std::unordered_map<size_t, std::pair<GLuint, sf::Vector3i>> m_world_list;
+	std::unordered_map<size_t, Chunk*> m_chunks4rendering;
 
 
 	std::vector<GLuint> m_vao_list;
@@ -42,7 +42,7 @@ private:
 
 public:
 	/* init some objects */
-	App(sf::RenderWindow &window);
+	App(sf::RenderWindow& window);
 
 	/* Run game cycle */
 	void run();
@@ -54,7 +54,7 @@ private:
 	void input();
 
 	/* update entity activity */
-	void update(sf::Clock &timer);
+	void update(sf::Clock& timer);
 
 	/* create all gllists from memory */
 	void create_all_gllists();
@@ -64,11 +64,12 @@ private:
 	void draw_openGL();
 
 	/* eponymous */
-	void update_gllist(const sf::Vector3i &c);
+	void update_gllist(const sf::Vector3i& c);
 
 	/* eponymous */
-	void create_gllist(const sf::Vector3i &c, size_t hash);
+	void create_gllist(const sf::Vector3i& c, size_t hash);
 
 	void update_vao_list();
+	void update_game_logic();
 };
 

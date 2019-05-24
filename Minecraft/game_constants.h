@@ -7,5 +7,8 @@ extern const float STANDART_PLAYER_SPEED;
 
 static const float BLOCK_SIZE = 1.F; // coordinates and image resolution
 static const int CHUNK_SIZE = 16; // blocks in chunk
-static const int SUPER_CHUNK_SIZE = 16; // chunks in world
+static const int SUPER_CHUNK_SIZE = 100; // chunks in world
 static const int SUPER_CHUNK_SIZE_HEIGHT = 16; // chunks in world height
+
+
+extern int verticies_wasnt_free;

@@ -6,7 +6,7 @@
 
 using namespace World;
 
-Menu::Menu(sf::RenderWindow &window)
+Menu::Menu(sf::RenderWindow& window)
 	: m_window{ window }
 {
 	//tool bar
@@ -45,23 +45,23 @@ void Menu::update()
 	sf::Vector2f tool_old_pos = m_sprites[curr_tool].getPosition();
 	m_sprites[curr_tool].setPosition(tool_old_pos + bar_new_pos - bar_old_pos);
 
-	for (auto &e : m_side_sprites) {
+	for (auto& e : m_side_sprites) {
 		e.second.setPosition(e.second.getPosition() + bar_new_pos - bar_old_pos);
 	}
 }
 
-void Menu::input(sf::Event &e)
+void Menu::input(sf::Event& e)
 {
 	keyboard_input(e);
 	mouse_input(e);
 }
 
-void Menu::update_players_blocks(Player & player)
+void Menu::update_players_blocks(Player&  player)
 {
 	m_side_sprites.clear();
 
 	int i = 0;
-	for (auto &e : player.get_inventory()) {
+	for (auto& e : player.get_inventory()) {
 		m_side_sprites[e.first].setTexture(DB::s_side_textures[e.first]);
 		sf::Vector2f pos = m_sprites[tool_bar].getPosition();
 		pos.y += 8; pos.x += 8;
@@ -75,11 +75,11 @@ void Menu::update_players_blocks(Player & player)
 	}
 }
 
-void Menu::keyboard_input(sf::Event &e)
+void Menu::keyboard_input(sf::Event& e)
 {
 }
 
-void Menu::mouse_input(sf::Event &e)
+void Menu::mouse_input(sf::Event& e)
 {
 	if (e.type == sf::Event::MouseWheelMoved) {
 		// toolbar
