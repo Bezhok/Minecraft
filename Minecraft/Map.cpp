@@ -50,12 +50,12 @@ Map::Map()
 	size_t x = 0, y = 0;
 	sf::Vector2u size = height_map.getSize();
 
-	for (size_t x = 0; x < size.x / 4; ++x) {
-		for (size_t y = 0; y < size.y / 4; ++y) {
+	for (size_t x = 0; x < size.x / 1; ++x) {
+		for (size_t y = 0; y < size.y / 1; ++y) {
 
-			int h = height_map.getPixel(x, y).r/2+80;
+			int h = height_map.getPixel(x, y).r/2+30;
 
-			for (int ss = 0; ss < 80; ++ss, --h) {
+			for (int ss = 0; ss < 30; ++ss, --h) {
 				if (h / CHUNK_SIZE < SUPER_CHUNK_SIZE &&
 					x / CHUNK_SIZE < SUPER_CHUNK_SIZE &&
 					y / CHUNK_SIZE < SUPER_CHUNK_SIZE_HEIGHT
@@ -79,7 +79,7 @@ Map::Map()
 	//load();
 }
 
-bool Map::is_block_without_checking_range(const int& x, const int& y, const int& z) {
+bool Map::is_block_without_checking_range(int x, int y, int z) {
 	Chunk& e = m_map->operator[](x / CHUNK_SIZE)[y / CHUNK_SIZE][z / CHUNK_SIZE];
 	//const auto& block = e.chunk()(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE);
 

@@ -6,6 +6,14 @@
 
 using namespace World;
 
+
+bool is_keys_pressed[6] = { false };
+
+enum Key
+{
+	W = 0, A, S, D, Space, LShift
+};
+
 void Player::init(Map *map)
 {
 	m_map = map;
@@ -29,6 +37,66 @@ void Player::input(sf::Event& e)
 
 void Player::update(float time)
 {
+	// forward
+	if (is_keys_pressed[Key::W])
+	{
+		m_dpos.x = -sinf(m_camera_angle.x / 180 * PI) * m_speed;
+		m_dpos.z = -cosf(m_camera_angle.x / 180 * PI) * m_speed;
+	}
+
+	// back
+	if (is_keys_pressed[Key::S])
+	{
+		m_dpos.x = +sinf(m_camera_angle.x / 180 * PI) * m_speed;
+		m_dpos.z = +cosf(m_camera_angle.x / 180 * PI) * m_speed;
+	}
+
+	// left
+	if (is_keys_pressed[Key::A])
+	{
+		m_dpos.x = +sinf((m_camera_angle.x - 90) / 180 * PI) * m_speed;
+		m_dpos.z = +cosf((m_camera_angle.x - 90) / 180 * PI) * m_speed;
+	}
+
+	//rigth
+	if (is_keys_pressed[Key::D])
+	{
+		m_dpos.x = +sinf((m_camera_angle.x + 90) / 180 * PI) * m_speed;
+		m_dpos.z = +cosf((m_camera_angle.x + 90) / 180 * PI) * m_speed;
+	}
+
+	// up(jump)
+	if (is_keys_pressed[Key::Space])
+	{
+		if (m_flying) {
+			m_dpos.y = m_speed;
+			m_on_ground = false;
+		}
+		else {
+			if (m_on_ground) {
+				m_dpos.y = 5.F / 8.F * BLOCK_SIZE;
+				m_on_ground = false;
+			}
+		}
+	}
+
+	// lshift
+	if (is_keys_pressed[Key::LShift])
+	{
+		if (m_flying) {
+			m_dpos.y = -m_speed;
+		}
+	}
+
+
+
+
+
+
+
+
+
+
 	//if (time > 1.F) time = 1.F;
 	if (m_flying) {
 		m_on_ground = false;
@@ -87,11 +155,11 @@ void Player::put_block()
 
 	prev_x = x; prev_y = y; prev_z = z;
 	bool able_create = false;
-	for (int distance = 0; distance < 10 * BLOCK_SIZE; ++distance) {
+	for (int distance = 0; distance < 50 * BLOCK_SIZE; ++distance) {
 		
-		x += -sinf(m_camera_angle.x / 180 * PI)/2.F;
-		y += tanf(m_camera_angle.y / 180 * PI)/2.F;
-		z += -cosf(m_camera_angle.x / 180 * PI)/2.F;
+		x += -sinf(m_camera_angle.x / 180 * PI)/10.F;
+		y += tanf(m_camera_angle.y / 180 * PI)/10.F;
+		z += -cosf(m_camera_angle.x / 180 * PI)/10.F;
 
 		if (m_map->is_block(x/BLOCK_SIZE, y/BLOCK_SIZE, z/BLOCK_SIZE)) {
 			// is we in this block
@@ -132,10 +200,10 @@ void Player::delete_block()
 		z = m_pos.z;
 
 	bool able_create = false;
-	for (int distance = 0; distance < 10 * BLOCK_SIZE; ++distance) {
-		x += -sinf(m_camera_angle.x / 180 * PI)/2.F;
-		y += tanf(m_camera_angle.y / 180 * PI)/2.F;
-		z += -cosf(m_camera_angle.x / 180 * PI)/2.F;
+	for (int distance = 0; distance < 50 * BLOCK_SIZE; ++distance) {
+		x += -sinf(m_camera_angle.x / 180 * PI)/10.F;
+		y += tanf(m_camera_angle.y / 180 * PI)/10.F;
+		z += -cosf(m_camera_angle.x / 180 * PI)/10.F;
 		if (m_map->is_block(
 			x / BLOCK_SIZE,
 			y / BLOCK_SIZE,
@@ -174,57 +242,63 @@ void Player::collision(float dx, float dy, float dz)
 	}
 }
 
+
 void Player::keyboard_input(sf::Event& e)
 {
-	// forward
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+	switch (e.type)
 	{
-		m_dpos.x = -sinf(m_camera_angle.x / 180 * PI) * m_speed;
-		m_dpos.z = -cosf(m_camera_angle.x / 180 * PI) * m_speed;
-	}
-
-	// back
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-	{
-		m_dpos.x = +sinf(m_camera_angle.x / 180 * PI) * m_speed;
-		m_dpos.z = +cosf(m_camera_angle.x / 180 * PI) * m_speed;
-	}
-
-	// left
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-	{
-		m_dpos.x = +sinf((m_camera_angle.x - 90) / 180 * PI) * m_speed;
-		m_dpos.z = +cosf((m_camera_angle.x - 90) / 180 * PI) * m_speed;
-	}
-
-	//rigth
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-	{
-		m_dpos.x = +sinf((m_camera_angle.x + 90) / 180 * PI) * m_speed;
-		m_dpos.z = +cosf((m_camera_angle.x + 90) / 180 * PI) * m_speed;
-	}
-
-	// up(jump)
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
-	{
-		if (m_flying) {
-			m_dpos.y = m_speed;
-			m_on_ground = false;
+	case sf::Event::KeyPressed: {
+		switch (e.key.code)
+		{
+		case sf::Keyboard::W:
+			is_keys_pressed[Key::W] = true;
+			break;
+		case sf::Keyboard::A:
+			is_keys_pressed[Key::A] = true;
+			break;
+		case sf::Keyboard::S:
+			is_keys_pressed[Key::S] = true;
+			break;
+		case sf::Keyboard::D:
+			is_keys_pressed[Key::D] = true;
+			break;
+		case sf::Keyboard::Space:
+			is_keys_pressed[Key::Space] = true;
+			break;
+		case sf::Keyboard::LShift:
+			is_keys_pressed[Key::LShift] = true;
+			break;
+		default:
+			break;
 		}
-		else {
-			if (m_on_ground) {
-				m_dpos.y = 5.F/8.F * BLOCK_SIZE;
-				m_on_ground = false;
-			}
-		}
+		break;
 	}
-
-	// lshift
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift))
-	{
-		if (m_flying) {
-			m_dpos.y = -m_speed;
+	case sf::Event::KeyReleased: {
+		switch (e.key.code)
+		{
+		case sf::Keyboard::W:
+			is_keys_pressed[Key::W] = false;
+			break;
+		case sf::Keyboard::A:
+			is_keys_pressed[Key::A] = false;
+			break;
+		case sf::Keyboard::S:
+			is_keys_pressed[Key::S] = false;
+			break;
+		case sf::Keyboard::D:
+			is_keys_pressed[Key::D] = false;
+			break;
+		case sf::Keyboard::Space:
+			is_keys_pressed[Key::Space] = false;
+			break;
+		case sf::Keyboard::LShift:
+			is_keys_pressed[Key::LShift] = false;
+			break;
+		default:
+			break;
 		}
+		break;
+	}
 	}
 
 	// rshift

@@ -21,7 +21,7 @@ using namespace World;
 unordered_map<size_t, vector<pair<size_t, Chunk*>>> m_columns4updating;
 
 // x, y, z hash, Chunk*
-stack<pair<size_t, Chunk*>> m_chunks4vbo_generation;
+vector<pair<size_t, Chunk*>> m_chunks4vbo_generation;
 sf::Mutex mutex, mutex_columns4updating;
 
 
@@ -50,7 +50,7 @@ void App::update_gllist(
 	int x_diff = new_chunk_x - old_chunk_x;
 	int z_diff = new_chunk_z - old_chunk_z;
 
-	if (abs(x_diff) == 1 || abs(z_diff) == 1) {
+	if (abs(x_diff) == 1 || abs(z_diff) == 1 || true) {
 
 		// old chunks for rendering
 		vector<pair<int, int>> old_chunks_set;
@@ -69,28 +69,30 @@ void App::update_gllist(
 		}
 
 
-
-		//
-		for (auto it = m_chunks4rendering.begin(); it != m_chunks4rendering.end();) {
-			auto &pos = it->second->get_pos();
-			if (pos.x < new_sx || pos.z < new_sz || pos.x > new_ex || pos.z > new_ez) {
-
-				Chunk *chunk = &m_map.get_chunk(pos.x, pos.y, pos.z);
-				if (!chunk->is_empty()) {
-					m_map.m_free_vbo_chunks.insert(chunk);
-				}
-
-				it = m_chunks4rendering.erase(it);
-			}
-			else
-				it++;
-		}
-
-
 		// and render it
 		vector<pair<int, int>> diff;
 		set_difference(new_chunks_set.begin(), new_chunks_set.end(), old_chunks_set.begin(), old_chunks_set.end(), back_inserter(diff));
 
+		mutex.lock();
+		////error threads
+		//for (auto it = m_chunks4rendering.begin(); it != m_chunks4rendering.end();) {
+		//	auto &pos = it->second->get_pos();
+		//	if (pos.x < new_sx || pos.z < new_sz || pos.x > new_ex || pos.z > new_ez) {
+
+		//		Chunk *chunk = &m_map.get_chunk(pos.x, pos.y, pos.z);
+		//		if (!chunk->is_empty()) {
+		//			m_map.m_free_vbo_chunks.insert(chunk);
+		//		}
+
+		//		it = m_chunks4rendering.erase(it);
+		//	}
+		//	else
+		//		it++;
+		//}
+
+
+
+		//mutex_columns4updating.lock();
 		//mutex_columns4updating.lock();
 		for (auto& e : diff) {
 			for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
@@ -108,6 +110,9 @@ void App::update_gllist(
 				}
 			}
 		}
+		//mutex_columns4updating.unlock();
+
+		mutex.unlock();
 		//mutex_columns4updating.unlock();
 	}
 }
@@ -167,35 +172,90 @@ void App::draw_openGL()
 
 void App::update_vao_list()
 {
-	//sf::Context context;
+	int current_chunk_x;
+	int current_chunk_z;
+	int prev_chunk_x = -1;
+	int prev_chunk_z = -1;
+
 	while (m_window.isOpen()) {
-		mutex.lock();
-		auto local_update_order = m_columns4updating;
-		mutex.unlock();
-
-		while (local_update_order.size()) {
-
-			auto it = local_update_order.begin();
-			auto column_chunks = it->second;
+		current_chunk_x = m_player.get_position().x / BLOCK_SIZE / CHUNK_SIZE;
+		current_chunk_z = m_player.get_position().z / BLOCK_SIZE / CHUNK_SIZE;
+		
+		if (prev_chunk_x != current_chunk_x || prev_chunk_z != current_chunk_z) {
+			int new_chunk_x = current_chunk_x;
+			int new_chunk_z = current_chunk_z;
 
 
-			for (auto& e : column_chunks) {
-				e.second->update_vertices(m_map);
-			}
+			//new
+			int new_sx = new_chunk_x - RENDER_DISTANCE_CHUNKS / 2 < 0 ? 0 : new_chunk_x - RENDER_DISTANCE_CHUNKS / 2;
+			int new_sz = new_chunk_z - RENDER_DISTANCE_CHUNKS / 2 < 0 ? 0 : new_chunk_z - RENDER_DISTANCE_CHUNKS / 2;
 
+			int new_ex = new_chunk_x + RENDER_DISTANCE_CHUNKS / 2 > SUPER_CHUNK_SIZE ? SUPER_CHUNK_SIZE : new_chunk_x + RENDER_DISTANCE_CHUNKS / 2;
+			int new_ez = new_chunk_z + RENDER_DISTANCE_CHUNKS / 2 > SUPER_CHUNK_SIZE ? SUPER_CHUNK_SIZE : new_chunk_z + RENDER_DISTANCE_CHUNKS / 2;
 
 			mutex.lock();
+			for (auto it = m_chunks4rendering.begin(); it != m_chunks4rendering.end();) {
+				auto &pos = it->second->get_pos();
+				if (pos.x < new_sx || pos.z < new_sz || pos.x > new_ex || pos.z > new_ez) {
 
-			for (auto& e : column_chunks) {
+					Chunk *chunk = &m_map.get_chunk(pos.x, pos.y, pos.z);
+					if (!chunk->is_empty()) {
+						m_map.m_free_vbo_chunks.insert(chunk);
+					}
 
-				m_chunks4vbo_generation.push(e);
+					it = m_chunks4rendering.erase(it);
+				}
+				else {
+					it++;
+				}
+			}
+			mutex.unlock();
+		}
+		
+		mutex.lock();
+		auto local_update_order = m_columns4updating;
+		//m_columns4updating.clear();
+		mutex.unlock();
+
+
+		int i = 0;
+		auto prev = local_update_order.begin();
+		for (auto e = local_update_order.begin(); e != local_update_order.end(); ++e) {
+			for (auto& column : e->second) {
+				column.second->update_vertices(m_map);
 			}
 
-			m_columns4updating.erase(it->first);
-			mutex.unlock();
+			++i;
 
-			local_update_order.erase(it);
+			if (i > 4) {
+				mutex.lock();
+				// slow
+				for (; prev != e; ++prev) {
+					//for (auto& column : prev->second) {
+					m_chunks4vbo_generation.insert(m_chunks4vbo_generation.end(), prev->second.begin(), prev->second.end());
+					m_columns4updating.erase(prev->first);
+					//}
+				}
+
+				mutex.unlock();
+				i = 0;
+			}
 		}
+
+
+		mutex.lock();
+
+		for (; prev != local_update_order.end(); ++prev) {
+			m_chunks4vbo_generation.insert(m_chunks4vbo_generation.end(), prev->second.begin(), prev->second.end());
+			m_columns4updating.erase(prev->first);
+		}
+
+		mutex.unlock();
+
+
+		prev_chunk_x = current_chunk_x;
+		prev_chunk_z = current_chunk_z;
+
 	}
 
 }
@@ -298,35 +358,35 @@ void App::run()
 
 
 		mutex.lock();
-		while (m_chunks4vbo_generation.size()) {
+		auto local_m_chunks4vbo_generation = m_chunks4vbo_generation;
+		m_chunks4vbo_generation.clear();
 
-			auto& e = m_chunks4vbo_generation.top();
+		for (auto& e : local_m_chunks4vbo_generation) {
 
 			e.second->upate_vao();
-			m_chunks4rendering[e.first] = e.second;
-
-			m_chunks4vbo_generation.pop();
 		}
+
+		std::copy(
+			local_m_chunks4vbo_generation.begin(),
+			local_m_chunks4vbo_generation.end(),
+			std::inserter(m_chunks4rendering, m_chunks4rendering.end())
+		);
+
+		draw_SFML();
+		mutex.unlock();
+
+
+		//local_m_chunks4vbo_generation.clear();
+		//m_chunks4rendering.insert(std::end(m_chunks4rendering), std::begin(m_chunks4rendering), std::end(m_chunks4vbo_generation));
+
 
 		if (prev_chunk_x != current_chunk_x || prev_chunk_z != current_chunk_z) {
 			update_gllist(prev_chunk_x, prev_chunk_z, current_chunk_x, current_chunk_z);
 		}
 		// draw
-		draw_SFML();
+
 		draw_openGL();
-
-
-
-		mutex.unlock();
-
 		m_renderer.finish_render(m_window, m_player, m_map, m_chunks4rendering);
-
-
-
-
-
-
-
 
 		prev_chunk_x = current_chunk_x;
 		prev_chunk_z = current_chunk_z;
@@ -431,8 +491,9 @@ void App::input()
 
 void App::update(sf::Clock& timer)
 {
-	int time = timer.getElapsedTime().asMilliseconds();
-	timer.restart();
-
-	m_player.update(time / 50.F);
+	//int time = timer.getElapsedTime().asMilliseconds();
+	//timer.restart().asMilliseconds();
+	//float time = timer.restart().asMilliseconds() / 50.F;
+	//if (time > 3) time = 3;
+	m_player.update(timer.restart().asSeconds()*25);
 }
