@@ -83,12 +83,12 @@ void Renderer::finish_render(sf::RenderWindow& window, const Player& player, Wor
 	view = glm::lookAt(
 		glm::vec3(
 			player.get_position().x,
-			player.get_position().y+0.0F,
+			player.get_position().y+ BLOCK_SIZE,//m_size.y
 			player.get_position().z
 		),
 		glm::vec3(
 			player.get_position().x - sin(player.m_camera_angle.x / 180 * PI),
-			player.get_position().y + tan(player.m_camera_angle.y / 180 * PI),
+			player.get_position().y + BLOCK_SIZE + tan(player.m_camera_angle.y / 180 * PI),
 			player.get_position().z - cos(player.m_camera_angle.x / 180 * PI)
 		),
 		glm::vec3(0.0f, 1.0f, 0.0f)

@@ -157,6 +157,14 @@ Chunk::Chunk()
 	//m_chunk.reserve(16 * 16 * 16);
 }
 
+World::Chunk::~Chunk()
+{
+	if (m_is_vertices_created) {
+		delete[] m_vertices;
+		--verticies_wasnt_free;
+	}
+}
+
 
 void World::Chunk::upate_vao()
 {
@@ -207,7 +215,7 @@ void Chunk::update_vertices(World::Map& map) {
 
 		if (map.m_free_vbo_chunks.size()) {
 
-			if (is_finded && map.is_chunk_edited()) {
+			if (is_finded && map.is_chunk_edited() && (*this_chunk_iter)->m_VAO) {
 				map.m_free_vbo_chunks.erase(this_chunk_iter);			
 			}
 			else {

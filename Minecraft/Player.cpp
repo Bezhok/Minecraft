@@ -150,7 +150,7 @@ void Player::put_block()
 {
 	float prev_x, prev_y, prev_z;
 	float x = m_pos.x,
-		y = m_pos.y,
+		y = m_pos.y+ m_size.y,
 		z = m_pos.z;
 
 	prev_x = x; prev_y = y; prev_z = z;
@@ -196,7 +196,7 @@ void Player::put_block()
 void Player::delete_block()
 {
 	float x = m_pos.x,
-		y = m_pos.y,
+		y = m_pos.y+ m_size.y,
 		z = m_pos.z;
 
 	bool able_create = false;

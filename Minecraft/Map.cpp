@@ -17,7 +17,7 @@ Map::Map()
 {
 	m_map = std::make_shared<map_type>();
 
-
+	m_should_be_updated_neighbours.resize(6);
 	//for (int i = 0; i < SUPER_CHUNK_SIZE; ++i) {
 	//	for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
 	//		for (int k = 0; k < SUPER_CHUNK_SIZE; ++k) {
@@ -48,6 +48,14 @@ Map::Map()
 	height_map.loadFromFile("resources/noiseTexture.png");//hmp.bmp
 
 	sf::Vector2u size = height_map.getSize();
+
+	for (int x = 0; x < SUPER_CHUNK_SIZE; ++x) {
+		for (int y = 0; y < SUPER_CHUNK_SIZE_HEIGHT; ++y) {
+			for (int z = 0; z < SUPER_CHUNK_SIZE; ++z) {
+				m_map->at(x)[y][z].set_pos({ x, y, z });
+			}
+		}
+	}
 
 	for (size_t x = 0; x < size.x / 2; ++x) {
 		for (size_t y = 0; y < size.y / 2; ++y) {
@@ -85,7 +93,7 @@ Map::Map()
 					m_map->at(chunk_x)[chunk_y][chunk_z].chunk()(block_x, block_y, block_z) = id;
 
 
-					m_map->at(chunk_x)[chunk_y][chunk_z].set_pos({ chunk_x, chunk_y, chunk_z });
+
 				}
 			}
 
@@ -117,12 +125,12 @@ bool Map::is_block(int x, int y, int z) //block x,y,z in chunk
 	return e.chunk()(x%CHUNK_SIZE, y%CHUNK_SIZE, z%CHUNK_SIZE);
 }
 
-bool Map::is_chunk_in_map(const int&  x, const int&  y, const int&  z)
+bool Map::is_chunk_in_map(int x, int y, int z)
 {
-	return (x >= 0 || y >= 0 || z >= 0
-		|| x < SUPER_CHUNK_SIZE
-		|| y < SUPER_CHUNK_SIZE_HEIGHT
-		|| z < SUPER_CHUNK_SIZE);
+	return (x >= 0 && y >= 0 && z >= 0
+		&& x < SUPER_CHUNK_SIZE
+		&& y < SUPER_CHUNK_SIZE_HEIGHT
+		&& z < SUPER_CHUNK_SIZE);
 }
 
 bool Map::create_block(int x, int y, int z, DB::block_id id)
@@ -171,6 +179,31 @@ bool Map::delete_block(int x, int y, int z)
 	}
 	else {
 		m_edited_chunk_pos = { chunk_x, chunk_y, chunk_z};
+
+		if (block_in_chunk_x == 0 && is_block(x - 1, y, z)) {
+			m_should_be_updated_neighbours.push_back({ (x - 1) / CHUNK_SIZE, chunk_y, chunk_z });
+		}
+
+		if (block_in_chunk_x == 15 && is_block(x + 1, y, z)) {
+			m_should_be_updated_neighbours.push_back({ (x + 1) / CHUNK_SIZE, chunk_y, chunk_z });
+		}
+
+		if (block_in_chunk_y == 0 && is_block(x, y - 1, z)) {
+			m_should_be_updated_neighbours.push_back({ chunk_x, (y-1)/ CHUNK_SIZE, chunk_z });
+		}
+
+		if (block_in_chunk_y == 15 && is_block(x, y + 1, z)) {
+			m_should_be_updated_neighbours.push_back({ chunk_x, (y + 1) / CHUNK_SIZE, chunk_z });
+		}
+
+		if (block_in_chunk_z == 0 && is_block(x, y, z - 1)) {
+			m_should_be_updated_neighbours.push_back({ chunk_x, chunk_y, (z - 1) / CHUNK_SIZE });
+		}
+
+		if (block_in_chunk_z == 15 && is_block(x, y, z + 1)) {
+			m_should_be_updated_neighbours.push_back({ chunk_x, chunk_y, (z + 1) / CHUNK_SIZE });
+		}
+
 		e.chunk()(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z) = DB::block_id::Air;
 		m_redraw_chunk = true;
 		return true;

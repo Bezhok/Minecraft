@@ -59,6 +59,7 @@ namespace World {
 			return true;
 		};
 		Chunk();
+		~Chunk();
 		auto& chunk() { return m_chunk; };
 
 		/* return hash of block. x,y,z coordinates of block relative to chunk */

@@ -327,6 +327,14 @@ void App::run()
 		handle_events();
 		update(clock);
 
+
+		current_chunk_x = m_player.get_position().x / BLOCK_SIZE / CHUNK_SIZE;
+		current_chunk_z = m_player.get_position().z / BLOCK_SIZE / CHUNK_SIZE;
+
+
+
+		mutex.lock();
+
 		if (m_map.is_chunk_edited()) {
 			const sf::Vector3i& chunk_pos = m_map.get_edited_chunk_pos();
 
@@ -338,7 +346,7 @@ void App::run()
 			size_t hash_3d = calculate_3D_hash(i, j, k);
 
 
-			// if buffer wasn't generated
+			// if buffer was generated
 			if (m_map.get_chunk(i, j, k).get_VAO()) {
 				m_map.m_free_vbo_chunks.insert(&m_map.get_chunk(i, j, k));
 			}
@@ -348,17 +356,16 @@ void App::run()
 			//TODO
 			m_chunks4rendering[hash_3d] = &m_map.get_chunk(i, j, k);
 
+			for (sf::Vector3i& pos : m_map.m_should_be_updated_neighbours) {
+				Chunk& chunk = m_map.get_chunk(pos.x, pos.y, pos.z);
+				m_map.m_free_vbo_chunks.insert(&chunk);
+				chunk.update_vertices(m_map);
+				chunk.upate_vao();
+			}
+
 			m_map.cancel_chunk_editing_state();
 		}
 
-
-
-		current_chunk_x = m_player.get_position().x / BLOCK_SIZE / CHUNK_SIZE;
-		current_chunk_z = m_player.get_position().z / BLOCK_SIZE / CHUNK_SIZE;
-
-
-
-		mutex.lock();
 		auto local_m_chunks4vbo_generation = m_chunks4vbo_generation;
 		m_chunks4vbo_generation.clear();
 

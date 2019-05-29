@@ -9,7 +9,6 @@ int main()
 	//window.setVerticalSyncEnabled(true);
 
 	App app(window);
-
 	app.run();
 
 

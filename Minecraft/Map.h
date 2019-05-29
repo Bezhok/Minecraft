@@ -30,18 +30,28 @@ namespace World {
 		bool save();
 		bool load();
 
+		std::vector<sf::Vector3i> m_should_be_updated_neighbours;
+
 		/* when you add/delete block */
 		bool is_chunk_edited() { return m_redraw_chunk; };
-		void cancel_chunk_editing_state() { m_redraw_chunk = false; };
+		void cancel_chunk_editing_state() 
+		{ 
+			m_redraw_chunk = false;
+			m_should_be_updated_neighbours.clear();
+		};
 
 		/* getters */
+		
 		const sf::Vector3i& get_edited_chunk_pos() { return m_edited_chunk_pos; };
-		auto& get_chunk(int i, int j, int k) { return m_map->operator[](i)[j][k]; };
+		auto& get_chunk(int i, int j, int k) 
+		{ 
+			return m_map->operator[](i)[j][k]; 
+		};
 
 		std::vector<std::pair<GLuint, GLuint>> m_global_vao_vbo_buffers;
 		std::unordered_set<Chunk*> m_free_vbo_chunks;
 	private:
-		bool is_chunk_in_map(const int& x, const int& y, const int& z);
+		bool is_chunk_in_map(int x, int y, int z);
 	};
 }
 
