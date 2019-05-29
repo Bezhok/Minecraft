@@ -19,7 +19,7 @@ void Player::init(Map *map)
 	m_map = map;
 
 	m_size = { BLOCK_SIZE / 4.F, BLOCK_SIZE, BLOCK_SIZE / 4.F };
-	m_pos = { 60 * BLOCK_SIZE, 60*BLOCK_SIZE, 15 * BLOCK_SIZE };
+	m_pos = { 60 * BLOCK_SIZE, 155*BLOCK_SIZE, 15 * BLOCK_SIZE };
 	//m_pos = { 10,10,10 };
 	//m_pos = { 1800, 2900, 1800 };
 	//m_pos = { 0, 20, 0 };

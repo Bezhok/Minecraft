@@ -91,9 +91,6 @@ void App::update_gllist(
 		//}
 
 
-
-		//mutex_columns4updating.lock();
-		//mutex_columns4updating.lock();
 		for (auto& e : diff) {
 			for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
 
@@ -110,10 +107,9 @@ void App::update_gllist(
 				}
 			}
 		}
-		//mutex_columns4updating.unlock();
+
 
 		mutex.unlock();
-		//mutex_columns4updating.unlock();
 	}
 }
 
@@ -231,10 +227,8 @@ void App::update_vao_list()
 				mutex.lock();
 				// slow
 				for (; prev != e; ++prev) {
-					//for (auto& column : prev->second) {
 					m_chunks4vbo_generation.insert(m_chunks4vbo_generation.end(), prev->second.begin(), prev->second.end());
 					m_columns4updating.erase(prev->first);
-					//}
 				}
 
 				mutex.unlock();
@@ -287,6 +281,8 @@ void App::run()
 	ex = cx + RENDER_DISTANCE_CHUNKS / 2 > SUPER_CHUNK_SIZE ? SUPER_CHUNK_SIZE : cx + RENDER_DISTANCE_CHUNKS / 2;
 	ez = cz + RENDER_DISTANCE_CHUNKS / 2 > SUPER_CHUNK_SIZE ? SUPER_CHUNK_SIZE : cz + RENDER_DISTANCE_CHUNKS / 2;
 
+	//sx += 10; sz += 10;
+	//ex -= 15; ez -= 15;
 	for (int i = sx; i < ex; ++i) {
 		for (int j = 0; j < SUPER_CHUNK_SIZE_HEIGHT; ++j) {
 			for (int k = sz; k < ez; ++k) {
@@ -295,9 +291,15 @@ void App::run()
 				bool is_founded = m_chunks4rendering.find(hash_3d) != m_chunks4rendering.end();
 				if (!m_map.get_chunk(i, j, k).is_empty() && !is_founded) {
 
-					m_map.get_chunk(i, j, k).update_vertices(m_map);
-					m_map.get_chunk(i, j, k).upate_vao();
-					m_chunks4rendering[hash_3d] = &m_map.get_chunk(i, j, k);
+					if (k < ez - 15 || i < ex - 15) {
+						m_map.get_chunk(i, j, k).update_vertices(m_map);
+						m_map.get_chunk(i, j, k).upate_vao();
+						m_chunks4rendering[hash_3d] = &m_map.get_chunk(i, j, k);
+					}
+					else {
+						size_t hash_2d = calculate_2D_hash(i, k);
+						m_columns4updating[hash_2d].push_back({ hash_3d,&m_map.get_chunk(i, j, k) });
+					}
 				}
 			}
 		}
@@ -318,7 +320,6 @@ void App::run()
 
 	while (m_window.isOpen())
 	{
-
 		//m_window.setActive(true);
 		m_debug_data.start();
 
@@ -380,7 +381,7 @@ void App::run()
 		//m_chunks4rendering.insert(std::end(m_chunks4rendering), std::begin(m_chunks4rendering), std::end(m_chunks4vbo_generation));
 
 
-		if (prev_chunk_x != current_chunk_x || prev_chunk_z != current_chunk_z) {
+		if (prev_chunk_x != current_chunk_x || prev_chunk_z != current_chunk_z && prev_chunk_x>=0) {
 			update_gllist(prev_chunk_x, prev_chunk_z, current_chunk_x, current_chunk_z);
 		}
 		// draw

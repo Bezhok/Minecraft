@@ -9,41 +9,49 @@ int Chunk::block_hash(int x, int y, int z)
 	return int(x + z * CHUNK_SIZE + y * CHUNK_SIZE * CHUNK_SIZE);
 }
 
+void Chunk::bind_texture_first_order(DB::block_id id, const sf::Vector2i& p)
+{
+	m_vertices[m_i + 4] = p.x; m_vertices[m_i + 5] = (p.y + 1);
+	m_vertices[m_i + 10] = (p.x + 1); m_vertices[m_i + 11] = (p.y + 1);
+	m_vertices[m_i + 16] = p.x; m_vertices[m_i + 17] = p.y;
+	m_vertices[m_i + 22] = p.x; m_vertices[m_i + 23] = p.y;
+	m_vertices[m_i + 28] = (p.x + 1); m_vertices[m_i + 29] = (p.y + 1);
+	m_vertices[m_i + 34] = (p.x + 1); m_vertices[m_i + 35] = p.y;
+}
+
+void Chunk::bind_texture_second_order(DB::block_id id, const sf::Vector2i& p)
+{
+	m_vertices[m_i + 4] = p.x; m_vertices[m_i + 5] = (p.y + 1);
+	m_vertices[m_i + 10] = p.x; m_vertices[m_i + 11] = p.y;
+	m_vertices[m_i + 16] = (p.x + 1); m_vertices[m_i + 17] = (p.y + 1);
+	m_vertices[m_i + 22] = p.x; m_vertices[m_i + 23] = p.y;
+	m_vertices[m_i + 28] = (p.x + 1); m_vertices[m_i + 29] = p.y;
+	m_vertices[m_i + 34] = (p.x + 1); m_vertices[m_i + 35] = (p.y + 1);
+}
+
 void Chunk::bind_texture2negative_x(DB::block_id id)
 {
-	int x = 2; int y = 1;
-	m_vertices[m_i+4] = x; m_vertices[m_i+5] = (y + 1);
-	m_vertices[m_i+10] = (x + 1); m_vertices[m_i+11] = (y + 1);
-	m_vertices[m_i+16] = x; m_vertices[m_i+17] = y;
-	m_vertices[m_i+22] = x; m_vertices[m_i+23] = y;
-	m_vertices[m_i+28] = (x + 1); m_vertices[m_i+29] = (y + 1);
-	m_vertices[m_i+34] = (x + 1); m_vertices[m_i+35] = y;
+	bind_texture_first_order(id, DB::s_atlas_db[id][DB::sides::negative_x]);
 }
 
 void Chunk::bind_texture2positive_x(DB::block_id id) {
-	int x = 2; int y = 1;
-	m_vertices[m_i+4] = x; m_vertices[m_i+5] = (y + 1);
-	m_vertices[m_i+10] = x; m_vertices[m_i+11] = y;
-	m_vertices[m_i+16] = (x + 1); m_vertices[m_i+17] = (y + 1);
-	m_vertices[m_i+22] = x; m_vertices[m_i+23] = y;
-	m_vertices[m_i+28] = (x + 1); m_vertices[m_i+29] = y;
-	m_vertices[m_i+34] = (x + 1); m_vertices[m_i+35] = (y + 1);
+	bind_texture_second_order(id, DB::s_atlas_db[id][DB::sides::positive_x]);
 }
 
 void Chunk::bind_texture2negative_y(DB::block_id id) {
-	bind_texture2positive_x(id);
+	bind_texture_second_order(id, DB::s_atlas_db[id][DB::sides::negative_y]);
 }
 
 void Chunk::bind_texture2positive_y(DB::block_id id) {
-	bind_texture2negative_x(id);
+	bind_texture_first_order(id, DB::s_atlas_db[id][DB::sides::positive_y]);
 }
 
 void Chunk::bind_texture2negative_z(DB::block_id id) {
-	bind_texture2positive_x(id);
+	bind_texture_second_order(id, DB::s_atlas_db[id][DB::sides::negative_z]);
 }
 
 void Chunk::bind_texture2positive_z(DB::block_id id) {
-	bind_texture2negative_x(id);
+	bind_texture_first_order(id, DB::s_atlas_db[id][DB::sides::positive_z]);
 }
 
 void Chunk::add_byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w) 
@@ -97,23 +105,23 @@ void Chunk::generate_vertices(World::Map& map)
 
 					if (!map.is_block(X, Y - 1, Z)) {
 						bind_texture2negative_y(id);
-						add_byte4(x, y, z, side);
-						add_byte4(x + BS, y, z, side);
-						add_byte4(x, y, z + BS, side);
-						add_byte4(x + BS, y, z, side);
-						add_byte4(x + BS, y, z + BS, side);
-						add_byte4(x, y, z + BS, side);
+						add_byte4(x, y, z, -side);
+						add_byte4(x + BS, y, z, -side);
+						add_byte4(x, y, z + BS, -side);
+						add_byte4(x + BS, y, z, -side);
+						add_byte4(x + BS, y, z + BS, -side);
+						add_byte4(x, y, z + BS, -side);
 
 					}
 
 					if (!map.is_block(X, Y + 1, Z)) {
 						bind_texture2positive_y(id);
-						add_byte4(x, y + BS, z, -BS);
-						add_byte4(x, y + BS, z + BS, -BS);
-						add_byte4(x + BS, y + BS, z, -BS);
-						add_byte4(x + BS, y + BS, z, -BS);
-						add_byte4(x, y + BS, z + BS, -BS);
-						add_byte4(x + BS, y + BS, z + BS, -BS);
+						add_byte4(x, y + BS, z, -side);
+						add_byte4(x, y + BS, z + BS, -side);
+						add_byte4(x + BS, y + BS, z, -side);
+						add_byte4(x + BS, y + BS, z, -side);
+						add_byte4(x, y + BS, z + BS, -side);
+						add_byte4(x + BS, y + BS, z + BS, -side);
 
 					}
 

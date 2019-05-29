@@ -28,7 +28,16 @@ Renderer::Renderer()
 	glEnable(GL_TEXTURE_2D);
 
 	m_texture_atlas.loadFromImage(m_image_atlas);
-	m_texture_atlas.generateMipmap();
+	GLuint opengl_tex = m_texture_atlas.getNativeHandle();
+
+	glBindTexture(GL_TEXTURE_2D, opengl_tex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//m_texture_atlas.generateMipmap();
 
 	glEnable(GL_CULL_FACE);
 }
@@ -39,6 +48,7 @@ Renderer::~Renderer()
 
 void Renderer::reset_view(sf::Vector2f size)
 {
+	glViewport(0, 0, size.x, size.y);
 }
 
 void Renderer::draw_chunk(Chunk* chunk)
@@ -61,7 +71,7 @@ void Renderer::finish_render(sf::RenderWindow& window, const Player& player, Wor
 	static glm::mat4 view = glm::mat4(1.0f);
 	static glm::mat4 projection = glm::mat4(1.0f);
 
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.6, 0.8, 1.0, 0.0);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 

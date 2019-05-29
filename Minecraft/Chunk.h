@@ -32,6 +32,8 @@ namespace World {
 		GLbyte *m_vertices;
 		GLuint m_VBO, m_VAO;
 
+		void bind_texture_second_order(DB::block_id id, const sf::Vector2i& p);
+		void bind_texture_first_order(DB::block_id id, const sf::Vector2i& p);
 
 		void bind_texture2positive_x(DB::block_id id);
 		void bind_texture2negative_x(DB::block_id id);

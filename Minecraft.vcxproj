@@ -164,6 +164,10 @@
     <ClInclude Include="Minecraft\SkyBox.h" />
     <ClInclude Include="Minecraft\Map.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\atlas.png" />
+    <Image Include="resources\hmp.bmp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

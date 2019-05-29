@@ -45,31 +45,47 @@ Map::Map()
 	}
 
 	sf::Image height_map;
-	height_map.loadFromFile("resources/hmp.bmp");
+	height_map.loadFromFile("resources/noiseTexture.png");//hmp.bmp
 
-	size_t x = 0, y = 0;
 	sf::Vector2u size = height_map.getSize();
 
-	for (size_t x = 0; x < size.x / 1; ++x) {
-		for (size_t y = 0; y < size.y / 1; ++y) {
+	for (size_t x = 0; x < size.x / 2; ++x) {
+		for (size_t y = 0; y < size.y / 2; ++y) {
 
-			int h = height_map.getPixel(x, y).r/2+30;
+			int h = height_map.getPixel(x, y).r/16+30;
 
 			for (int ss = 0; ss < 30; ++ss, --h) {
-				if (h / CHUNK_SIZE < SUPER_CHUNK_SIZE &&
-					x / CHUNK_SIZE < SUPER_CHUNK_SIZE &&
-					y / CHUNK_SIZE < SUPER_CHUNK_SIZE_HEIGHT
-					) {
+				int
+					chunk_x = x / CHUNK_SIZE,
+					chunk_y = h / CHUNK_SIZE,
+					chunk_z = y / CHUNK_SIZE;
+
+				if (chunk_y < SUPER_CHUNK_SIZE_HEIGHT &&
+					chunk_x < SUPER_CHUNK_SIZE &&
+					chunk_z < SUPER_CHUNK_SIZE) 
+				{
+
 					size_t
 						block_x = x % CHUNK_SIZE,
 						block_y = h % CHUNK_SIZE,
 						block_z = y % CHUNK_SIZE;
 
-					DB::block_data block = { block_x, block_y, block_z, DB::block_id::Grass };
-					m_map->at(x / CHUNK_SIZE)[h / CHUNK_SIZE][y / CHUNK_SIZE].chunk()(block_x, block_y, block_z) = block.id;
+
+					DB::block_id id;
+					if (ss == 0) {
+						id = DB::block_id::Grass;
+					}
+					else if (ss < 7 && ss > 0) {
+						id = DB::block_id::Dirt;
+					}
+					else {
+						id = DB::block_id::Stone;
+					}
+
+					m_map->at(chunk_x)[chunk_y][chunk_z].chunk()(block_x, block_y, block_z) = id;
 
 
-					m_map->at(x / CHUNK_SIZE)[h / CHUNK_SIZE][y / CHUNK_SIZE].set_pos({ int(x) / CHUNK_SIZE, int(h) / CHUNK_SIZE, int(y) / CHUNK_SIZE });
+					m_map->at(chunk_x)[chunk_y][chunk_z].set_pos({ chunk_x, chunk_y, chunk_z });
 				}
 			}
 

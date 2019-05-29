@@ -126,4 +126,12 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\atlas.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+    <Image Include="resources\hmp.bmp">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
