@@ -15,7 +15,7 @@ void DebugData::count()
 		update_frequency_timer.restart();
 		timer.restart();
 
-		frame_time = (end_time - start_time);
+		frame_time = static_cast<float>(end_time - start_time);
 		fps = 1000.f / frame_time;
 	}
 }

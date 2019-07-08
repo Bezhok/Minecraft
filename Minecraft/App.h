@@ -1,21 +1,18 @@
 #pragma once
 #include "pch.h"
-#include "Player.h"
-//#include "Block.h"
 #include "Renderer.h"
 #include "DebugData.h"
-//#include "Menu.h"
 
+#include "Player.h"
+
+//using spp::sparse_hash_map;
 class Menu;
-//class Player;
-////class Block;
-//class Renderer;
-//class DebugData;
-namespace World { class Map; }
+class Player;
 
 class App
 {
 private:
+
 	sf::Text m_text;
 	sf::Font m_font;
 	DebugData m_debug_data;
@@ -25,22 +22,33 @@ private:
 	Player m_player;
 	
 	Renderer m_renderer;
-	World::Map m_map;
-	std::unordered_map<size_t, Chunk*> m_chunks4rendering;
+	std::shared_ptr<World::Map> m_map;
+
+	/*
+	spp::sparse_hash_map<glm::vec3i, World::Chunk*> m_chunks4rendering;
+	std::vector<std::pair<glm::vec3i, World::Chunk*>> m_chunks4updating;
+
+	std::vector<std::pair<glm::vec3i, World::Chunk*>> m_chunks4vbo_generation;
+	*/
+
+	//std::unordered_map<glm::vec3i, World::Chunk*> m_chunks4vbo_generation;
 
 
-	std::vector<GLuint> m_vao_list;
+
 	bool m_debug_info = true;
 	bool m_handle_cursor = true;
 
-	void update_gllist(
-		int old_chunk_x,
-		int old_chunk_z,
-		int new_chunk_x,
-		int new_chunk_z
-	);
 
+	
+	std::unordered_set<World::Chunk*> m_chunks4rendering;
+	std::vector<World::Chunk*> m_chunks4updating;
+
+	std::vector<World::Chunk*> m_chunks4vbo_generation;
+	
 public:
+
+
+	sf::Mutex m_mutex__chunks4vbo_generation, m_mutex__chunks4rendering;
 	/* init some objects */
 	App(sf::RenderWindow& window);
 
@@ -56,20 +64,14 @@ private:
 	/* update entity activity */
 	void update(sf::Clock& timer);
 
-	/* create all gllists from memory */
-	void create_all_gllists();
 
 	/* send data to render */
 	void draw_SFML();
 	void draw_openGL();
 
-	/* eponymous */
-	void update_gllist(const sf::Vector3i& c);
-
-	/* eponymous */
-	void create_gllist(const sf::Vector3i& c, size_t hash);
 
 	void update_vao_list();
-	void update_game_logic();
+
+	void update_vao_list2();
 };
 

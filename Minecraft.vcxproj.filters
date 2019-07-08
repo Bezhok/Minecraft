@@ -36,9 +36,6 @@
     <ClCompile Include="Minecraft\App.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Minecraft\Block.cpp">
-      <Filter>Исходные файлы\World</Filter>
-    </ClCompile>
     <ClCompile Include="Minecraft\block_db.cpp">
       <Filter>Исходные файлы\World</Filter>
     </ClCompile>
@@ -63,9 +60,6 @@
     <ClCompile Include="Minecraft\Renderer.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="Minecraft\SkyBox.cpp">
-      <Filter>Исходные файлы\World</Filter>
-    </ClCompile>
     <ClCompile Include="Minecraft\Map.cpp">
       <Filter>Исходные файлы\World</Filter>
     </ClCompile>
@@ -75,16 +69,10 @@
     <ClCompile Include="Minecraft\game_constants.cpp">
       <Filter>Исходные файлы\Supporting</Filter>
     </ClCompile>
-    <ClCompile Include="Minecraft\Maths.cpp">
-      <Filter>Исходные файлы\Supporting</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minecraft\App.h">
       <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Minecraft\Block.h">
-      <Filter>Файлы заголовков\World</Filter>
     </ClInclude>
     <ClInclude Include="Minecraft\block_db.h">
       <Filter>Файлы заголовков\World</Filter>
@@ -115,9 +103,6 @@
     </ClInclude>
     <ClInclude Include="Minecraft\Renderer.h">
       <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="Minecraft\SkyBox.h">
-      <Filter>Файлы заголовков\World</Filter>
     </ClInclude>
     <ClInclude Include="Minecraft\Map.h">
       <Filter>Файлы заголовков\World</Filter>

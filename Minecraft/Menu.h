@@ -1,9 +1,10 @@
 #pragma once
 #include "pch.h"
-#include "block_db.h"
-//#include "Player.h"
 
 class Player;
+namespace World {
+	enum class block_id :uint8_t;
+}
 
 class Menu
 {
@@ -15,7 +16,7 @@ class Menu
 private:
 	sf::RenderWindow& m_window;
 	std::unordered_map<enum MenuElement, sf::Sprite> m_sprites;
-	std::unordered_map<enum World::DB::block_id, sf::Sprite> m_side_sprites; // tool bar items
+	std::unordered_map<enum World::block_id, sf::Sprite> m_side_sprites; // tool bar items
 	std::unordered_map<enum MenuElement, sf::Texture> m_textures;
 
 public:

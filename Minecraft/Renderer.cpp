@@ -1,13 +1,10 @@
 #include "pch.h"
 #include "Renderer.h"
 #include "Player.h"
-#include "SkyBox.h"
 #include "block_db.h"
+#include "Chunk.h"
 
-
-using std::array;
-
-GLfloat halfSideLength = BLOCK_SIZE * 0.5f;
+using namespace World;
 
 
 Renderer::Renderer()
@@ -48,7 +45,7 @@ Renderer::~Renderer()
 
 void Renderer::reset_view(sf::Vector2f size)
 {
-	glViewport(0, 0, size.x, size.y);
+	glViewport(0, 0, static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y));
 }
 
 void Renderer::draw_chunk(Chunk* chunk)
@@ -61,17 +58,13 @@ void Renderer::draw_SFML(const sf::Drawable& drawable)
 	m_SFML.push(&drawable);
 }
 
-float SPHERE_DIAMETER = std::sqrtf(3 * BLOCK_SIZE*BLOCK_SIZE);
-
-
-void Renderer::finish_render(sf::RenderWindow& window, const Player& player, World::Map& m_map, std::unordered_map<size_t, Chunk*> &m_chunks4rendering)
+void Renderer::finish_render(sf::RenderWindow& window, Player& player, World::Map& m_map, std::unordered_set<World::Chunk*>& m_chunks4rendering, sf::Mutex& mutex_chunks4rendering)
 {
+	//static glm::mat4 model = glm::mat4(1.0f);
+	static glm::mat4 view;
+	static glm::mat4 projection;
 
-	static glm::mat4 model = glm::mat4(1.0f);
-	static glm::mat4 view = glm::mat4(1.0f);
-	static glm::mat4 projection = glm::mat4(1.0f);
-
-	glClearColor(0.6, 0.8, 1.0, 0.0);
+	glClearColor(0.6f, 0.8f, 1.0f, 0.0f);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
@@ -83,13 +76,13 @@ void Renderer::finish_render(sf::RenderWindow& window, const Player& player, Wor
 	view = glm::lookAt(
 		glm::vec3(
 			player.get_position().x,
-			player.get_position().y+ BLOCK_SIZE,//m_size.y
+			player.get_position().y+ COORDS_IN_BLOCK*0.8f,//m_size.y
 			player.get_position().z
 		),
 		glm::vec3(
-			player.get_position().x - sin(player.m_camera_angle.x / 180 * PI),
-			player.get_position().y + BLOCK_SIZE + tan(player.m_camera_angle.y / 180 * PI),
-			player.get_position().z - cos(player.m_camera_angle.x / 180 * PI)
+			player.get_position().x - sin(player.m_camera_angle.x / 180.0f * PI),
+			player.get_position().y + COORDS_IN_BLOCK * 0.8f + tan(player.m_camera_angle.y / 180.0f * PI),
+			player.get_position().z - cos(player.m_camera_angle.x / 180.0f * PI)
 		),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
@@ -109,42 +102,22 @@ void Renderer::finish_render(sf::RenderWindow& window, const Player& player, Wor
 	};
 
 
-
-	glm::vec4 norm_coords;
 	glEnable(GL_CULL_FACE);
-	for (auto &e : m_chunks4rendering) {
-		Chunk* chunk = e.second;
+	//mutex_chunks4rendering.lock();
+	for (auto &chunk : m_chunks4rendering) {
 		auto &pos = chunk->get_pos();
 
+		mat[12] = static_cast<float>(pos.x * BLOCKS_IN_CHUNK);
+		mat[13] = static_cast<float>(pos.y * BLOCKS_IN_CHUNK);
+		mat[14] = static_cast<float>(pos.z * BLOCKS_IN_CHUNK);
 
-		mat[12] = pos.x * CHUNK_SIZE;
-		mat[13] = pos.y * CHUNK_SIZE;
-		mat[14] = pos.z * CHUNK_SIZE;
+		glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
 
-
-		//glm::mat4 mvp = glm::mat4(1.0F);
-		//mvp *= projection * view * model;
-
-		//norm_coords = (projection * view * model) * glm::vec4(1.F);
-
-		//norm_coords.x /= norm_coords.w;
-		//norm_coords.y /= norm_coords.w;
-
-		////TODO invalid "rendering sphere"
-		//if (norm_coords.z >= -80 * BLOCK_SIZE / std::fabsf(norm_coords.w)
-		//	&& std::fabsf(norm_coords.x) <= 1 + 60 * BLOCK_SIZE / std::fabsf(norm_coords.w)
-		//	&& std::fabsf(norm_coords.y) <= 1 + 90 * BLOCK_SIZE / std::fabsf(norm_coords.w)
-		//	) {
-			//m_shader_program.setUniform("model", sf::Glsl::Mat4(glm::value_ptr(model)));
-
-			glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
-
-			glBindVertexArray(chunk->get_VAO());
-			glDrawArrays(GL_TRIANGLES, 0, chunk->get_points_count());
-			glBindVertexArray(0);
-		//}
-
+		glBindVertexArray(chunk->get_VAO());
+		glDrawArrays(GL_TRIANGLES, 0, chunk->get_points_count());
+		glBindVertexArray(0);
 	}
+	//mutex_chunks4rendering.unlock();
 	glDisable(GL_CULL_FACE);
 
 	//sfml render
@@ -155,45 +128,5 @@ void Renderer::finish_render(sf::RenderWindow& window, const Player& player, Wor
 	}
 	window.popGLStates();
 
-	window.display(); // swap buffers
+	window.display();
 }
-
-
-/*
-	glm::vec4 norm_coords;
-	//glEnable(GL_CULL_FACE);
-	while (!m_chunks.empty()) {
-		Chunk* chunk = m_chunks.front();
-		auto &pos = chunk->get_pos();
-
-
-		model = glm::translate(model, glm::vec3(
-			BLOCK_SIZE*(pos.x * CHUNK_SIZE + 0.0F),
-			BLOCK_SIZE*(pos.y * CHUNK_SIZE + 0.0F),
-			BLOCK_SIZE*(pos.z * CHUNK_SIZE + 0.0F)
-		));
-
-		//glm::mat4 mvp = glm::mat4(1.0F);
-		//mvp *= projection * view * model;
-
-		norm_coords = (projection * view * model) * glm::vec4(1.F);
-
-		norm_coords.x /= norm_coords.w;
-		norm_coords.y /= norm_coords.w;
-
-		//TODO invalid "rendering sphere"
-		if (norm_coords.z >= -80 * BLOCK_SIZE / std::fabsf(norm_coords.w)
-			&& std::fabsf(norm_coords.x) <= 1 + 60 * BLOCK_SIZE / std::fabsf(norm_coords.w)
-			&& std::fabsf(norm_coords.y) <= 1 + 90 * BLOCK_SIZE / std::fabsf(norm_coords.w)
-			) {
-			m_shader_program.setUniform("model", sf::Glsl::Mat4(glm::value_ptr(model)));
-
-			glBindVertexArray(chunk->get_VAO());
-			glDrawArrays(GL_TRIANGLES, 0, chunk->get_points_count());
-			glBindVertexArray(0);
-		}
-
-		model = glm::mat4(1.0f);
-		m_chunks.pop();
-	}
-*/

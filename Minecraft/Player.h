@@ -1,24 +1,22 @@
 #pragma once
 #include "pch.h"
 #include "Entity.h"
-#include "Map.h"
 #include "game_constants.h"
-#include "block_db.h"
 
-using namespace Base;
-using namespace World;
+namespace World { 
+	class Map;
+	enum class block_id :uint8_t;
+}
 
-using std::vector;
-using std::pair;
 class Player :
-	public Entity
+	public Base::Entity
 {
 public:
 	sf::Vector2f m_camera_angle;
 private:
-	vector<pair<DB::block_id, int>> m_inventory;
-	DB::block_id m_curr_block;
-	float m_speed = STANDART_PLAYER_SPEED;
+	std::vector<std::pair<World::block_id, int>> m_inventory;
+	World::block_id m_curr_block;
+	float m_speed = DEFAULT_PLAYER_SPEED;
 
 	sf::Vector3f m_dpos;
 	bool m_on_ground = false;

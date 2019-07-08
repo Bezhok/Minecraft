@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\c++\vs\Minecraft\glm;C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;D:\c++\vs\Minecraft\libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glew32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-audio-d.lib</AdditionalDependencies>
@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\c++\vs\Minecraft\glm;C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;D:\c++\vs\Minecraft\libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glew32.lib;sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-audio-d.lib</AdditionalDependencies>
@@ -104,7 +104,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\c++\vs\Minecraft\glm;C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;D:\c++\vs\Minecraft\libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -121,7 +121,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\c++\vs\Minecraft\glm;C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\CppLibs\glew-2.1.0\include\GL;C:\CppLibs\SFML-2.5.1x86x64\include;D:\c++\vs\Minecraft\libs;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -132,10 +132,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Minecraft\game_constants.cpp" />
-    <ClCompile Include="Minecraft\Maths.cpp" />
     <ClCompile Include="Minecraft\Menu.cpp" />
     <ClCompile Include="Minecraft\App.cpp" />
-    <ClCompile Include="Minecraft\Block.cpp" />
     <ClCompile Include="Minecraft\block_db.cpp" />
     <ClCompile Include="Minecraft\Box.cpp" />
     <ClCompile Include="Minecraft\Chunk.cpp" />
@@ -144,13 +142,11 @@
     <ClCompile Include="Minecraft\main.cpp" />
     <ClCompile Include="Minecraft\Player.cpp" />
     <ClCompile Include="Minecraft\Renderer.cpp" />
-    <ClCompile Include="Minecraft\SkyBox.cpp" />
     <ClCompile Include="Minecraft\Map.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minecraft\Menu.h" />
     <ClInclude Include="Minecraft\App.h" />
-    <ClInclude Include="Minecraft\Block.h" />
     <ClInclude Include="Minecraft\block_db.h" />
     <ClInclude Include="Minecraft\Box.h" />
     <ClInclude Include="Minecraft\Chunk.h" />
@@ -161,7 +157,6 @@
     <ClInclude Include="Minecraft\pch.h" />
     <ClInclude Include="Minecraft\Player.h" />
     <ClInclude Include="Minecraft\Renderer.h" />
-    <ClInclude Include="Minecraft\SkyBox.h" />
     <ClInclude Include="Minecraft\Map.h" />
   </ItemGroup>
   <ItemGroup>

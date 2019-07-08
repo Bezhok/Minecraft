@@ -3,12 +3,13 @@ extern const int WINDOW_WIDTH;
 extern const int WINDOW_HEIGTH;
 extern const float RENDER_DISTANCE;
 extern const int RENDER_DISTANCE_CHUNKS;
-extern const float STANDART_PLAYER_SPEED;
+extern const float DEFAULT_PLAYER_SPEED;
 
-static const float BLOCK_SIZE = 1.F; // coordinates and image resolution
-static const int CHUNK_SIZE = 16; // blocks in chunk
-static const int SUPER_CHUNK_SIZE = 100; // chunks in world
-static const int SUPER_CHUNK_SIZE_HEIGHT = 16; // chunks in world height
+//TODO
+static const float COORDS_IN_BLOCK = 1.F; // coordinates and image resolution
+static const int BLOCKS_IN_CHUNK = 16; // blocks in chunk
+static const int CHUNKS_IN_WORLD = 30; // chunks in world
+static const int CHUNKS_IN_WORLD_HEIGHT = 16; // chunks in world height
 
 
 extern int verticies_wasnt_free;

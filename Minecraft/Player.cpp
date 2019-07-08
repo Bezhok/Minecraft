@@ -18,8 +18,8 @@ void Player::init(Map *map)
 {
 	m_map = map;
 
-	m_size = { BLOCK_SIZE / 4.F, BLOCK_SIZE, BLOCK_SIZE / 4.F };
-	m_pos = { 60 * BLOCK_SIZE, 155*BLOCK_SIZE, 15 * BLOCK_SIZE };
+	m_size = { COORDS_IN_BLOCK / 4.F, COORDS_IN_BLOCK, COORDS_IN_BLOCK / 4.F };
+	m_pos = { 60 * COORDS_IN_BLOCK + 160, 155*COORDS_IN_BLOCK, 15 * COORDS_IN_BLOCK+ 160 };
 	//m_pos = { 10,10,10 };
 	//m_pos = { 1800, 2900, 1800 };
 	//m_pos = { 0, 20, 0 };
@@ -74,7 +74,7 @@ void Player::update(float time)
 		}
 		else {
 			if (m_on_ground) {
-				m_dpos.y = 5.F / 8.F * BLOCK_SIZE;
+				m_dpos.y = 5.F / 8.F * COORDS_IN_BLOCK;
 				m_on_ground = false;
 			}
 		}
@@ -113,7 +113,7 @@ void Player::update(float time)
 		m_dpos.x = m_dpos.y = m_dpos.z = 0;
 	} else {
 		if (!m_on_ground)
-			m_dpos.y -= 1.5F/16.F*BLOCK_SIZE*time;
+			m_dpos.y -= 1.5F/16.F*COORDS_IN_BLOCK*time;
 
 		m_on_ground = false; //reset
 
@@ -142,7 +142,7 @@ void Player::flight_off()
 {
 	if (m_flying) {
 		m_flying = false;
-		m_speed = STANDART_PLAYER_SPEED;
+		m_speed = DEFAULT_PLAYER_SPEED;
 	}
 }
 
@@ -150,25 +150,25 @@ void Player::put_block()
 {
 	float prev_x, prev_y, prev_z;
 	float x = m_pos.x,
-		y = m_pos.y+ m_size.y,
+		y = m_pos.y+ m_size.y*0.8f,
 		z = m_pos.z;
 
 	prev_x = x; prev_y = y; prev_z = z;
 	bool able_create = false;
-	for (int distance = 0; distance < 50 * BLOCK_SIZE; ++distance) {
+	for (int distance = 0; distance < 50 * COORDS_IN_BLOCK; ++distance) {
 		
 		x += -sinf(m_camera_angle.x / 180 * PI)/10.F;
 		y += tanf(m_camera_angle.y / 180 * PI)/10.F;
 		z += -cosf(m_camera_angle.x / 180 * PI)/10.F;
 
-		if (m_map->is_block(x/BLOCK_SIZE, y/BLOCK_SIZE, z/BLOCK_SIZE)) {
+		if (m_map->is_block(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z))) {
 			// is we in this block
-			for (int matrix_x = (m_pos.x - m_size.x) / BLOCK_SIZE; matrix_x < (m_pos.x + m_size.x) / BLOCK_SIZE; matrix_x++) {
-				for (int matrix_y = (m_pos.y - m_size.y) / BLOCK_SIZE; matrix_y < (m_pos.y + m_size.y) / BLOCK_SIZE; matrix_y++) {
-					for (int matrix_z = (m_pos.z - m_size.z) / BLOCK_SIZE; matrix_z < (m_pos.z + m_size.z) / BLOCK_SIZE; matrix_z++) {
-						int x = prev_x / BLOCK_SIZE;
-						int y = prev_y / BLOCK_SIZE;
-						int z = prev_z / BLOCK_SIZE;
+			for (int matrix_x = Map::coord2block_coord(m_pos.x - m_size.x); matrix_x <(m_pos.x + m_size.x) / COORDS_IN_BLOCK; matrix_x++) {
+				for (int matrix_y = Map::coord2block_coord(m_pos.y - m_size.y); matrix_y < (m_pos.y + m_size.y) / COORDS_IN_BLOCK; matrix_y++) {
+					for (int matrix_z = Map::coord2block_coord(m_pos.z - m_size.z); matrix_z < (m_pos.z + m_size.z) / COORDS_IN_BLOCK; matrix_z++) {
+						int x = Map::coord2block_coord(prev_x);
+						int y = Map::coord2block_coord(prev_y);
+						int z = Map::coord2block_coord(prev_z);
 						if (matrix_x == x && matrix_y == y && matrix_z == z) {
 							able_create = false;
 							break;
@@ -179,9 +179,9 @@ void Player::put_block()
 
 			if (able_create) {
 				m_map->create_block(
-					prev_x / BLOCK_SIZE,
-					prev_y / BLOCK_SIZE,
-					prev_z / BLOCK_SIZE,
+					Map::coord2block_coord(prev_x),
+					Map::coord2block_coord(prev_y),
+					Map::coord2block_coord(prev_z),
 					m_curr_block
 				);
 				break;
@@ -196,23 +196,23 @@ void Player::put_block()
 void Player::delete_block()
 {
 	float x = m_pos.x,
-		y = m_pos.y+ m_size.y,
+		y = m_pos.y+ m_size.y*0.8f,
 		z = m_pos.z;
 
 	bool able_create = false;
-	for (int distance = 0; distance < 50 * BLOCK_SIZE; ++distance) {
+	for (int distance = 0; distance < 50 * COORDS_IN_BLOCK; ++distance) {
 		x += -sinf(m_camera_angle.x / 180 * PI)/10.F;
 		y += tanf(m_camera_angle.y / 180 * PI)/10.F;
 		z += -cosf(m_camera_angle.x / 180 * PI)/10.F;
 		if (m_map->is_block(
-			x / BLOCK_SIZE,
-			y / BLOCK_SIZE,
-			z / BLOCK_SIZE
+			Map::coord2block_coord(x),
+			Map::coord2block_coord(y),
+			Map::coord2block_coord(z)
 		)) {
 			m_map->delete_block(
-				x / BLOCK_SIZE,
-				y / BLOCK_SIZE,
-				z / BLOCK_SIZE
+				Map::coord2block_coord(x),
+				Map::coord2block_coord(y),
+				Map::coord2block_coord(z)
 			);
 			break;
 		}
@@ -222,20 +222,20 @@ void Player::delete_block()
 void Player::collision(float dx, float dy, float dz)
 {
 	 //for  blocks in player's area
-	for (int matrix_x = (m_pos.x - m_size.x) / BLOCK_SIZE; matrix_x < (m_pos.x + m_size.x) / BLOCK_SIZE; matrix_x++) {
-		for (int matrix_y = (m_pos.y - m_size.y) / BLOCK_SIZE; matrix_y < (m_pos.y + m_size.y) / BLOCK_SIZE; matrix_y++) {
-			for (int matrix_z = (m_pos.z - m_size.z) / BLOCK_SIZE; matrix_z < (m_pos.z + m_size.z) / BLOCK_SIZE; matrix_z++) {
+	for (int matrix_x = Map::coord2block_coord(m_pos.x - m_size.x); matrix_x < (m_pos.x + m_size.x) / COORDS_IN_BLOCK; matrix_x++) {
+		for (int matrix_y = Map::coord2block_coord(m_pos.y - m_size.y); matrix_y < (m_pos.y + m_size.y) / COORDS_IN_BLOCK; matrix_y++) {
+			for (int matrix_z = Map::coord2block_coord(m_pos.z - m_size.z); matrix_z < (m_pos.z + m_size.z) / COORDS_IN_BLOCK; matrix_z++) {
 				if (m_map->is_block(matrix_x, matrix_y, matrix_z)) { //if collided with block
-					if (dx > 0)  m_pos.x = matrix_x * BLOCK_SIZE - m_size.x;
-					if (dx < 0)  m_pos.x = matrix_x * BLOCK_SIZE + BLOCK_SIZE + m_size.x;
-					if (dy > 0)  m_pos.y = matrix_y * BLOCK_SIZE- m_size.y;
+					if (dx > 0)  m_pos.x = matrix_x * COORDS_IN_BLOCK - m_size.x;
+					if (dx < 0)  m_pos.x = matrix_x * COORDS_IN_BLOCK + COORDS_IN_BLOCK + m_size.x;
+					if (dy > 0)  m_pos.y = matrix_y * COORDS_IN_BLOCK- m_size.y;
 					if (dy < 0) {
-						m_pos.y = matrix_y * BLOCK_SIZE + BLOCK_SIZE + m_size.y;
+						m_pos.y = matrix_y * COORDS_IN_BLOCK + COORDS_IN_BLOCK + m_size.y;
 						m_on_ground = true;
 						m_dpos.y = 0;
 					}
-					if (dz > 0)  m_pos.z = matrix_z * BLOCK_SIZE  - m_size.z;
-					if (dz < 0)  m_pos.z = matrix_z * BLOCK_SIZE + BLOCK_SIZE  + m_size.z;
+					if (dz > 0)  m_pos.z = matrix_z * COORDS_IN_BLOCK  - m_size.z;
+					if (dz < 0)  m_pos.z = matrix_z * COORDS_IN_BLOCK + COORDS_IN_BLOCK  + m_size.z;
 				}
 			}
 		}

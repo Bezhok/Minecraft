@@ -1,73 +1,80 @@
 #pragma once
 #include "pch.h"
 #include "game_constants.h"
-#include "block_db.h"
+
 
 namespace World {
 	class Map;
+	enum class block_id :uint8_t;
+
 	class Chunk
 	{
-		class array3D {
-			
+	private:
+		class ChunkLayer {
 		public:
-			std::vector<enum DB::block_id> m_data;
-			array3D(enum DB::block_id init = DB::block_id::Air) :
-				m_data(CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE, init)
-			{}
-			enum DB::block_id& operator()(int x, int y, int z) {
-				return m_data.at(x + y * CHUNK_SIZE + z * CHUNK_SIZE * CHUNK_SIZE);
-			}
+			bool is_all_solid() { return solid_block_count == BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK; };
+
+			//void init_block(block_id type) {
+			//	if (type != block_id::Air) /*and water*/
+			//	{
+			//		++solid_block_count;
+			//	}
+			//}
+
+			void update(block_id type);
+
+		private:
+			int solid_block_count = 0;
 		};
 
-
-	private:
 		sf::Vector3i m_pos = {0,0,0};
-		//std::unordered_map<int, DB::block_data> m_chunk;
-		array3D m_chunk;
-
-
+		std::vector<block_id> m_data;
+		std::array<ChunkLayer, BLOCKS_IN_CHUNK> m_layers;
 
 		int m_i = 0;
 		bool m_is_vertices_created = false;
 		GLbyte *m_vertices;
-		GLuint m_VBO, m_VAO;
+		GLuint m_VBO=0, m_VAO=0;
 
-		void bind_texture_second_order(DB::block_id id, const sf::Vector2i& p);
-		void bind_texture_first_order(DB::block_id id, const sf::Vector2i& p);
+		//void bind_texture_second_order(block_id id, int x, int y);
+		//void bind_texture_first_order(block_id id, int x, int y);
 
-		void bind_texture2positive_x(DB::block_id id);
-		void bind_texture2negative_x(DB::block_id id);
-		void bind_texture2negative_y(DB::block_id id);
-		void bind_texture2positive_y(DB::block_id id);
-		void bind_texture2negative_z(DB::block_id id);
-		void bind_texture2positive_z(DB::block_id id);
+		void bind_texture_second_order(block_id id, const sf::Vector2i& p);
+		void bind_texture_first_order(block_id id,  const sf::Vector2i& p);
+
+		void bind_texture2positive_x(block_id id);
+		void bind_texture2negative_x(block_id id);
+		void bind_texture2negative_y(block_id id);
+		void bind_texture2positive_y(block_id id);
+		void bind_texture2negative_z(block_id id);
+		void bind_texture2positive_z(block_id id);
 
 		void add_byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w);
 
 		void generate_vertices(World::Map& map);
 	public:
-
-		bool is_empty()
-		{
-			for (const auto &e : m_chunk.m_data)
-			{
-				if (e) {
-					return false;
-				}
-			}
-
-			return true;
-		};
+		bool is_vertices_created() { return m_is_vertices_created; };
+		//bool is_verticies
+		bool is_rendering = false;
+		bool is_empty();
 		Chunk();
 		~Chunk();
-		auto& chunk() { return m_chunk; };
 
-		/* return hash of block. x,y,z coordinates of block relative to chunk */
-		static int block_hash(int x, int y, int z);
+		bool should_make_layer(int y);
+		ChunkLayer& get_layer(sf::Vector3i pos, int y);
+
+		bool is_layer_solid(sf::Vector3i pos, int y);
+
+		void init();
+		enum block_id get_type(int x, int y, int z);
+		void set_type(int x, int y, int z, enum block_id type);
+
+		World::Map* m_map;
 
 		void upate_vao();
 		void update_vertices(Map& map);
-		int get_points_count() { return std::floorf(m_i/6.F); };
+
+		int get_points_count() { return m_i/6; };
 		void set_pos(const sf::Vector3i& pos) { m_pos = pos; };
 		const sf::Vector3i& get_pos() { return m_pos; };
 

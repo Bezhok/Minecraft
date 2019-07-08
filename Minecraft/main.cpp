@@ -4,6 +4,7 @@
 
 int main()
 {
+	int x = 0;
 	// Create the main window
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGTH), "Minecraft", sf::Style::Default, sf::ContextSettings(24));
 	//window.setVerticalSyncEnabled(true);
