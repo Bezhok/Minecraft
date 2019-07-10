@@ -4,15 +4,11 @@
 #include "Map.h"
 #include "block_db.h"
 
+using std::cosf;
+using std::sinf;
+using std::tanf;
 using namespace World;
 
-
-bool is_keys_pressed[6] = { false };
-
-enum Key
-{
-	W = 0, A, S, D, Space, LShift
-};
 
 void Player::init(Map *map)
 {
@@ -20,9 +16,7 @@ void Player::init(Map *map)
 
 	m_size = { COORDS_IN_BLOCK / 4.F, COORDS_IN_BLOCK, COORDS_IN_BLOCK / 4.F };
 	m_pos = { 60 * COORDS_IN_BLOCK + 160, 155*COORDS_IN_BLOCK, 15 * COORDS_IN_BLOCK+ 160 };
-	//m_pos = { 10,10,10 };
-	//m_pos = { 1800, 2900, 1800 };
-	//m_pos = { 0, 20, 0 };
+
 	for (auto& e : DB::s_side_textures)
 		m_inventory.push_back({ e.first, 1 });
 
@@ -38,35 +32,35 @@ void Player::input(sf::Event& e)
 void Player::update(float time)
 {
 	// forward
-	if (is_keys_pressed[Key::W])
+	if (m_is_keys_pressed[Key::W])
 	{
 		m_dpos.x = -sinf(m_camera_angle.x / 180 * PI) * m_speed;
 		m_dpos.z = -cosf(m_camera_angle.x / 180 * PI) * m_speed;
 	}
 
 	// back
-	if (is_keys_pressed[Key::S])
+	if (m_is_keys_pressed[Key::S])
 	{
 		m_dpos.x = +sinf(m_camera_angle.x / 180 * PI) * m_speed;
 		m_dpos.z = +cosf(m_camera_angle.x / 180 * PI) * m_speed;
 	}
 
 	// left
-	if (is_keys_pressed[Key::A])
+	if (m_is_keys_pressed[Key::A])
 	{
 		m_dpos.x = +sinf((m_camera_angle.x - 90) / 180 * PI) * m_speed;
 		m_dpos.z = +cosf((m_camera_angle.x - 90) / 180 * PI) * m_speed;
 	}
 
 	//rigth
-	if (is_keys_pressed[Key::D])
+	if (m_is_keys_pressed[Key::D])
 	{
 		m_dpos.x = +sinf((m_camera_angle.x + 90) / 180 * PI) * m_speed;
 		m_dpos.z = +cosf((m_camera_angle.x + 90) / 180 * PI) * m_speed;
 	}
 
 	// up(jump)
-	if (is_keys_pressed[Key::Space])
+	if (m_is_keys_pressed[Key::Space])
 	{
 		if (m_flying) {
 			m_dpos.y = m_speed;
@@ -81,20 +75,12 @@ void Player::update(float time)
 	}
 
 	// lshift
-	if (is_keys_pressed[Key::LShift])
+	if (m_is_keys_pressed[Key::LShift])
 	{
 		if (m_flying) {
 			m_dpos.y = -m_speed;
 		}
 	}
-
-
-
-
-
-
-
-
 
 
 	//if (time > 1.F) time = 1.F;
@@ -251,22 +237,22 @@ void Player::keyboard_input(sf::Event& e)
 		switch (e.key.code)
 		{
 		case sf::Keyboard::W:
-			is_keys_pressed[Key::W] = true;
+			m_is_keys_pressed[Key::W] = true;
 			break;
 		case sf::Keyboard::A:
-			is_keys_pressed[Key::A] = true;
+			m_is_keys_pressed[Key::A] = true;
 			break;
 		case sf::Keyboard::S:
-			is_keys_pressed[Key::S] = true;
+			m_is_keys_pressed[Key::S] = true;
 			break;
 		case sf::Keyboard::D:
-			is_keys_pressed[Key::D] = true;
+			m_is_keys_pressed[Key::D] = true;
 			break;
 		case sf::Keyboard::Space:
-			is_keys_pressed[Key::Space] = true;
+			m_is_keys_pressed[Key::Space] = true;
 			break;
 		case sf::Keyboard::LShift:
-			is_keys_pressed[Key::LShift] = true;
+			m_is_keys_pressed[Key::LShift] = true;
 			break;
 		default:
 			break;
@@ -277,22 +263,22 @@ void Player::keyboard_input(sf::Event& e)
 		switch (e.key.code)
 		{
 		case sf::Keyboard::W:
-			is_keys_pressed[Key::W] = false;
+			m_is_keys_pressed[Key::W] = false;
 			break;
 		case sf::Keyboard::A:
-			is_keys_pressed[Key::A] = false;
+			m_is_keys_pressed[Key::A] = false;
 			break;
 		case sf::Keyboard::S:
-			is_keys_pressed[Key::S] = false;
+			m_is_keys_pressed[Key::S] = false;
 			break;
 		case sf::Keyboard::D:
-			is_keys_pressed[Key::D] = false;
+			m_is_keys_pressed[Key::D] = false;
 			break;
 		case sf::Keyboard::Space:
-			is_keys_pressed[Key::Space] = false;
+			m_is_keys_pressed[Key::Space] = false;
 			break;
 		case sf::Keyboard::LShift:
-			is_keys_pressed[Key::LShift] = false;
+			m_is_keys_pressed[Key::LShift] = false;
 			break;
 		default:
 			break;

@@ -26,9 +26,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/hash.hpp>
 
-#include <sparsepp/spp.h>	
-#include <sparsehash/dense_hash_map.h>
-#include <sparsehash/sparse_hash_map.h>
+#include <sparsepp/spp.h>
+
 
 // local
 #include "Maths.h"

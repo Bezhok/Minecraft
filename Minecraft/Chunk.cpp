@@ -1,21 +1,19 @@
 #include "pch.h"
-
 #include "block_db.h"
 #include "Map.h"
 #include "Chunk.h"
+
 using namespace World;
 
 
-void World::Chunk::init()
+void Chunk::init(const sf::Vector3i& pos, World::Map* map)
 {
-	if (m_data.empty()) {
-		m_data.resize(BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK, block_id::Air);
-
-		//m_layers.resize(BLOCKS_IN_CHUNK);
-	}
+	m_is_init = true;
+	m_pos = pos;
+	m_map = map;
 }
 
-block_id World::Chunk::get_type(int x, int y, int z)
+block_id Chunk::get_type(int x, int y, int z)
 {
 	if (m_data.empty()) {
 		return block_id::Air;
@@ -24,7 +22,7 @@ block_id World::Chunk::get_type(int x, int y, int z)
 	return m_data.at(x + y * BLOCKS_IN_CHUNK + z * BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK);
 }
 
-void World::Chunk::set_type(int x, int y, int z, block_id type)
+void Chunk::set_type(int x, int y, int z, block_id type)
 {
 	m_data.at(x + y * BLOCKS_IN_CHUNK + z * BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK) = type;
 	m_layers[y].update(type);
@@ -51,7 +49,7 @@ void Chunk::add_byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w)
 	m_i += 2;
 }
 
-void Chunk::generate_vertices(World::Map& map)
+void Chunk::generate_vertices()
 {
 	for (int j = 0; j < BLOCKS_IN_CHUNK; ++j) {
 		if (!should_make_layer(j))
@@ -64,7 +62,7 @@ void Chunk::generate_vertices(World::Map& map)
 				int Z = (k + Map::chunk_coord2block_coord(m_pos.z));
 				int Y = (j + Map::chunk_coord2block_coord(m_pos.y));
 
-				if (map.is_block(X, Y, Z)) {
+				if (m_map->is_block(X, Y, Z)) {
 					// local(in chunk) pos
 					int	x = Map::block_coord2coord(i);
 					int	y = Map::block_coord2coord(j);
@@ -75,7 +73,7 @@ void Chunk::generate_vertices(World::Map& map)
 					uint8_t side = 1;
 					block_id id = get_type(i, j, k);
 
-					if (!map.is_block(X - 1, Y, Z)) {
+					if (!m_map->is_block(X - 1, Y, Z)) {
 						bind_texture2negative_x(id);
 						add_byte4(x, y, z, side);
 						add_byte4(x, y, z + BS, side);
@@ -85,7 +83,7 @@ void Chunk::generate_vertices(World::Map& map)
 						add_byte4(x, y + BS, z + BS, side);
 
 					}
-					if (!map.is_block(X + 1, Y, Z)) {
+					if (!m_map->is_block(X + 1, Y, Z)) {
 						bind_texture2positive_x(id);
 						add_byte4(x + BS, y, z, side);
 						add_byte4(x + BS, y + BS, z, side);
@@ -96,7 +94,7 @@ void Chunk::generate_vertices(World::Map& map)
 
 					}
 
-					if (!map.is_block(X, Y - 1, Z)) {
+					if (!m_map->is_block(X, Y - 1, Z)) {
 						bind_texture2negative_y(id);
 						add_byte4(x, y, z, -side);
 						add_byte4(x + BS, y, z, -side);
@@ -107,7 +105,7 @@ void Chunk::generate_vertices(World::Map& map)
 
 					}
 
-					if (!map.is_block(X, Y + 1, Z)) {
+					if (!m_map->is_block(X, Y + 1, Z)) {
 						bind_texture2positive_y(id);
 						add_byte4(x, y + BS, z, -side);
 						add_byte4(x, y + BS, z + BS, -side);
@@ -118,7 +116,7 @@ void Chunk::generate_vertices(World::Map& map)
 
 					}
 
-					if (!map.is_block(X, Y, Z - 1)) {
+					if (!m_map->is_block(X, Y, Z - 1)) {
 						bind_texture2negative_z(id);
 						add_byte4(x, y, z, side);
 						add_byte4(x, y + BS, z, side);
@@ -129,7 +127,7 @@ void Chunk::generate_vertices(World::Map& map)
 
 					}
 
-					if (!map.is_block(X, Y, Z + 1)) {
+					if (!m_map->is_block(X, Y, Z + 1)) {
 						bind_texture2positive_z(id);
 						add_byte4(x, y, z + BS, side);
 						add_byte4(x + BS, y, z + BS, side);
@@ -147,9 +145,10 @@ void Chunk::generate_vertices(World::Map& map)
 
 Chunk::Chunk()
 {
+	m_data.fill(block_id::Air);
 }
 
-World::Chunk::~Chunk()
+Chunk::~Chunk()
 {
 	if (m_is_vertices_created) {
 		delete[] m_vertices;
@@ -157,7 +156,7 @@ World::Chunk::~Chunk()
 	}
 }
 
-bool World::Chunk::should_make_layer(int y)
+bool Chunk::should_make_layer(int y)
 {
 	auto is_all_solid_y_check = [&](sf::Vector3i& pos, int y) {
 		//check error value
@@ -182,23 +181,28 @@ bool World::Chunk::should_make_layer(int y)
 
 }
 
-Chunk::ChunkLayer& World::Chunk::get_layer(sf::Vector3i pos, int y)
+Chunk::ChunkLayer& Chunk::get_layer(sf::Vector3i pos, int y)
 {
 	return m_map->get_chunk(pos.x, pos.y, pos.z).m_layers[y];
 }
 
-bool World::Chunk::is_layer_solid(sf::Vector3i pos, int y)
+bool Chunk::is_layer_solid(sf::Vector3i pos, int y)
 {
-	if (m_map->can_get_chunk(pos.x, pos.y, pos.z)) {
-		return m_map->get_chunk(pos.x, pos.y, pos.z).m_layers[y].is_all_solid();
+	Chunk* chunk = m_map->get_chunk_ptr(pos.x, pos.y, pos.z);
+	if (chunk != nullptr) {
+		if (chunk->is_init()) {
+			return chunk->m_layers[y].is_all_solid();
+		}
+		else {
+			return false;
+		}
 	}
 	else {
 		return false;
 	}
 }
 
-
-void World::Chunk::upate_vao()
+void Chunk::upate_vao()
 {
 	if (m_is_vertices_created) {
 		glBindVertexArray(m_VAO);
@@ -225,7 +229,7 @@ void World::Chunk::upate_vao()
 	}
 }
 
-void Chunk::update_vertices(World::Map& map)
+void Chunk::update_vertices()
 {
 	if (m_is_vertices_created) {
 		delete[] m_vertices;
@@ -233,38 +237,37 @@ void Chunk::update_vertices(World::Map& map)
 	}
 
 	m_i = 0;
-	m_vertices = new GLbyte[BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK * 6];
-	generate_vertices(map);
+	m_vertices = new GLbyte[BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK * 36 * 6];
+	generate_vertices();
 	m_is_vertices_created = true;
 	++verticies_wasnt_free;
 
 	//TODO mutex
-	map.m_mutex__chunks4vbo_generation->lock();
-	auto this_chunk_iter = map.m_free_vbo_chunks.find(this);
-	bool is_chunk_in_buffer = this_chunk_iter != map.m_free_vbo_chunks.end();
+	m_map->m_mutex__chunks4vbo_generation->lock();
+	auto this_chunk_iter = m_map->m_free_vbo_chunks.find(this);
+	bool is_chunk_in_buffer = this_chunk_iter != m_map->m_free_vbo_chunks.end();
 
-	if (map.m_free_vbo_chunks.size()) {
+	if (m_map->m_free_vbo_chunks.size()) {
 		if (is_chunk_in_buffer) {
-			map.m_free_vbo_chunks.erase(this_chunk_iter);	
+			m_map->m_free_vbo_chunks.erase(this_chunk_iter);	
 		}
 		else {
-			auto this_chunk_iter = map.m_free_vbo_chunks.begin();
+			auto this_chunk_iter = m_map->m_free_vbo_chunks.begin();
 
 			m_VAO = (*this_chunk_iter)->m_VAO;
 			m_VBO = (*this_chunk_iter)->m_VBO;
-			map.m_free_vbo_chunks.erase(this_chunk_iter);
+			m_map->m_free_vbo_chunks.erase(this_chunk_iter);
 		}
 	}
 	else {
-		assert(!map.m_global_vao_vbo_buffers.empty());
-		m_VAO = map.m_global_vao_vbo_buffers.back().first;
-		m_VBO = map.m_global_vao_vbo_buffers.back().second;
+		assert(!m_map->m_global_vao_vbo_buffers.empty());
+		m_VAO = m_map->m_global_vao_vbo_buffers.back().first;
+		m_VBO = m_map->m_global_vao_vbo_buffers.back().second;
 
-		map.m_global_vao_vbo_buffers.pop_back();
+		m_map->m_global_vao_vbo_buffers.pop_back();
 	}
-	map.m_mutex__chunks4vbo_generation->unlock();
+	m_map->m_mutex__chunks4vbo_generation->unlock();
 }
-
 
 void Chunk::bind_texture_first_order(block_id id, const sf::Vector2i& p)
 {
@@ -360,9 +363,8 @@ void Chunk::bind_texture2positive_z(block_id id) {
 //}
 //
 
-void World::Chunk::ChunkLayer::update(block_id type)
+void Chunk::ChunkLayer::update(block_id type)
 {
-	//TODO only for initializiation
 	if (type == block_id::Air) /*or water*/
 	{
 		--solid_block_count;

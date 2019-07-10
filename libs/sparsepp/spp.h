@@ -2068,7 +2068,7 @@ public:
     // of not-empty buckets (use num_nonempty() for that).  Instead
     // it says whether you've allocated any buckets or not.
     // ----------------------------------------------------------------
-    size_type size() const           { return _table_size; }
+     size_type size() const           { return _table_size; }
     size_type max_size() const       { return _alloc.max_size(); }
     bool empty() const               { return _table_size == 0; }
     size_type num_nonempty() const   { return _num_buckets; }

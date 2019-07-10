@@ -2,10 +2,9 @@
 #include "pch.h"
 #include "Renderer.h"
 #include "DebugData.h"
-
 #include "Player.h"
 
-//using spp::sparse_hash_map;
+
 class Menu;
 class Player;
 
@@ -24,25 +23,14 @@ private:
 	Renderer m_renderer;
 	std::shared_ptr<World::Map> m_map;
 
-	/*
-	spp::sparse_hash_map<glm::vec3i, World::Chunk*> m_chunks4rendering;
-	std::vector<std::pair<glm::vec3i, World::Chunk*>> m_chunks4updating;
-
-	std::vector<std::pair<glm::vec3i, World::Chunk*>> m_chunks4vbo_generation;
-	*/
-
-	//std::unordered_map<glm::vec3i, World::Chunk*> m_chunks4vbo_generation;
-
-
-
 	bool m_debug_info = true;
 	bool m_handle_cursor = true;
 
 
 	
 	std::unordered_set<World::Chunk*> m_chunks4rendering;
-	std::vector<World::Chunk*> m_chunks4updating;
 
+	std::vector<World::Chunk*> m_chunks4updating;
 	std::vector<World::Chunk*> m_chunks4vbo_generation;
 	
 public:
@@ -62,7 +50,7 @@ private:
 	void input();
 
 	/* update entity activity */
-	void update(sf::Clock& timer);
+	void update();
 
 
 	/* send data to render */
@@ -70,8 +58,6 @@ private:
 	void draw_openGL();
 
 
-	void update_vao_list();
-
-	void update_vao_list2();
+	void generate_verticies();
 };
 

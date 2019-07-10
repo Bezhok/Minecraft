@@ -11,9 +11,15 @@ namespace World {
 class Player :
 	public Base::Entity
 {
+	enum Key
+	{
+		W = 0, A, S, D, Space, LShift
+	};
 public:
 	sf::Vector2f m_camera_angle;
 private:
+	bool m_is_keys_pressed[6] = { false };
+
 	std::vector<std::pair<World::block_id, int>> m_inventory;
 	World::block_id m_curr_block;
 	float m_speed = DEFAULT_PLAYER_SPEED;

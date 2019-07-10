@@ -3,22 +3,13 @@
 #include "Chunk.h"
 #include "block_db.h"
 
-using std::unordered_map;
-using std::ifstream;
-using std::ofstream;
-using std::stringstream;
-using std::getline;
-using std::to_string;
-using std::string;
-
 using namespace World;
+
 
 Map::Map()
 {
-	//m_map.set_empty_key(-1000);
-	//m_map.reserve(CHUNKS_IN_WORLD *CHUNKS_IN_WORLD);
-	m_map.reserve(1024);
-	//m_map = std::make_shared<map_type>();
+	m_map.reserve(RENDER_DISTANCE_CHUNKS*RENDER_DISTANCE_CHUNKS*2);
+
 
 
 	m_should_be_updated_neighbours.resize(6);
@@ -35,8 +26,8 @@ Map::Map()
 	sf::Image height_map;
 	height_map.loadFromFile("resources/noiseTexture.png");//hmp.bmp
 	sf::Vector2u size = height_map.getSize();
-	for (size_t x = 0; x < size.x / 2; ++x) {
-		for (size_t y = 0; y < size.y / 2; ++y) {
+	for (size_t x = 0; x < 320; ++x) {
+		for (size_t y = 0; y < 320; ++y) {
 
 			int h = height_map.getPixel(x, y).r/16+30;
 
@@ -46,14 +37,12 @@ Map::Map()
 					chunk_y = h / BLOCKS_IN_CHUNK,
 					chunk_z = y / BLOCKS_IN_CHUNK;
 
-				if (chunk_y < CHUNKS_IN_WORLD_HEIGHT &&
-					chunk_x < CHUNKS_IN_WORLD &&
-					chunk_z < CHUNKS_IN_WORLD) 
+				if (chunk_y < CHUNKS_IN_WORLD_HEIGHT) 
 				{
-					Chunk& chunk = get_chunk(chunk_x, chunk_y, chunk_z);
-					chunk.init();
-					chunk.set_pos({ chunk_x, chunk_y, chunk_z });
-					chunk.m_map = this;
+					Chunk& chunk = create_chunk(chunk_x, chunk_y, chunk_z);
+					if (!chunk.is_init()) {
+						chunk.init({ chunk_x, chunk_y, chunk_z }, this);
+					}
 
 					size_t
 						block_x = x % BLOCKS_IN_CHUNK,
@@ -86,21 +75,15 @@ bool Map::is_block(int x, int y, int z) //block x,y,z in chunk
 		chunk_y = y / BLOCKS_IN_CHUNK,
 		chunk_z = z / BLOCKS_IN_CHUNK;
 
-	if (x < 0 || y < 0 || z < 0
-		|| chunk_x >= CHUNKS_IN_WORLD
-		|| chunk_y >= CHUNKS_IN_WORLD_HEIGHT
-		|| chunk_z >= CHUNKS_IN_WORLD) return false;
+	if (y < 0 || chunk_y >= CHUNKS_IN_WORLD_HEIGHT || x < 0 || z < 0) return false;
 
-	Chunk& chunk = get_chunk(chunk_x, chunk_y, chunk_z);
-	return chunk.get_type(x%BLOCKS_IN_CHUNK, y%BLOCKS_IN_CHUNK, z%BLOCKS_IN_CHUNK) != block_id::Air;
-}
-
-bool Map::is_chunk_in_map(int x, int y, int z)
-{
-	return (x >= 0 && y >= 0 && z >= 0
-		&& x < CHUNKS_IN_WORLD
-		&& y < CHUNKS_IN_WORLD_HEIGHT
-		&& z < CHUNKS_IN_WORLD);
+	Chunk* chunk = get_chunk_ptr(chunk_x, chunk_y, chunk_z);
+	if (chunk != nullptr) {
+		return chunk->get_type(x % BLOCKS_IN_CHUNK, y % BLOCKS_IN_CHUNK, z % BLOCKS_IN_CHUNK) != block_id::Air;
+	}
+	else {
+		return false;
+	}
 }
 
 bool Map::create_block(int x, int y, int z, block_id id)
@@ -112,22 +95,35 @@ bool Map::create_block(int x, int y, int z, block_id id)
 		block_in_chunk_y = y % BLOCKS_IN_CHUNK,
 		block_in_chunk_z = z % BLOCKS_IN_CHUNK;
 
-	if (!is_chunk_in_map(chunk_x, chunk_y, chunk_z)) return false;
+	if (y < 0 || chunk_y >= CHUNKS_IN_WORLD_HEIGHT || x < 0 || z < 0) return false;
 
-	Chunk& chunk = get_chunk(chunk_x, chunk_y, chunk_z);
-	auto old_id = chunk.get_type(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z);
+	Chunk* chunk = get_chunk_ptr(chunk_x, chunk_y, chunk_z);
+	if (chunk != nullptr) {
+		auto old_id = chunk->get_type(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z);
 
-	if (old_id == block_id::Air) {
-		chunk.init();
+		if (old_id == block_id::Air) {
+			chunk->set_type(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z, id);
+
+			m_edited_block_pos = { block_in_chunk_x, block_in_chunk_y, block_in_chunk_z };
+			m_edited_chunk_pos = { chunk_x, chunk_y, chunk_z };
+			m_redraw_chunk = true;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	else {
+		Chunk& chunk = create_chunk(chunk_x, chunk_y, chunk_z);
+		chunk.init({ chunk_x, chunk_y, chunk_z }, this);
+		
+
 		chunk.set_type(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z, id);
 
 		m_edited_block_pos = { block_in_chunk_x, block_in_chunk_y, block_in_chunk_z };
 		m_edited_chunk_pos = { chunk_x, chunk_y, chunk_z };
 		m_redraw_chunk = true;
 		return true;
-	}
-	else {
-		return false;
 	}
 }
 
@@ -140,7 +136,7 @@ bool Map::delete_block(int x, int y, int z)
 		block_in_chunk_y = y % BLOCKS_IN_CHUNK,
 		block_in_chunk_z = z % BLOCKS_IN_CHUNK;
 
-	if (!is_chunk_in_map(chunk_x, chunk_y, chunk_z)) return false;
+	if (y < 0 || chunk_y >= CHUNKS_IN_WORLD_HEIGHT || x < 0 || z < 0) return false;
 
 	Chunk& chunk = get_chunk(chunk_x, chunk_y, chunk_z);
 	auto old_id = chunk.get_type(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z);
@@ -182,12 +178,41 @@ bool Map::delete_block(int x, int y, int z)
 	}
 }
 
-bool Map::save()
+Map::Column& Map::get_column(int i, int k)
 {
-	return true;
+	return m_map.at(hashXZ(i, k));
 }
 
-bool Map::load()
+Chunk& Map::get_chunk(int i, int j, int k)
 {
-	return true;
+	return  m_map.at(hashXZ(i, k))[j];
+}
+
+Chunk& Map::create_chunk(int i, int j, int k)
+{
+	return  m_map[hashXZ(i, k)][j];
+}
+
+Chunk* Map::get_chunk_ptr(int i, int j, int k)
+{
+	auto column = m_map.find(hashXZ(i, k));
+
+	if (column != m_map.end()) {
+		return &(column->second[j]);
+	}
+	else {
+		return nullptr;
+	}
+}
+
+Map::Column* Map::get_column_ptr(int i, int k)
+{
+	auto column = m_map.find(hashXZ(i, k));
+
+	if (column != m_map.end()) {
+		return &(column->second);
+	}
+	else {
+		return nullptr;
+	}
 }

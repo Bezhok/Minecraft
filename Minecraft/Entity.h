@@ -1,7 +1,9 @@
 #pragma once
 #include "pch.h"
 
-namespace World { class Map; }
+namespace World { 
+	class Map;
+}
 
 namespace Base {
 	class Entity

@@ -8,12 +8,8 @@ using std::vector;
 using namespace World;
 
 
-
-
 unordered_map<block_id, array<sf::Texture, 6>> DB::s_blocks_db;
 unordered_map<block_id, sf::Texture> DB::s_side_textures;
-
-
 std::unordered_map<block_id, std::unordered_map<sides, sf::Vector2i>> DB::s_atlas_db;
 //std::vector<std::vector<sf::Vector2i>> DB::s_atlas_db(static_cast<uint8_t>(block_id::BLOCK_ID_COUNT), std::vector<sf::Vector2i>(6));
 
@@ -30,8 +26,6 @@ void DB::load_block(block_id id, string name)
 {
 	s_side_textures[id].loadFromFile(PATH2BLOCKS_TEXTURES + name);
 }
-
-
 
 void DB::load_blocks()
 {

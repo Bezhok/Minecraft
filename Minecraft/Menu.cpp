@@ -6,6 +6,7 @@
 
 using namespace World;
 
+
 Menu::Menu(sf::RenderWindow& window)
 	: m_window{ window }
 {
