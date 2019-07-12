@@ -16,6 +16,9 @@ using std::sqrtf;
 using namespace World;
 
 
+sf::Mutex m_mutex_unload_columns;
+sf::Mutex m_mutex_4rendering;
+
 App::App(sf::RenderWindow& window)
 	: m_window{ window }
 {
@@ -44,10 +47,10 @@ void App::draw_SFML()
 			to_string(m_player.get_position().z) + "\n" +
 
 			to_string(m_chunks4rendering.size()) + " " +
-			to_string(m_map->m_free_vbo_chunks.size()) + " " +
+			to_string(m_map->m_map.size()) + " " +
 			to_string(m_chunks4updating.size()) + " " +
 			to_string(m_map->m_global_vao_vbo_buffers.size()) + " " +
-			"- chunks rendering, local buffer, updates, global buffer\n" +
+			"- chunks rendering, map size, updates, global buffer\n" +
 
 			to_string(verticies_wasnt_free) + " - chunks which veticies memory is not freed"
 		);
@@ -76,26 +79,17 @@ void App::draw_openGL()
 		int k = chunk_pos.z;
 
 
-		Chunk& chunk = m_map->get_chunk(i, j, k);
-
-		if (chunk.is_init()) {
-			chunk.set_is_rendering(true);
-			m_map->m_free_vbo_chunks.insert(&chunk);
-			chunk.update_vertices();
-			chunk.upate_vao();
-			//TODO
-			m_chunks4rendering.insert(&chunk);
-		}
-		else {
-			chunk.init(chunk_pos, m_map.get());
-			chunk.set_is_rendering(true);
+		Chunk& chunk = m_map->get_chunk_n(i, j, k);
 
 
-			chunk.update_vertices();
-			chunk.upate_vao();
-			//TODO
-			m_chunks4rendering.insert(&chunk);
-		}
+		chunk.set_is_rendering(true);
+		m_map->m_global_vao_vbo_buffers.push_back({chunk.get_VAO(), chunk.get_VBO()});
+
+		chunk.update_vertices();
+		chunk.upate_vao();
+		//TODO
+		m_chunks4rendering.insert(&chunk);
+		
 
 
 
@@ -122,6 +116,7 @@ void App::draw_openGL()
 	if (counter > 20) {
 
 		m_mutex__chunks4vbo_generation.lock();
+		m_mutex_4rendering.lock();
 
 		copy(
 			m_chunks4vbo_generation.begin(),
@@ -129,42 +124,21 @@ void App::draw_openGL()
 			inserter(m_chunks4rendering, m_chunks4rendering.end())
 		);
 
-		for (auto& chunk : m_chunks4vbo_generation) {
+		for (Chunk* chunk : m_chunks4vbo_generation) {
+			if (chunk->get_pos().y < 0) {
+				int dd = 0;
+			}
 
 			chunk->upate_vao();
+
+			if (chunk->get_pos().y < 0) {
+				int dd = 0;
+			}
 		}
 
 		m_chunks4vbo_generation.clear();
 
-		m_mutex__chunks4vbo_generation.unlock();
-
-
-		int new_chunk_x = Map::coord2chunk_coord(m_player.get_position().x);
-		int new_chunk_z = Map::coord2chunk_coord(m_player.get_position().z);
-
-
-		int new_sx = new_chunk_x - RENDER_DISTANCE_CHUNKS / 2 < 0 ? 0 : new_chunk_x - RENDER_DISTANCE_CHUNKS / 2;
-		int new_sz = new_chunk_z - RENDER_DISTANCE_CHUNKS / 2 < 0 ? 0 : new_chunk_z - RENDER_DISTANCE_CHUNKS / 2;
-
-		int new_ex = new_chunk_x + RENDER_DISTANCE_CHUNKS / 2;
-		int new_ez = new_chunk_z + RENDER_DISTANCE_CHUNKS / 2;
-
-		m_mutex__chunks4vbo_generation.lock();
-		for (auto it = m_chunks4rendering.begin(); it != m_chunks4rendering.end();) {
-			Chunk& chunk = *(*it);
-			auto& pos = chunk.get_pos();
-			if (pos.x < new_sx || pos.z < new_sz || pos.x > new_ex || pos.z > new_ez) {
-				chunk.set_is_rendering(false);
-				if (chunk.get_VAO()) {
-					m_map->m_free_vbo_chunks.insert(&chunk);
-				}
-
-				it = m_chunks4rendering.erase(it);
-			}
-			else {
-				it++;
-			}
-		}
+		m_mutex_4rendering.unlock();
 		m_mutex__chunks4vbo_generation.unlock();
 
 		counter = 0;
@@ -194,9 +168,11 @@ void App::generate_verticies()
 
 	while (m_window.isOpen()) {
 		timer2.restart();
+
+
 		int new_chunk_x = Map::coord2chunk_coord(m_player.get_position().x);
 		int new_chunk_z = Map::coord2chunk_coord(m_player.get_position().z);
-
+		
 		//new
 		int new_sx = new_chunk_x - RENDER_DISTANCE_CHUNKS / 2 < 0 ? 0 : new_chunk_x - RENDER_DISTANCE_CHUNKS / 2;
 		int new_sz = new_chunk_z - RENDER_DISTANCE_CHUNKS / 2 < 0 ? 0 : new_chunk_z - RENDER_DISTANCE_CHUNKS / 2;
@@ -204,7 +180,35 @@ void App::generate_verticies()
 		int new_ex = new_chunk_x + RENDER_DISTANCE_CHUNKS / 2;
 		int new_ez = new_chunk_z + RENDER_DISTANCE_CHUNKS / 2;
 
+		m_mutex_4rendering.lock();
+		for (auto it = m_chunks4rendering.begin(); it != m_chunks4rendering.end();) {
+			Chunk& chunk = *(*it);
+			auto& pos = chunk.get_pos();
+			if (pos.x < new_sx || pos.z < new_sz || pos.x > new_ex || pos.z > new_ez) {
+				chunk.set_is_rendering(false);
+				if (chunk.get_VAO()) {
+					m_map->m_global_vao_vbo_buffers.push_back({ chunk.get_VAO(), chunk.get_VBO() });
+				}
+				it = m_chunks4rendering.erase(it);
 
+			}
+			else {
+				it++;
+			}
+		}
+
+		for (auto it = m_map->m_map.begin(); it != m_map->m_map.end();) {
+			auto& column = it->second;
+			auto& pos = column[0].get_pos();
+			if (pos.x < new_sx - 3 || pos.z < new_sz - 3 || pos.x > new_ex + 3 || pos.z > new_ez + 3) {
+				it = m_map->m_map.erase(it);
+			}
+			else {
+				it++;
+			}
+		}
+
+		m_mutex_4rendering.unlock();
 
 		static glm::mat4 view;
 		static glm::mat4 projection;
@@ -246,33 +250,34 @@ void App::generate_verticies()
 					//TODO invalid "rendering sphere"
 
 					
-						auto column_ptr = m_map->get_column_ptr(i, k);
-						if (column_ptr != nullptr) {
-							auto& column = *column_ptr;
+						//auto column_ptr = m_map->get_column_ptr(i, k);
+						//if (column_ptr != nullptr) {
+							//auto& column = *column_ptr;
+					auto& column = m_map->get_column_n(i, k);
 
-							if (is_chunk_visible && !column[j].is_rendering() && column[j].is_init()) {
-								bool is_new = false;
-								for (int y = 0; y < CHUNKS_IN_WORLD_HEIGHT; ++y) {
+					if (is_chunk_visible && !column[j].is_rendering() && column[j].is_init()) {
+						bool is_new = false;
+						for (int y = 0; y < CHUNKS_IN_WORLD_HEIGHT; ++y) {
 
 
-									Chunk& chunk = column[y];
-									//CRITICAL ERROR
-									if (!chunk.is_empty() && !chunk.is_vertices_created() && !chunk.is_rendering() && chunk.is_init()) {
-										is_new = true;
-										chunk.set_is_rendering(true);
-										m_chunks4updating.push_back(&chunk);
-									}
-
-								}
-
-								if (is_new)
-									++visible_columns_count;
-								break;
+							Chunk& chunk = column[y];
+							if (column[y].get_pos().y < 0) {
+								int dd = 0;
 							}
+							//CRITICAL ERROR
+							if (!chunk.is_empty() && !chunk.is_vertices_created() && !chunk.is_rendering() && chunk.is_init()) {
+								is_new = true;
+								chunk.set_is_rendering(true);
+								m_chunks4updating.push_back(&chunk);
+							}
+
 						}
-						else {
-							//TODO load from disk
-						}
+
+						if (is_new)
+							++visible_columns_count;
+						break;
+					}
+						//}
 				}
 			}
 		}
@@ -288,6 +293,10 @@ void App::generate_verticies()
 
 		int inftest = 0;
 		for (; it != m_chunks4updating.end(); ++it) {
+			if ((*it)->get_pos().y < 0) {
+				int dd = 0;
+			}
+
 			timer.restart();
 			(*it)->update_vertices();
 			int time = timer.getElapsedTime().asMilliseconds();
@@ -295,7 +304,9 @@ void App::generate_verticies()
 			std::cout << time << ' ' << verticies_count << std::endl;
 			inftest += time;
 
-
+			if ((*it)->get_pos().y < 0) {
+				int dd = 0;
+			}
 			m_mutex__chunks4vbo_generation.lock();
 			m_chunks4vbo_generation.push_back(*it);
 			m_mutex__chunks4vbo_generation.unlock();
@@ -304,6 +315,8 @@ void App::generate_verticies()
 		std::cout << "******************* " << inftest << std::endl;
 
 		second_thread.wait();
+		//m_mutex__chunks4vbo_generation.lock();
+
 
 
 		m_chunks4updating.clear();
@@ -338,7 +351,10 @@ void App::run()
 
 		draw_openGL();
 		draw_SFML();
+
+		m_mutex_4rendering.lock();
 		m_renderer.finish_render(m_window, m_player, *m_map, m_chunks4rendering, m_mutex__chunks4rendering);
+		m_mutex_4rendering.unlock();
 
 		if (m_debug_info) {
 			m_debug_data.count();

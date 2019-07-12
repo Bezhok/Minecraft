@@ -1,4 +1,5 @@
 #pragma once
+#define _ENABLE_EXTENDED_ALIGNED_STORAGE
 
 // standart
 #include <cmath>
@@ -27,7 +28,7 @@
 #include <glm/gtx/hash.hpp>
 
 #include <sparsepp/spp.h>
-
+#include <fast_noise/FastNoise.h>
 
 // local
 #include "Maths.h"

@@ -69,6 +69,12 @@
     <ClCompile Include="Minecraft\game_constants.cpp">
       <Filter>Исходные файлы\Supporting</Filter>
     </ClCompile>
+    <ClCompile Include="Minecraft\TerrainGenerator.cpp">
+      <Filter>Исходные файлы\World</Filter>
+    </ClCompile>
+    <ClCompile Include="libs\fast_noise\FastNoise.cpp">
+      <Filter>Исходные файлы\Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minecraft\App.h">
@@ -109,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="Minecraft\Menu.h">
       <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="Minecraft\TerrainGenerator.h">
+      <Filter>Файлы заголовков\World</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

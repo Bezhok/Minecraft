@@ -53,6 +53,8 @@ namespace World {
 
 		bool m_is_rendering = false;
 	public:
+		bool m_is_empty_onsrart = true;
+
 		bool is_init() { return m_is_init; };
 
 		bool is_vertices_created() { return m_is_vertices_created; };

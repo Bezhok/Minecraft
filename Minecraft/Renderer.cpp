@@ -107,6 +107,8 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, World::Ma
 	for (auto &chunk : m_chunks4rendering) {
 		auto &pos = chunk->get_pos();
 
+		if (pos.y < 0)
+			int dd = 0;
 		mat[12] = static_cast<float>(pos.x * BLOCKS_IN_CHUNK);
 		mat[13] = static_cast<float>(pos.y * BLOCKS_IN_CHUNK);
 		mat[14] = static_cast<float>(pos.z * BLOCKS_IN_CHUNK);

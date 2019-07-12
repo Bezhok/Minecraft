@@ -8,6 +8,9 @@ namespace World {
 		Grass,
 		Dirt,
 		Stone,
+		Oak,
+		Oak_leafage,
+
 		concrete_black,
 		concrete_blue,
 		concrete_brown,

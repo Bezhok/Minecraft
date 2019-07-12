@@ -43,6 +43,12 @@ void DB::load_blocks()
 	init_same(block_id::Stone, { 1, 0 });
 	load_block(block_id::Dirt, "dirt.png");
 	init_same(block_id::Dirt, { 2, 0 });
+
+	load_block(block_id::Oak, "dirt.png");
+	init_same(block_id::Oak, { 4, 1 });
+
+	load_block(block_id::Oak_leafage, "dirt.png");
+	init_same(block_id::Oak_leafage, { 4, 3 });
 	//load_block(concrete_black, "concrete_black.png");
 	//load_block(concrete_blue, "concrete_blue.png");
 	//load_block(concrete_brown, "concrete_brown.png");

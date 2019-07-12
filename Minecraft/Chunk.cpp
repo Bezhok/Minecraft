@@ -40,7 +40,7 @@ bool Chunk::is_empty()
 	}
 
 	//empty
-	return m_data.empty();
+	return true;// m_data.empty();
 };
 
 void Chunk::add_byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w) 
@@ -52,8 +52,11 @@ void Chunk::add_byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w)
 void Chunk::generate_vertices()
 {
 	for (int j = 0; j < BLOCKS_IN_CHUNK; ++j) {
+		assert(m_vertices != nullptr);
 		if (!should_make_layer(j))
 			continue;
+
+		assert(m_vertices != nullptr);
 			for (int i = 0; i < BLOCKS_IN_CHUNK; ++i) {
 			for (int k = 0; k < BLOCKS_IN_CHUNK; ++k) {
 
@@ -181,21 +184,20 @@ bool Chunk::should_make_layer(int y)
 
 }
 
-Chunk::ChunkLayer& Chunk::get_layer(sf::Vector3i pos, int y)
-{
-	return m_map->get_chunk(pos.x, pos.y, pos.z).m_layers[y];
-}
+//Chunk::ChunkLayer& Chunk::get_layer(sf::Vector3i pos, int y)
+//{
+//	return m_map->get_chunk(pos.x, pos.y, pos.z).m_layers[y];
+//}
 
 bool Chunk::is_layer_solid(sf::Vector3i pos, int y)
 {
-	Chunk* chunk = m_map->get_chunk_ptr(pos.x, pos.y, pos.z);
-	if (chunk != nullptr) {
-		if (chunk->is_init()) {
-			return chunk->m_layers[y].is_all_solid();
-		}
-		else {
-			return false;
-		}
+	if (pos.y < 0 || pos.y >= CHUNKS_IN_WORLD_HEIGHT)
+		return false;
+
+	Chunk& chunk = m_map->get_chunk_n(pos.x, pos.y, pos.z);
+
+	if (chunk.is_init()) {
+		return chunk.m_layers[y].is_all_solid();
 	}
 	else {
 		return false;
@@ -244,28 +246,13 @@ void Chunk::update_vertices()
 
 	//TODO mutex
 	m_map->m_mutex__chunks4vbo_generation->lock();
-	auto this_chunk_iter = m_map->m_free_vbo_chunks.find(this);
-	bool is_chunk_in_buffer = this_chunk_iter != m_map->m_free_vbo_chunks.end();
 
-	if (m_map->m_free_vbo_chunks.size()) {
-		if (is_chunk_in_buffer) {
-			m_map->m_free_vbo_chunks.erase(this_chunk_iter);	
-		}
-		else {
-			auto this_chunk_iter = m_map->m_free_vbo_chunks.begin();
-
-			m_VAO = (*this_chunk_iter)->m_VAO;
-			m_VBO = (*this_chunk_iter)->m_VBO;
-			m_map->m_free_vbo_chunks.erase(this_chunk_iter);
-		}
-	}
-	else {
-		assert(!m_map->m_global_vao_vbo_buffers.empty());
-		m_VAO = m_map->m_global_vao_vbo_buffers.back().first;
-		m_VBO = m_map->m_global_vao_vbo_buffers.back().second;
-
-		m_map->m_global_vao_vbo_buffers.pop_back();
-	}
+	assert(!m_map->m_global_vao_vbo_buffers.empty());
+	auto& pr = m_map->m_global_vao_vbo_buffers.back();
+	m_VAO = pr.first;
+	m_VBO = pr.second;
+	m_map->m_global_vao_vbo_buffers.pop_back();
+	
 	m_map->m_mutex__chunks4vbo_generation->unlock();
 }
 

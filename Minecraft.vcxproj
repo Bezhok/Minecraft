@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="libs\fast_noise\FastNoise.cpp" />
     <ClCompile Include="Minecraft\game_constants.cpp" />
     <ClCompile Include="Minecraft\Menu.cpp" />
     <ClCompile Include="Minecraft\App.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="Minecraft\Player.cpp" />
     <ClCompile Include="Minecraft\Renderer.cpp" />
     <ClCompile Include="Minecraft\Map.cpp" />
+    <ClCompile Include="Minecraft\TerrainGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minecraft\Menu.h" />
@@ -158,6 +160,7 @@
     <ClInclude Include="Minecraft\Player.h" />
     <ClInclude Include="Minecraft\Renderer.h" />
     <ClInclude Include="Minecraft\Map.h" />
+    <ClInclude Include="Minecraft\TerrainGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\atlas.png" />
