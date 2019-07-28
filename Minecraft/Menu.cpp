@@ -27,6 +27,15 @@ Menu::Menu(sf::RenderWindow& window)
 		float(m_sprites[tool_bar].getPosition().x - 2),
 		float(m_window.getSize().y - m_textures[curr_tool].getSize().y + 2)
 	);
+
+	//cross
+	m_textures[cross].loadFromFile("resources/textures/gui/cross.png");
+	m_sprites[cross].setTexture(m_textures[cross]);
+
+	m_sprites[cross].setPosition(
+		float(m_window.getSize().x / 2 - int(m_textures[cross].getSize().x/2)),
+		float(m_window.getSize().y / 2 - int(m_textures[cross].getSize().y/2))
+	);
 }
 
 Menu::~Menu()
@@ -49,6 +58,11 @@ void Menu::update()
 	for (auto& e : m_side_sprites) {
 		e.second.setPosition(e.second.getPosition() + bar_new_pos - bar_old_pos);
 	}
+
+	m_sprites[cross].setPosition(
+		float(m_window.getSize().x / 2 - int(m_textures[cross].getSize().x / 2)),
+		float(m_window.getSize().y / 2 - int(m_textures[cross].getSize().y / 2))
+	);
 }
 
 void Menu::input(sf::Event& e)

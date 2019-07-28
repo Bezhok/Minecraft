@@ -12,6 +12,9 @@ Renderer::Renderer()
 	glewExperimental = GL_TRUE;
 	glewInit();
 
+	//glfwWindowHint(GLFW_SAMPLES, 4);
+	glEnable(GL_MULTISAMPLE);
+
 	//glFrontFace(GL_CW); // way around
 	glEnable(GL_DEPTH_TEST); glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
@@ -33,10 +36,6 @@ Renderer::Renderer()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	//m_texture_atlas.generateMipmap();
-
-	glEnable(GL_CULL_FACE);
 }
 
 Renderer::~Renderer()
@@ -60,11 +59,7 @@ void Renderer::draw_SFML(const sf::Drawable& drawable)
 
 void Renderer::finish_render(sf::RenderWindow& window, Player& player, World::Map& m_map, std::unordered_set<World::Chunk*>& m_chunks4rendering, sf::Mutex& mutex_chunks4rendering)
 {
-	//static glm::mat4 model = glm::mat4(1.0f);
-	static glm::mat4 view;
-	static glm::mat4 projection;
-
-	glClearColor(0.6f, 0.8f, 1.0f, 0.0f);
+	glClearColor(0.5f, 0.7f, 0.9f, 0.0f);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
@@ -72,8 +67,8 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, World::Ma
 	sf::Shader::bind(&m_shader_program);
 	sf::Texture::bind(&m_texture_atlas);
 
-	projection = glm::perspective(45.0f, (GLfloat)window.getSize().x / (GLfloat)window.getSize().y, 0.1f, RENDER_DISTANCE);
-	view = glm::lookAt(
+	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)window.getSize().x / (GLfloat)window.getSize().y, 0.1f, RENDER_DISTANCE);
+	glm::mat4 view = glm::lookAt(
 		glm::vec3(
 			player.get_position().x,
 			player.get_position().y+ COORDS_IN_BLOCK*0.8f,//m_size.y
@@ -101,14 +96,13 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, World::Ma
 		0, 0, 0, 1.f,
 	};
 
-
+	glEnable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
-	//mutex_chunks4rendering.lock();
+	mutex_chunks4rendering.lock();
 	for (auto &chunk : m_chunks4rendering) {
 		auto &pos = chunk->get_pos();
+		assert(pos.y >= 0);
 
-		if (pos.y < 0)
-			int dd = 0;
 		mat[12] = static_cast<float>(pos.x * BLOCKS_IN_CHUNK);
 		mat[13] = static_cast<float>(pos.y * BLOCKS_IN_CHUNK);
 		mat[14] = static_cast<float>(pos.z * BLOCKS_IN_CHUNK);
@@ -116,10 +110,10 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, World::Ma
 		glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
 
 		glBindVertexArray(chunk->get_VAO());
-		glDrawArrays(GL_TRIANGLES, 0, chunk->get_points_count());
+		glDrawArrays(GL_TRIANGLES, 0, chunk->get_final_points_count());
 		glBindVertexArray(0);
 	}
-	//mutex_chunks4rendering.unlock();
+	mutex_chunks4rendering.unlock();
 	glDisable(GL_CULL_FACE);
 
 	//sfml render

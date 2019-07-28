@@ -10,7 +10,8 @@ class Menu
 {
 	enum MenuElement {
 		tool_bar,
-		curr_tool
+		curr_tool,
+		cross
 	};
 
 private:

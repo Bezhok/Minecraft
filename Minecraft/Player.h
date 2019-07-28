@@ -19,6 +19,7 @@ public:
 	sf::Vector2f m_camera_angle;
 private:
 	bool m_is_keys_pressed[6] = { false };
+	float m_direction_speed[6] = { 0 };
 
 	std::vector<std::pair<World::block_id, int>> m_inventory;
 	World::block_id m_curr_block;

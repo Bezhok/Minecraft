@@ -166,6 +166,10 @@
     <Image Include="resources\atlas.png" />
     <Image Include="resources\hmp.bmp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\shader.frag.glsl" />
+    <None Include="shaders\shader.vert.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

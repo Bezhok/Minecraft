@@ -13,12 +13,12 @@ using namespace World;
 void Player::init(Map *map)
 {
 	m_map = map;
-
+	m_speed = 5*COORDS_IN_BLOCK;
 	m_size = { COORDS_IN_BLOCK / 4.F, COORDS_IN_BLOCK, COORDS_IN_BLOCK / 4.F };
-	m_pos = { 60 * COORDS_IN_BLOCK + 160, 155*COORDS_IN_BLOCK, 15 * COORDS_IN_BLOCK+ 160 };
+	m_pos = { 320, 51+30, 360 };
 
 	for (auto& e : DB::s_side_textures)
-		m_inventory.push_back({ e.first, 1 });
+		m_inventory.emplace_back(e.first, 1);
 
 	m_curr_block = m_inventory[0].first;
 }
@@ -29,87 +29,144 @@ void Player::input(sf::Event& e)
 	mouse_input(e);
 }
 
-void Player::update(float time)
+void Player::update(float dtime)
 {
+	static float acceleration = 5.f*DEFAULT_PLAYER_SPEED;
+	
+	auto get_oveclocking_moving = [&](Key key) -> float {
+		float dmoving = m_speed*dtime;
+
+		if (m_direction_speed[key] < m_speed) {
+			dmoving = m_direction_speed[key];
+
+			m_direction_speed[key] += acceleration * dtime;
+
+			dmoving += m_direction_speed[key];
+			dmoving *= dtime / 2;
+		}
+		else {
+			m_direction_speed[key] = m_speed;
+		}
+
+		return dmoving;
+	};
+
+	auto get_braking_moving = [&](Key key) -> float {
+		float dmoving = 0.f;
+		if (m_direction_speed[key] > 0) {
+			dmoving = m_direction_speed[key];
+
+			m_direction_speed[key] -= acceleration * dtime;
+
+			dmoving += m_direction_speed[key];
+			dmoving *= dtime / 2;
+		}
+		else {
+			m_direction_speed[key] = 0.f;
+		}
+
+		return dmoving;
+	};
+
+	auto get_moving = [&](Key key) -> float {
+		if (m_is_keys_pressed[key])
+		{
+			return get_oveclocking_moving(key);
+		}
+		else {
+			return get_braking_moving(key);
+		}
+	};
+
+	m_dpos.x = 0.f;
+	if (m_flying)
+		m_dpos.y = 0.f;
+
+	m_dpos.z = 0.f;
+
 	// forward
-	if (m_is_keys_pressed[Key::W])
-	{
-		m_dpos.x = -sinf(m_camera_angle.x / 180 * PI) * m_speed;
-		m_dpos.z = -cosf(m_camera_angle.x / 180 * PI) * m_speed;
-	}
+	float dmoving = get_moving(Key::W)*5;
+	m_dpos.x += -sinf(m_camera_angle.x / 180 * PI) * dmoving;
+	m_dpos.z += -cosf(m_camera_angle.x / 180 * PI) * dmoving;
 
 	// back
-	if (m_is_keys_pressed[Key::S])
-	{
-		m_dpos.x = +sinf(m_camera_angle.x / 180 * PI) * m_speed;
-		m_dpos.z = +cosf(m_camera_angle.x / 180 * PI) * m_speed;
-	}
-
+	dmoving = get_moving(Key::S)*5;
+	m_dpos.x += +sinf(m_camera_angle.x / 180 * PI) * dmoving;
+	m_dpos.z += +cosf(m_camera_angle.x / 180 * PI) * dmoving;
+	
 	// left
-	if (m_is_keys_pressed[Key::A])
-	{
-		m_dpos.x = +sinf((m_camera_angle.x - 90) / 180 * PI) * m_speed;
-		m_dpos.z = +cosf((m_camera_angle.x - 90) / 180 * PI) * m_speed;
-	}
+	dmoving = get_moving(Key::A)*5;
+	m_dpos.x += +sinf((m_camera_angle.x - 90) / 180 * PI) * dmoving;
+	m_dpos.z += +cosf((m_camera_angle.x - 90) / 180 * PI) * dmoving;
 
 	//rigth
-	if (m_is_keys_pressed[Key::D])
-	{
-		m_dpos.x = +sinf((m_camera_angle.x + 90) / 180 * PI) * m_speed;
-		m_dpos.z = +cosf((m_camera_angle.x + 90) / 180 * PI) * m_speed;
-	}
+	dmoving = get_moving(Key::D)*5;
+	m_dpos.x += +sinf((m_camera_angle.x + 90) / 180 * PI) * dmoving;
+	m_dpos.z += +cosf((m_camera_angle.x + 90) / 180 * PI) * dmoving;
 
 	// up(jump)
+	dmoving = get_moving(Key::Space);
 	if (m_is_keys_pressed[Key::Space])
 	{
 		if (m_flying) {
-			m_dpos.y = m_speed;
+			m_dpos.y += dmoving*2;
 			m_on_ground = false;
 		}
 		else {
 			if (m_on_ground) {
-				m_dpos.y = 5.F / 8.F * COORDS_IN_BLOCK;
+				m_direction_speed[Key::Space] = 2*COORDS_IN_BLOCK;
 				m_on_ground = false;
+			}
+			else {
+				m_direction_speed[Key::Space] = 0;
 			}
 		}
 	}
 
 	// lshift
+	dmoving = get_moving(Key::LShift);
 	if (m_is_keys_pressed[Key::LShift])
 	{
 		if (m_flying) {
-			m_dpos.y = -m_speed;
+			m_dpos.y -= dmoving*2;
 		}
 	}
 
 
-	//if (time > 1.F) time = 1.F;
 	if (m_flying) {
 		m_on_ground = false;
 
-		m_pos.x += m_dpos.x * time;
+		m_pos.x += m_dpos.x;
 		collision(m_dpos.x, 0, 0);
 
-		m_pos.y += m_dpos.y * time;
+		m_pos.y += m_dpos.y;
 		collision(0, m_dpos.y, 0);
 
-		m_pos.z += m_dpos.z * time;
+		m_pos.z += m_dpos.z;
 		collision(0, 0, m_dpos.z);
 
 		m_dpos.x = m_dpos.y = m_dpos.z = 0;
 	} else {
-		if (!m_on_ground)
-			m_dpos.y -= 1.5F/16.F*COORDS_IN_BLOCK*time;
+		if (!m_on_ground) {
+			float s = m_direction_speed[Key::Space];
+
+			m_direction_speed[Key::Space] -= 9.8f * dtime;
+
+			s += m_direction_speed[Key::Space];
+			s *= dtime / 2;
+
+			m_dpos.y += s*5;
+		}
 
 		m_on_ground = false; //reset
 
-		m_pos.x += m_dpos.x * time;
+		m_pos.x += m_dpos.x;
 		collision(m_dpos.x, 0, 0);
 
-		m_pos.y += m_dpos.y * time;
+		m_pos.y += m_dpos.y;
 		collision(0, m_dpos.y, 0);
 
-		m_pos.z += m_dpos.z * time;
+		m_pos.z += m_dpos.z;
 		collision(0, 0, m_dpos.z);
 
 		m_dpos.x = m_dpos.z = 0;
@@ -147,7 +204,7 @@ void Player::put_block()
 		y += tanf(m_camera_angle.y / 180 * PI)/10.F;
 		z += -cosf(m_camera_angle.x / 180 * PI)/10.F;
 
-		if (m_map->is_block(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z))) {
+		if (!m_map->is_air(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z))) {
 			// is we in this block
 			for (int matrix_x = Map::coord2block_coord(m_pos.x - m_size.x); matrix_x <(m_pos.x + m_size.x) / COORDS_IN_BLOCK; matrix_x++) {
 				for (int matrix_y = Map::coord2block_coord(m_pos.y - m_size.y); matrix_y < (m_pos.y + m_size.y) / COORDS_IN_BLOCK; matrix_y++) {
@@ -190,7 +247,7 @@ void Player::delete_block()
 		x += -sinf(m_camera_angle.x / 180 * PI)/10.F;
 		y += tanf(m_camera_angle.y / 180 * PI)/10.F;
 		z += -cosf(m_camera_angle.x / 180 * PI)/10.F;
-		if (m_map->is_block(
+		if (!m_map->is_air(
 			Map::coord2block_coord(x),
 			Map::coord2block_coord(y),
 			Map::coord2block_coord(z)
@@ -207,21 +264,21 @@ void Player::delete_block()
 
 void Player::collision(float dx, float dy, float dz)
 {
-	 //for  blocks in player's area
-	for (int matrix_x = Map::coord2block_coord(m_pos.x - m_size.x); matrix_x < (m_pos.x + m_size.x) / COORDS_IN_BLOCK; matrix_x++) {
-		for (int matrix_y = Map::coord2block_coord(m_pos.y - m_size.y); matrix_y < (m_pos.y + m_size.y) / COORDS_IN_BLOCK; matrix_y++) {
-			for (int matrix_z = Map::coord2block_coord(m_pos.z - m_size.z); matrix_z < (m_pos.z + m_size.z) / COORDS_IN_BLOCK; matrix_z++) {
-				if (m_map->is_block(matrix_x, matrix_y, matrix_z)) { //if collided with block
-					if (dx > 0)  m_pos.x = matrix_x * COORDS_IN_BLOCK - m_size.x;
-					if (dx < 0)  m_pos.x = matrix_x * COORDS_IN_BLOCK + COORDS_IN_BLOCK + m_size.x;
-					if (dy > 0)  m_pos.y = matrix_y * COORDS_IN_BLOCK- m_size.y;
+	//for  blocks in player's area
+	for (int x = Map::coord2block_coord(m_pos.x - m_size.x); x < (m_pos.x + m_size.x) / COORDS_IN_BLOCK; x++) {
+		for (int y = Map::coord2block_coord(m_pos.y - m_size.y); y < (m_pos.y + m_size.y) / COORDS_IN_BLOCK; y++) {
+			for (int z = Map::coord2block_coord(m_pos.z - m_size.z); z < (m_pos.z + m_size.z) / COORDS_IN_BLOCK; z++) {
+				if (m_map->is_solid(x, y, z)) { //if collided with block
+					if (dx > 0)  m_pos.x = x * COORDS_IN_BLOCK - m_size.x;
+					if (dx < 0)  m_pos.x = x * COORDS_IN_BLOCK + COORDS_IN_BLOCK + m_size.x;
+					if (dy > 0)  m_pos.y = y * COORDS_IN_BLOCK - m_size.y;
 					if (dy < 0) {
-						m_pos.y = matrix_y * COORDS_IN_BLOCK + COORDS_IN_BLOCK + m_size.y;
+						m_pos.y = y * COORDS_IN_BLOCK + COORDS_IN_BLOCK + m_size.y;
 						m_on_ground = true;
 						m_dpos.y = 0;
 					}
-					if (dz > 0)  m_pos.z = matrix_z * COORDS_IN_BLOCK  - m_size.z;
-					if (dz < 0)  m_pos.z = matrix_z * COORDS_IN_BLOCK + COORDS_IN_BLOCK  + m_size.z;
+					if (dz > 0)  m_pos.z = z * COORDS_IN_BLOCK  - m_size.z;
+					if (dz < 0)  m_pos.z = z * COORDS_IN_BLOCK + COORDS_IN_BLOCK  + m_size.z;
 				}
 			}
 		}
@@ -231,6 +288,7 @@ void Player::collision(float dx, float dy, float dz)
 
 void Player::keyboard_input(sf::Event& e)
 {
+	static float start_direction_speed = m_speed/10;
 	switch (e.type)
 	{
 	case sf::Event::KeyPressed: {
@@ -238,21 +296,28 @@ void Player::keyboard_input(sf::Event& e)
 		{
 		case sf::Keyboard::W:
 			m_is_keys_pressed[Key::W] = true;
+			m_direction_speed[Key::W] = start_direction_speed;
 			break;
 		case sf::Keyboard::A:
 			m_is_keys_pressed[Key::A] = true;
+			m_direction_speed[Key::A] = start_direction_speed;
 			break;
 		case sf::Keyboard::S:
 			m_is_keys_pressed[Key::S] = true;
+			m_direction_speed[Key::S] = start_direction_speed;
 			break;
 		case sf::Keyboard::D:
 			m_is_keys_pressed[Key::D] = true;
+			m_direction_speed[Key::D] = start_direction_speed;
 			break;
 		case sf::Keyboard::Space:
 			m_is_keys_pressed[Key::Space] = true;
+			m_direction_speed[Key::Space] = start_direction_speed;
+
 			break;
 		case sf::Keyboard::LShift:
 			m_is_keys_pressed[Key::LShift] = true;
+			m_direction_speed[Key::LShift] = start_direction_speed;
 			break;
 		default:
 			break;

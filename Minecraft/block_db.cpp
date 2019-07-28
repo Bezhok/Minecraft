@@ -15,11 +15,35 @@ std::unordered_map<block_id, std::unordered_map<sides, sf::Vector2i>> DB::s_atla
 
 static const string PATH2BLOCKS_TEXTURES = "resources/textures/blocks/";
 
-void World::DB::init_same(block_id id, const sf::Vector2i& pos)
+void World::DB::init_xyz(block_id id, const sf::Vector2i& pos)
 {
 	for (int i = 0; i < static_cast<int>(sides::SIDES_COUNT); ++i) {
 		s_atlas_db[id][static_cast<sides>(i)] = pos;
 	}
+}
+
+void DB::init_xz(block_id id, const sf::Vector2i& pos)
+{
+	s_atlas_db[id][sides::negative_x] =
+		s_atlas_db[id][sides::positive_x] =
+		s_atlas_db[id][sides::negative_z] =
+		s_atlas_db[id][sides::positive_z] = pos;
+}
+
+void DB::init_y(block_id id, const sf::Vector2i& pos)
+{
+	s_atlas_db[id][sides::positive_y] =
+		s_atlas_db[id][sides::negative_y] = pos;
+}
+
+void DB::init_n_y(block_id id, const sf::Vector2i& pos)
+{
+	s_atlas_db[id][sides::negative_y] = pos;
+}
+
+void DB::init_p_y(block_id id, const sf::Vector2i& pos)
+{
+	s_atlas_db[id][sides::positive_y] = pos;
 }
 
 void DB::load_block(block_id id, string name)
@@ -31,24 +55,34 @@ void DB::load_blocks()
 {
 
 	load_block(block_id::Grass, "grass_carried.png"); //front
-	s_atlas_db[block_id::Grass][sides::negative_x] =
-		s_atlas_db[block_id::Grass][sides::positive_x] =
-		s_atlas_db[block_id::Grass][sides::negative_z] =
-		s_atlas_db[block_id::Grass][sides::positive_z] = {3, 0};
-
-	s_atlas_db[block_id::Grass][sides::positive_y] = { 0, 0 };
-	s_atlas_db[block_id::Grass][sides::negative_y] = { 2, 0 };
+	init_xz(block_id::Grass, { 3, 0 });
+	init_n_y(block_id::Grass, { 2, 0 });
+	init_p_y(block_id::Grass, { 0, 0 });
 
 	load_block(block_id::Stone, "stone.png");
-	init_same(block_id::Stone, { 1, 0 });
+	init_xyz(block_id::Stone, { 1, 0 });
+
 	load_block(block_id::Dirt, "dirt.png");
-	init_same(block_id::Dirt, { 2, 0 });
+	init_xyz(block_id::Dirt, { 2, 0 });
 
 	load_block(block_id::Oak, "dirt.png");
-	init_same(block_id::Oak, { 4, 1 });
+	init_xz(block_id::Oak, { 4, 1 });
+	init_y(block_id::Oak, { 5, 1 });
 
 	load_block(block_id::Oak_leafage, "dirt.png");
-	init_same(block_id::Oak_leafage, { 4, 3 });
+	init_xyz(block_id::Oak_leafage, { 5, 3 });
+
+	load_block(block_id::Water, "dirt.png");
+	init_xyz(block_id::Water, { 13, 12 });
+
+	load_block(block_id::Sand, "dirt.png");
+	init_xyz(block_id::Sand, { 2, 1 });
+
+	load_block(block_id::Cactus, "dirt.png");
+	init_xz(block_id::Cactus, { 6, 4 });
+	init_n_y(block_id::Cactus, { 7, 4 });
+	init_p_y(block_id::Cactus, { 5, 4 });
+
 	//load_block(concrete_black, "concrete_black.png");
 	//load_block(concrete_blue, "concrete_blue.png");
 	//load_block(concrete_brown, "concrete_brown.png");

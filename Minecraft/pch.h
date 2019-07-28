@@ -14,6 +14,8 @@
 #include <sstream>
 #include <memory>
 #include <queue>
+#include <iostream>
+#include <iomanip>
 
 //libs
 #include <glew.h>
@@ -26,6 +28,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/hash.hpp>
+#include <glm/gtc/random.hpp>
 
 #include <sparsepp/spp.h>
 #include <fast_noise/FastNoise.h>

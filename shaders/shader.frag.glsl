@@ -8,11 +8,23 @@ uniform sampler2D ourTexture;
 
 void main()
 {
-	if (position.w < .0) // if on top
-		color = texture(ourTexture, tex_coord);
-	else 
-		color = texture(ourTexture, tex_coord)*vec4(0.65, 0.65, 0.65, 1.0);
 
+	vec4 texColor;
+	if (position.w < 1) // if on top
+		 texColor = texture(ourTexture, tex_coord)*vec4(0.85, 0.85, 0.85, 1.0);
+	else 
+		 texColor = texture(ourTexture, tex_coord)*vec4(0.65, 0.65, 0.65, 1.0);
+
+	if (texColor.a < 0.4)
+		discard;
+
+	color = texColor;
+
+//	if (position.w < .0) // if on top
+//		color = texture(ourTexture, tex_coord);
+//	else 
+//		color = texture(ourTexture, tex_coord)*vec4(0.65, 0.65, 0.65, 1.0);
+//
 	////fog
 //	float z = gl_FragCoord.z / gl_FragCoord.w;
 //	if (z>10) {

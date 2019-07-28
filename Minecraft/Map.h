@@ -9,35 +9,20 @@
 
 namespace World {
 	enum class block_id : uint8_t;
-	//class Chunk;
 
 	class Map
 	{
 	public:
-	//	class Column {
-	//	private:
-	//		std::vector<Chunk> m_column;
-
-	//	public:
-	//		Chunk& operator[](int y) { return m_column[y]; };
-	//		Column() : m_column(CHUNKS_IN_WORLD_HEIGHT) {};
-
-	//	};
-
-	//public:
-	//	phmap::parallel_flat_hash_map<int, Column> m_map;
-	
 		using Column = std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT>;
 
 	private:
+		phmap::parallel_node_hash_map<int, Column> m_map;
 		sf::Vector3i m_edited_chunk_pos;
 		bool m_redraw_chunk = false;
 		TerrainGenerator m_terrain_generator;
 
 	public:
-		phmap::parallel_node_hash_map<int, Column> m_map;
-
-
+		int get_size() { return m_map.size(); };
 		void generate_chunk_terrain(sf::Vector3i& pos);
 		void generate_chunk_terrain(int, int, int);
 
@@ -45,11 +30,16 @@ namespace World {
 		Map();
 
 		/* eponymous */
-		bool is_block(int mx, int my, int mz);
+		bool is_solid(int mx, int my, int mz);
+		bool is_opaque(int mx, int my, int mz);
+		bool is_air(int mx, int my, int mz);
+
+		
+
 		bool create_block(int x, int y, int z, block_id type);
 		bool delete_block(int x, int y, int z);
 
-		/* eponymous */ //TODO rewrite to binary
+		/* eponymous */ //TODO
 		bool save();
 		bool load();
 
@@ -76,10 +66,10 @@ namespace World {
 			return k;
 		}
 
+		void unload_columns(int start_x, int end_x, int start_z, int end_z);
+
 		void unload_column(int i, int k);
 		Column& get_column(int i, int k);
-		//Column* get_column_ptr(int i, int k);
-
 		Chunk& get_chunk(int i, int j, int k);
 
 		Chunk& get_chunk_n(int i, int j, int k);

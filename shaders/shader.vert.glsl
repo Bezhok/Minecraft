@@ -12,6 +12,9 @@ uniform mat4 projection;
 void main()
 {
 	position = loc_position;
-    gl_Position = projection * view * model * vec4(loc_position.xyz, 1.0f);
+
+	position /= 15;
+
+    gl_Position = projection * view * model * vec4(position.xyz, 1.0f);
     tex_coord = vec2(loc_tex_coord.x/16.0f, 1-loc_tex_coord.y/16.0f); // 16 - count of textures in atlas
 } 

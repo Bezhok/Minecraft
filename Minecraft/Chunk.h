@@ -22,10 +22,13 @@ namespace World {
 		std::array<block_id, BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK> m_data;
 		std::array<ChunkLayer, BLOCKS_IN_CHUNK> m_layers;
 
-		int m_i = 0;
+		
 		bool m_is_vertices_created = false;
 		GLbyte* m_vertices = nullptr;
-		GLuint m_VBO=0, m_VAO=0;
+		
+		GLuint m_VBO = 0, m_VAO = 0;
+		int m_i = 0;
+		int m_old_i = 0;
 
 		//void bind_texture_second_order(block_id id, int x, int y);
 		//void bind_texture_first_order(block_id id, int x, int y);
@@ -40,19 +43,24 @@ namespace World {
 		void bind_texture2negative_z(block_id id);
 		void bind_texture2positive_z(block_id id);
 
-		void add_byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w);
+		inline void add_byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w);
 
 		void generate_vertices();
 		bool m_is_init = false;
 		World::Map* m_map = nullptr;
 
 		bool should_make_layer(int y);
-		ChunkLayer& get_layer(sf::Vector3i pos, int y);
 
+		
 		bool is_layer_solid(sf::Vector3i pos, int y);
 
 		bool m_is_rendering = false;
 	public:
+
+
+		static bool is_block_type_transperent(block_id type);
+		static bool is_block_type_solid(block_id type);
+
 		bool m_is_empty_onsrart = true;
 
 		bool is_init() { return m_is_init; };
@@ -66,7 +74,8 @@ namespace World {
 		Chunk();
 		~Chunk();
 
-
+		bool is_air__in_chunk(int mx, int my, int mz);
+		bool is_opaque__in_chunk(int x, int y, int z);
 
 		void init(const sf::Vector3i& pos, World::Map* map);
 		enum block_id get_type(int x, int y, int z);
@@ -74,8 +83,10 @@ namespace World {
 
 		void upate_vao();
 		void update_vertices();
+		void update_vertices_use_old_buffers();
 
-		int get_points_count() { return m_i/6; };
+		int get_final_points_count() { return m_old_i / 6; };
+		int get_current_faces_count() { return m_i / 36; };
 		void set_pos(const sf::Vector3i& pos) { m_pos = pos; m_is_init = true;};
 		const sf::Vector3i& get_pos() { return m_pos; };
 

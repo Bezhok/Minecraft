@@ -31,6 +31,9 @@
     <Filter Include="Исходные файлы\Supporting">
       <UniqueIdentifier>{aa716f3e-5036-43e5-a98f-0deedecb21a9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы ресурсов\Shaders">
+      <UniqueIdentifier>{b52c6218-0de7-4fc0-b529-bedcb99ff510}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Minecraft\App.cpp">
@@ -127,5 +130,13 @@
     <Image Include="resources\hmp.bmp">
       <Filter>Файлы ресурсов</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\shader.frag.glsl">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+    <None Include="shaders\shader.vert.glsl">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

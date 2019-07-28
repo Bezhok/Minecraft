@@ -5,11 +5,16 @@ namespace World {
 	enum class block_id : uint8_t
 	{
 		Air = 0,
+		Glass,
+		Water,
+
+		Sand,
 		Grass,
 		Dirt,
 		Stone,
 		Oak,
 		Oak_leafage,
+		Cactus,
 
 		concrete_black,
 		concrete_blue,
@@ -44,8 +49,13 @@ namespace World {
 		void load_blocks();
 	private:
 		/* eponymous */
-		void init_same(block_id id, const sf::Vector2i& pos);
+		void init_xyz(block_id id, const sf::Vector2i& pos);
 		void load_block(block_id id, std::string name);
+
+		void init_xz(block_id id, const sf::Vector2i& pos);
+		void init_y(block_id id, const sf::Vector2i& pos);
+		void init_n_y(block_id id, const sf::Vector2i& pos);
+		void init_p_y(block_id id, const sf::Vector2i& pos);
 	};
 
 
