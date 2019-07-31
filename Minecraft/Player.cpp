@@ -17,8 +17,8 @@ void Player::init(Map *map)
 	m_size = { COORDS_IN_BLOCK / 4.F, COORDS_IN_BLOCK, COORDS_IN_BLOCK / 4.F };
 	m_pos = { 320, 51+30, 360 };
 
-	for (auto& e : DB::s_side_textures)
-		m_inventory.emplace_back(e.first, 1);
+	for (block_id type : DB::s_loaded_blocks)
+		m_inventory.emplace_back(type, 1);
 
 	m_curr_block = m_inventory[0].first;
 }
@@ -31,7 +31,7 @@ void Player::input(sf::Event& e)
 
 void Player::update(float dtime)
 {
-	static float acceleration = 5.f*DEFAULT_PLAYER_SPEED;
+	static float acceleration = 5.f*m_speed;// DEFAULT_PLAYER_SPEED;
 	
 	auto get_oveclocking_moving = [&](Key key) -> float {
 		float dmoving = m_speed*dtime;
@@ -109,7 +109,7 @@ void Player::update(float dtime)
 	if (m_is_keys_pressed[Key::Space])
 	{
 		if (m_flying) {
-			m_dpos.y += dmoving*2;
+			m_dpos.y += dmoving*3;
 			m_on_ground = false;
 		}
 		else {
@@ -128,7 +128,7 @@ void Player::update(float dtime)
 	if (m_is_keys_pressed[Key::LShift])
 	{
 		if (m_flying) {
-			m_dpos.y -= dmoving*2;
+			m_dpos.y -= dmoving*3;
 		}
 	}
 

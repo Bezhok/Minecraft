@@ -20,8 +20,8 @@ Renderer::Renderer()
 	glDepthMask(GL_TRUE);
 	glClearDepth(1.f);
 
-	m_shader_program.loadFromFile("D:\\c++\\vs\\Minecraft\\shaders\\shader.vert.glsl", "D:\\c++\\vs\\Minecraft\\shaders\\shader.frag.glsl");
-	m_image_atlas.loadFromFile("resources/atlas.png");
+	m_shader_program.loadFromFile("shaders\\shader.vert.glsl", "shaders\\shader.frag.glsl");
+	m_image_atlas.loadFromFile(PATH2ATLAS);
 	m_image_atlas.flipVertically();
 
 	// Bind the texture
@@ -47,17 +47,12 @@ void Renderer::reset_view(sf::Vector2f size)
 	glViewport(0, 0, static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y));
 }
 
-void Renderer::draw_chunk(Chunk* chunk)
-{
-	//m_chunks.push(chunk);
-}
-
 void Renderer::draw_SFML(const sf::Drawable& drawable)
 {
 	m_SFML.push(&drawable);
 }
 
-void Renderer::finish_render(sf::RenderWindow& window, Player& player, World::Map& m_map, std::unordered_set<World::Chunk*>& m_chunks4rendering, sf::Mutex& mutex_chunks4rendering)
+void Renderer::finish_render(sf::RenderWindow& window, Player& player, phmap::parallel_node_hash_set<World::Chunk*>& m_chunks4rendering, sf::Mutex& mutex_chunks4rendering)
 {
 	glClearColor(0.5f, 0.7f, 0.9f, 0.0f);
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);

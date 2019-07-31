@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="libs\fast_noise\FastNoise.cpp" />
     <ClCompile Include="Minecraft\game_constants.cpp" />
+    <ClCompile Include="Minecraft\MapMeshBuilder.cpp" />
     <ClCompile Include="Minecraft\Menu.cpp" />
     <ClCompile Include="Minecraft\App.cpp" />
     <ClCompile Include="Minecraft\block_db.cpp" />
@@ -147,6 +148,9 @@
     <ClCompile Include="Minecraft\TerrainGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Minecraft\block_types.h" />
+    <ClInclude Include="Minecraft\Buffers.h" />
+    <ClInclude Include="Minecraft\MapMeshBuilder.h" />
     <ClInclude Include="Minecraft\Menu.h" />
     <ClInclude Include="Minecraft\App.h" />
     <ClInclude Include="Minecraft\block_db.h" />

@@ -4,7 +4,8 @@ extern const int DEFAULT_WINDOW_HEIGTH;
 extern const float RENDER_DISTANCE;
 extern const int RENDER_DISTANCE_CHUNKS;
 extern const float DEFAULT_PLAYER_SPEED;
-
+extern const int BLOCK_RESOLUTION;
+extern const char PATH2ATLAS[];
 
 extern const float COORDS_IN_BLOCK;
 

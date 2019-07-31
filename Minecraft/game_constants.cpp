@@ -10,5 +10,8 @@ const float DEFAULT_PLAYER_SPEED = COORDS_IN_BLOCK; //in coordinates
 
 const float COORDS_IN_BLOCK = 1.F;
 
+const int BLOCK_RESOLUTION = 16;
+
+const char PATH2ATLAS[] = "resources\\atlas.png";
 
 int verticies_wasnt_free = 0;

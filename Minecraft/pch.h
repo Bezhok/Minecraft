@@ -17,6 +17,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include <stack>
+
 //libs
 #include <glew.h>
 #include <SFML/Graphics.hpp>
@@ -30,7 +32,7 @@
 #include <glm/gtx/hash.hpp>
 #include <glm/gtc/random.hpp>
 
-#include <sparsepp/spp.h>
+#include <parallel_hashmap/phmap.h>
 #include <fast_noise/FastNoise.h>
 
 // local

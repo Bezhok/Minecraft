@@ -3,10 +3,10 @@
 #include "Renderer.h"
 #include "DebugData.h"
 #include "Player.h"
+#include "MapMeshBuilder.h"
 
 
 class Menu;
-class Player;
 
 class App
 {
@@ -23,12 +23,9 @@ private:
 	bool m_should_display_debug_info = true;
 	bool m_should_fix_cursor = true;
 
-	std::unordered_set<World::Chunk*> m_chunks4rendering;
-	std::vector<World::Chunk*> m_chunks4updating;
-	std::vector<World::Chunk*> m_chunks4vbo_generation;
 	
+	World::MapMeshBuilder m_map_mesh_builder;
 public:
-	sf::Mutex m_mutex__chunks4vbo_generation, m_mutex__chunks4rendering, m_mutex_4rendering;
 	/* init some objects */
 	App(sf::RenderWindow& window);
 
@@ -49,7 +46,5 @@ private:
 	void draw_SFML();
 	void draw_openGL();
 
-
-	void generate_verticies();
 };
 

@@ -31,7 +31,6 @@ void Chunk::set_type(int x, int y, int z, block_id type)
 
 bool Chunk::is_empty()
 {
-	// air
 	for (block_id id : m_data)
 	{
 		if (id != block_id::Air) {
@@ -98,7 +97,6 @@ void Chunk::generate_vertices()
 					
 					if (id == block_id::Cactus) {
 
-						if (!is_opaque__in_chunk(i - 1, j, k)) {
 							uint8_t xx = x + 1;
 
 							bind_texture2negative_x(id);
@@ -109,10 +107,8 @@ void Chunk::generate_vertices()
 							add_byte4(xx, y,      z + BS, side);
 							add_byte4(xx, y + BS, z + BS, side);
 
-						}
-						if (!is_opaque__in_chunk(i + 1, j, k)) {
-							uint8_t xx = x - 1;
 
+							xx = x - 1;
 							bind_texture2positive_x(id);
 							add_byte4(xx + BS, y,      z, side);
 							add_byte4(xx + BS, y + BS, z, side);
@@ -121,9 +117,8 @@ void Chunk::generate_vertices()
 							add_byte4(xx + BS, y + BS, z + BS, side);
 							add_byte4(xx + BS, y,      z + BS, side);
 
-						}
 
-						if (!is_opaque__in_chunk(i, j - 1, k)) {
+
 							bind_texture2negative_y(id);
 							add_byte4(x, y,      z, 0);
 							add_byte4(x + BS, y, z, 0);
@@ -132,9 +127,7 @@ void Chunk::generate_vertices()
 							add_byte4(x + BS, y, z + BS, 0);
 							add_byte4(x, y,      z + BS, 0);
 
-						}
 
-						if (!is_opaque__in_chunk(i, j + 1, k)) {
 							bind_texture2positive_y(id);
 							add_byte4(x, y + BS, z, 0);
 							add_byte4(x, y + BS, z + BS, 0);
@@ -143,11 +136,8 @@ void Chunk::generate_vertices()
 							add_byte4(x, y + BS, z + BS, 0);
 							add_byte4(x + BS, y + BS, z + BS, 0);
 
-						}
 
-						if (!is_opaque__in_chunk(i, j, k - 1)) {
 							uint8_t zz = z + 1;
-
 							bind_texture2negative_z(id);
 							add_byte4(x, y,           zz, side);
 							add_byte4(x, y + BS,      zz, side);
@@ -156,11 +146,8 @@ void Chunk::generate_vertices()
 							add_byte4(x + BS, y + BS, zz, side);
 							add_byte4(x + BS, y,      zz, side);
 
-						}
 
-						if (!is_opaque__in_chunk(i, j, k + 1)) {
-							uint8_t zz = z - 1;
-
+							zz = z - 1;
 							bind_texture2positive_z(id);
 							add_byte4(x, y,           zz + BS, side);
 							add_byte4(x + BS, y,      zz + BS, side);
@@ -168,7 +155,6 @@ void Chunk::generate_vertices()
 							add_byte4(x, y + BS,      zz + BS, side);
 							add_byte4(x + BS, y,      zz + BS, side);
 							add_byte4(x + BS, y + BS, zz + BS, side);
-						}
 
 					}
 					else {
@@ -182,8 +168,8 @@ void Chunk::generate_vertices()
 							add_byte4(x, y + BS, z, side);
 							add_byte4(x, y, z + BS, side);
 							add_byte4(x, y + BS, z + BS, side);
-
 						}
+
 						if (!is_opaque__in_chunk(i + 1, j, k)) {
 							bind_texture2positive_x(id);
 							add_byte4(x + BS, y, z, side);
@@ -192,7 +178,6 @@ void Chunk::generate_vertices()
 							add_byte4(x + BS, y + BS, z, side);
 							add_byte4(x + BS, y + BS, z + BS, side);
 							add_byte4(x + BS, y, z + BS, side);
-
 						}
 
 						if (!is_opaque__in_chunk(i, j - 1, k)) {
@@ -203,7 +188,6 @@ void Chunk::generate_vertices()
 							add_byte4(x + BS, y, z, 0);
 							add_byte4(x + BS, y, z + BS, 0);
 							add_byte4(x, y, z + BS, 0);
-
 						}
 
 						if (!is_opaque__in_chunk(i, j + 1, k)) {
@@ -214,7 +198,6 @@ void Chunk::generate_vertices()
 							add_byte4(x + BS, y + BS, z, 0);
 							add_byte4(x, y + BS, z + BS, 0);
 							add_byte4(x + BS, y + BS, z + BS, 0);
-
 						}
 
 						if (!is_opaque__in_chunk(i, j, k - 1)) {
@@ -225,7 +208,6 @@ void Chunk::generate_vertices()
 							add_byte4(x, y + BS, z, side);
 							add_byte4(x + BS, y + BS, z, side);
 							add_byte4(x + BS, y, z, side);
-
 						}
 
 						if (!is_opaque__in_chunk(i, j, k + 1)) {
@@ -286,7 +268,7 @@ bool Chunk::is_layer_solid(sf::Vector3i pos, int y)
 	if (pos.y < 0 || pos.y >= CHUNKS_IN_WORLD_HEIGHT)
 		return false;
 
-	Chunk& chunk = m_map->get_chunk_n(pos.x, pos.y, pos.z);
+	Chunk& chunk = m_map->get_chunk_or_generate(pos.x, pos.y, pos.z);
 
 	if (chunk.is_init()) {
 		return chunk.m_layers[y].is_all_solid();
@@ -301,10 +283,10 @@ void Chunk::upate_vao()
 	if (m_is_vertices_created) {
 		m_old_i = m_i;
 
-		glBindVertexArray(m_VAO);
+		glBindVertexArray(m_buffers.VAO);
 		/**/
 
-		glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, m_buffers.VBO);
 		glBufferData(GL_ARRAY_BUFFER, m_i * sizeof(GLbyte), m_vertices, GL_DYNAMIC_DRAW); //GL_DYNAMIC_DRAW GL_STATIC_DRAW
 
 		// Position attribute
@@ -325,30 +307,17 @@ void Chunk::upate_vao()
 	}
 }
 
-void Chunk::update_vertices()
+void Chunk::update_vertices(sf::Mutex& mutex__for_vbo_generation)
 {
-	if (m_is_vertices_created) {
-		delete[] m_vertices;
-		--verticies_wasnt_free;
-	}
+	update_vertices_use_old_buffers();
 
-	m_i = 0;
-	m_vertices = new GLbyte[BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK * 36 * 6];
-	generate_vertices();
-	m_is_vertices_created = true;
-	++verticies_wasnt_free;
-
-
-	//TODO mutex
-	m_map->m_mutex__chunks4vbo_generation->lock();
+	mutex__for_vbo_generation.lock();
 
 	assert(!m_map->m_global_vao_vbo_buffers.empty());
-	auto& pr = m_map->m_global_vao_vbo_buffers.back();
-	m_VAO = pr.first;
-	m_VBO = pr.second;
+	m_buffers = m_map->m_global_vao_vbo_buffers.back();
 	m_map->m_global_vao_vbo_buffers.pop_back();
 
-	m_map->m_mutex__chunks4vbo_generation->unlock();
+	mutex__for_vbo_generation.unlock();
 }
 
 void Chunk::update_vertices_use_old_buffers()
@@ -363,6 +332,14 @@ void Chunk::update_vertices_use_old_buffers()
 	generate_vertices();
 	m_is_vertices_created = true;
 	++verticies_wasnt_free;
+}
+
+void World::Chunk::free_buffers()
+{
+	if (get_VAO()) {
+		m_map->m_global_vao_vbo_buffers.push_back(get_buffers());
+		m_buffers = Buffers();
+	}
 }
 
 void Chunk::bind_texture_first_order(block_id id, const sf::Vector2i& p)
@@ -385,79 +362,30 @@ void Chunk::bind_texture_second_order(block_id id, const sf::Vector2i& p)
 	m_vertices[m_i + 34] = (p.x + 1); m_vertices[m_i + 35] = (p.y + 1);
 }
 
-void Chunk::bind_texture2negative_x(block_id id)
+inline void Chunk::bind_texture2negative_x(block_id id)
 {
-	bind_texture_first_order(id, DB::s_atlas_db[id][sides::negative_x]);
+	bind_texture_first_order(id, DB::s_atlas_db(id, sides::negative_x));
 }
 
-void Chunk::bind_texture2positive_x(block_id id) {
-	bind_texture_second_order(id, DB::s_atlas_db[id][sides::positive_x]);
+inline void Chunk::bind_texture2positive_x(block_id id) {
+	bind_texture_second_order(id, DB::s_atlas_db(id, sides::positive_x));
 }
 
-void Chunk::bind_texture2negative_y(block_id id) {
-	bind_texture_second_order(id, DB::s_atlas_db[id][sides::negative_y]);
+inline void Chunk::bind_texture2negative_y(block_id id) {
+	bind_texture_second_order(id, DB::s_atlas_db(id, sides::negative_y));
 }
 
-void Chunk::bind_texture2positive_y(block_id id) {
-	bind_texture_first_order(id, DB::s_atlas_db[id][sides::positive_y]);
+inline void Chunk::bind_texture2positive_y(block_id id) {
+	bind_texture_first_order(id, DB::s_atlas_db(id, sides::positive_y));
 }
 
-void Chunk::bind_texture2negative_z(block_id id) {
-	bind_texture_second_order(id, DB::s_atlas_db[id][sides::negative_z]);
+inline void Chunk::bind_texture2negative_z(block_id id) {
+	bind_texture_second_order(id, DB::s_atlas_db(id, sides::negative_z));
 }
 
-void Chunk::bind_texture2positive_z(block_id id) {
-	bind_texture_first_order(id, DB::s_atlas_db[id][sides::positive_z]);
+inline void Chunk::bind_texture2positive_z(block_id id) {
+	bind_texture_first_order(id, DB::s_atlas_db(id, sides::positive_z));
 }
-
-//int x = 1;
-//int y = 0;
-//
-//void Chunk::bind_texture_first_order(block_id id, int x, int y)
-//{
-//	m_vertices[m_i + 4] = x; m_vertices[m_i + 5] = (y + 1);
-//	m_vertices[m_i + 10] = (x + 1); m_vertices[m_i + 11] = (y + 1);
-//	m_vertices[m_i + 16] = x; m_vertices[m_i + 17] = y;
-//	m_vertices[m_i + 22] = x; m_vertices[m_i + 23] = y;
-//	m_vertices[m_i + 28] = (x + 1); m_vertices[m_i + 29] = (y + 1);
-//	m_vertices[m_i + 34] = (x + 1); m_vertices[m_i + 35] = y;
-//}
-//
-//void Chunk::bind_texture_second_order(block_id id, int x, int y)
-//{
-//	m_vertices[m_i + 4] = x; m_vertices[m_i + 5] = (y + 1);
-//	m_vertices[m_i + 10] = x; m_vertices[m_i + 11] = y;
-//	m_vertices[m_i + 16] = (x + 1); m_vertices[m_i + 17] = (y + 1);
-//	m_vertices[m_i + 22] = x; m_vertices[m_i + 23] = y;
-//	m_vertices[m_i + 28] = (x + 1); m_vertices[m_i + 29] = y;
-//	m_vertices[m_i + 34] = (x + 1); m_vertices[m_i + 35] = (y + 1);
-//}
-//const sf::Vector2i p = { 1,0 };
-//void Chunk::bind_texture2negative_x(block_id id)
-//{
-//	bind_texture_first_order(id, 1, 0);
-//}
-//
-//void Chunk::bind_texture2positive_x(block_id id) {
-//	bind_texture_second_order(id, 1, 0);
-//}
-//
-//void Chunk::bind_texture2negative_y(block_id id) {
-//	bind_texture_second_order(id, 1, 0);
-//}
-//
-//void Chunk::bind_texture2positive_y(block_id id) {
-//	bind_texture_first_order(id, 1, 0);
-//}
-//
-//void Chunk::bind_texture2negative_z(block_id id) {
-//	bind_texture_second_order(id, 1, 0);
-//}
-//
-//void Chunk::bind_texture2positive_z(block_id id) {
-//	bind_texture_first_order(id, 1, 0);
-//}
-//
 
 void Chunk::ChunkLayer::update(block_id type)
 {

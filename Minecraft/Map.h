@@ -3,28 +3,31 @@
 #include "game_constants.h"
 #include "Chunk.h"
 #include "TerrainGenerator.h"
-
-#include "parallel_hashmap/phmap.h"
+#include "Buffers.h"
 
 
 namespace World {
+	class TerrainGenerator;
 	enum class block_id : uint8_t;
 
 	class Map
 	{
 	public:
 		using Column = std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT>;
-
 	private:
 		phmap::parallel_node_hash_map<int, Column> m_map;
-		sf::Vector3i m_edited_chunk_pos;
-		bool m_redraw_chunk = false;
+
+		bool m_should_redraw_chunk = false;
 		TerrainGenerator m_terrain_generator;
 
+		block_id m_edited_block_type;
+		sf::Vector3i m_edited_block_pos;
+		Chunk* m_edited_chunk = nullptr;
 	public:
 		int get_size() { return m_map.size(); };
 		void generate_chunk_terrain(sf::Vector3i& pos);
 		void generate_chunk_terrain(int, int, int);
+		void generate_chunk_terrain(Column&, int, int, int);
 
 		/* load world */
 		Map();
@@ -46,16 +49,12 @@ namespace World {
 		std::vector<sf::Vector3i> m_should_be_updated_neighbours;
 
 		/* when you add/delete block */
-		bool is_chunk_edited() { return m_redraw_chunk; };
-		void cancel_chunk_editing_state() 
-		{ 
-			m_redraw_chunk = false;
-			m_should_be_updated_neighbours.clear();
-		};
+		bool is_chunk_edited() { return m_should_redraw_chunk; };
+		void apply_chunk_changes();
 
-		/* getters */
-		sf::Vector3i m_edited_block_pos;
-		const sf::Vector3i& get_edited_chunk_pos() { return m_edited_chunk_pos; };
+
+
+		Chunk* get_edited_chunk() { return m_edited_chunk; };
 		
 		// TODO maybe hash collisions
 		inline int hashXZ(int i, int k)
@@ -72,12 +71,11 @@ namespace World {
 		Column& get_column(int i, int k);
 		Chunk& get_chunk(int i, int j, int k);
 
-		Chunk& get_chunk_n(int i, int j, int k);
-		Column& get_column_n(int i, int k);
+		Chunk& get_chunk_or_generate(int i, int j, int k);
+		Column& get_column_or_generate(int i, int k);
 
-		sf::Mutex* m_mutex__chunks4vbo_generation;
 
-		std::vector<std::pair<GLuint, GLuint>> m_global_vao_vbo_buffers;
+		std::vector<Buffers> m_global_vao_vbo_buffers;
 
 		void set_block(sf::Vector3i& pos_in_chunk, Map::Column& column, int y, block_id type);
 

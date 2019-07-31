@@ -36,6 +36,9 @@ Menu::Menu(sf::RenderWindow& window)
 		float(m_window.getSize().x / 2 - int(m_textures[cross].getSize().x/2)),
 		float(m_window.getSize().y / 2 - int(m_textures[cross].getSize().y/2))
 	);
+
+	//atlas
+	m_textures[atlas].loadFromFile(PATH2ATLAS);
 }
 
 Menu::~Menu()
@@ -77,16 +80,28 @@ void Menu::update_players_blocks(Player&  player)
 
 	int i = 0;
 	for (auto& e : player.get_inventory()) {
-		m_side_sprites[e.first].setTexture(DB::s_side_textures[e.first]);
-		sf::Vector2f pos = m_sprites[tool_bar].getPosition();
-		pos.y += 8; pos.x += 8;
 
-		float x_shift = float(m_textures[tool_bar].getSize().x - 2) / 9.F * i;
-		pos.x += x_shift;
+		if (e.first != block_id::EMPTY_TYPE) {
+			m_side_sprites[e.first].setTexture(m_textures[atlas]);
 
-		m_side_sprites[e.first].setScale(0.8f, 0.8f);
-		m_side_sprites[e.first].setPosition(pos);
-		++i;
+			sf::Vector2i& p = DB::s_atlas_db(e.first, sides::positive_x);
+			m_side_sprites[e.first].setTextureRect(sf::IntRect(
+				p.x * BLOCK_RESOLUTION,
+				p.y * BLOCK_RESOLUTION,
+				BLOCK_RESOLUTION,
+				BLOCK_RESOLUTION
+			));
+
+			sf::Vector2f pos = m_sprites[tool_bar].getPosition();
+			pos.y += 8; pos.x += 8;
+
+			float x_shift = float(m_textures[tool_bar].getSize().x - 2) / 9.F * i;
+			pos.x += x_shift;
+
+			m_side_sprites[e.first].setScale(1.6f, 1.6f);
+			m_side_sprites[e.first].setPosition(pos);
+			++i;
+		}
 	}
 }
 

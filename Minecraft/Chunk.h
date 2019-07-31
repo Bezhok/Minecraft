@@ -1,6 +1,7 @@
 #pragma once
 #include "pch.h"
 #include "game_constants.h"
+#include "Buffers.h"
 
 
 namespace World {
@@ -26,12 +27,11 @@ namespace World {
 		bool m_is_vertices_created = false;
 		GLbyte* m_vertices = nullptr;
 		
-		GLuint m_VBO = 0, m_VAO = 0;
+
 		int m_i = 0;
 		int m_old_i = 0;
 
-		//void bind_texture_second_order(block_id id, int x, int y);
-		//void bind_texture_first_order(block_id id, int x, int y);
+		Buffers m_buffers;
 
 		void bind_texture_second_order(block_id id, const sf::Vector2i& p);
 		void bind_texture_first_order(block_id id,  const sf::Vector2i& p);
@@ -43,7 +43,7 @@ namespace World {
 		void bind_texture2negative_z(block_id id);
 		void bind_texture2positive_z(block_id id);
 
-		inline void add_byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w);
+		void add_byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w);
 
 		void generate_vertices();
 		bool m_is_init = false;
@@ -60,8 +60,6 @@ namespace World {
 
 		static bool is_block_type_transperent(block_id type);
 		static bool is_block_type_solid(block_id type);
-
-		bool m_is_empty_onsrart = true;
 
 		bool is_init() { return m_is_init; };
 
@@ -82,15 +80,19 @@ namespace World {
 		void set_type(int x, int y, int z, enum block_id type);
 
 		void upate_vao();
-		void update_vertices();
+		void update_vertices(sf::Mutex& mutex__for_vbo_generation);
 		void update_vertices_use_old_buffers();
+
+		void free_buffers();
+
 
 		int get_final_points_count() { return m_old_i / 6; };
 		int get_current_faces_count() { return m_i / 36; };
 		void set_pos(const sf::Vector3i& pos) { m_pos = pos; m_is_init = true;};
 		const sf::Vector3i& get_pos() { return m_pos; };
 
-		GLuint get_VBO() { return m_VBO; };
-		GLuint get_VAO() { return m_VAO; };
+		Buffers get_buffers() { return m_buffers; };
+		GLuint get_VBO() { return m_buffers.VBO; };
+		GLuint get_VAO() { return m_buffers.VAO; };
 	};
 }
