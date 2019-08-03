@@ -9,6 +9,140 @@ using std::copy;
 using std::inserter;
 using std::advance;
 
+MapMeshBuilder::MapMeshBuilder() :
+	m_verticies_generator_thread(&MapMeshBuilder::generate_verticies, this)
+{
+
+}
+
+void World::MapMeshBuilder::launch(Map* map, Player* player, sf::Window* window)
+{
+	m_player = player;
+	m_map = map;
+	m_window = window;
+
+	/////////////////////////////////////
+	int chunk_x = Map::coord2chunk_coord(m_player->get_position().x);
+	int chunk_z = Map::coord2chunk_coord(m_player->get_position().z);
+
+	int start_x = std::max(0, chunk_x - 3);
+	int start_z = std::max(0, chunk_z - 3);
+
+	int end_x = chunk_x + 3;
+	int end_z = chunk_z + 3;
+
+	for (int i = start_x; i < end_x; ++i)
+		for (int j = start_z; j < end_z; ++j) {
+			m_map->get_column_or_generate(i, j);
+		}
+	/////////////////////////////////////////
+
+	m_verticies_generator_thread.launch();
+}
+
+void MapMeshBuilder::generate_verticies()
+{
+	int center_index;
+	sf::Clock verticies_gen_timer;
+	sf::Clock loop_timer;
+
+	RenderRange range;
+
+	sf::Thread second_thread([&]() {
+		auto end = m_chunks4verticies_generation.begin();
+		advance(end, center_index);
+
+		for (auto it = m_chunks4verticies_generation.begin(); it != end; ++it) {
+			(*it)->update_vertices(m_mutex__chunks4vbo_generation);
+			m_mutex__chunks4vbo_generation.lock();
+			m_chunks4vbo_generation.push_back(*it);
+			m_mutex__chunks4vbo_generation.unlock();
+		}
+	});
+
+
+	while (m_window->isOpen()) {
+
+		loop_timer.restart();
+
+
+		range.chunk_x = Map::coord2chunk_coord(m_player->get_position().x);
+		range.chunk_z = Map::coord2chunk_coord(m_player->get_position().z);
+
+		range.start_x = range.chunk_x - RENDER_DISTANCE_CHUNKS / 2;
+		range.start_z = range.chunk_z - RENDER_DISTANCE_CHUNKS / 2;
+
+		range.end_x = range.chunk_x + RENDER_DISTANCE_CHUNKS / 2;
+		range.end_z = range.chunk_z + RENDER_DISTANCE_CHUNKS / 2;
+
+		//RenderRange terrain_generation_range = range;
+
+		//terrain_generation_range.end_x += 3;
+		//terrain_generation_range.end_z += 3;
+
+		//terrain_generation_range.start_x -= 3;
+		//terrain_generation_range.start_z -= 3;
+
+
+		unload_columns(range);
+		add_chunks2verticies_generation(range);
+
+
+		size_t order_size = m_chunks4verticies_generation.size();
+		center_index = order_size / 2;
+
+		//second_thread.launch();
+
+		auto it = m_chunks4verticies_generation.begin();
+		//advance(it, center_index);
+
+		float inftest = 0;
+		for (; it != m_chunks4verticies_generation.end(); ++it) {
+
+			verticies_gen_timer.restart();
+			(*it)->update_vertices(m_mutex__chunks4vbo_generation);
+			float time = verticies_gen_timer.getElapsedTime().asMicroseconds() / 1000.0f;
+			int faces_count = (*it)->m_blocks_mesh.get_current_faces_count();
+			std::cout << std::setw(9) << time << "ms - " << std::setw(4) << faces_count << " faces" << std::endl;
+			inftest += time;
+
+			m_mutex__chunks4vbo_generation.lock();
+			m_chunks4vbo_generation.push_back(*it);
+			m_mutex__chunks4vbo_generation.unlock();
+		}
+
+		std::cout << "verticies generation time " << inftest << std::endl;
+
+		//second_thread.wait();
+
+		m_chunks4verticies_generation.clear();
+
+		std::cout << "thread loop time " << loop_timer.getElapsedTime().asMilliseconds() << std::endl << std::endl;
+	}
+}
+
+void MapMeshBuilder::unload_columns(RenderRange& range)
+{
+	m_mutex__chunks4rendering.lock();
+	for (auto it = m_chunks4rendering.begin(); it != m_chunks4rendering.end();) {
+		Chunk& chunk = *(*it);
+		auto& pos = chunk.get_pos();
+		if (pos.x < range.start_x || pos.z < range.start_z || pos.x > range.end_x || pos.z > range.end_z) {
+			chunk.set_is_rendering(false);
+			chunk.free_buffers();
+			it = m_chunks4rendering.erase(it);
+
+		}
+		else {
+			it++;
+		}
+	}
+
+	m_map->unload_columns(std::max(range.start_x - 5, 0), range.end_x + 5, std::max(range.start_z - 5, 0), range.end_z + 5);
+
+
+	m_mutex__chunks4rendering.unlock();
+}
 
 void MapMeshBuilder::regenerate_edited_chunk_verticies()
 {
@@ -22,7 +156,7 @@ void MapMeshBuilder::regenerate_edited_chunk_verticies()
 		Chunk& chunk = *m_map->get_edited_chunk();
 
 		if (chunk.is_rendering()) {
-			chunk.update_vertices_use_old_buffers();
+			chunk.update_vertices_using_old_buffers();
 		}
 		else {
 			chunk.set_is_rendering(true);
@@ -37,12 +171,11 @@ void MapMeshBuilder::regenerate_edited_chunk_verticies()
 			Chunk& chunk = m_map->get_chunk_or_generate(pos.x, pos.y, pos.z);
 
 			if (chunk.is_rendering()) {
-				chunk.update_vertices_use_old_buffers();
+				chunk.update_vertices_using_old_buffers();
 				priority4_rendering.push_back(&chunk);
 			}
 		}
 		should_update_priority_chunks = true;
-		
 
 		is_thread_free = true;
 	};
@@ -56,7 +189,6 @@ void MapMeshBuilder::regenerate_edited_chunk_verticies()
 	if (m_map->is_chunk_edited() && is_thread_free && !should_update_priority_chunks) {
 		is_thread_free = false;
 
-		//update_edited_chunk_thread.wait();
 		update_edited_chunk_thread.launch();
 	}
 
@@ -80,21 +212,6 @@ void MapMeshBuilder::regenerate_edited_chunk_verticies()
 	}
 }
 
-MapMeshBuilder::MapMeshBuilder() :
-	m_verticies_generator_thread(&MapMeshBuilder::generate_verticies, this)
-{
-
-}
-
-void World::MapMeshBuilder::launch(Map* map, Player* player, sf::Window* window)
-{
-	m_player = player;
-	m_map = map;
-	m_window = window;
-
-	m_verticies_generator_thread.launch();
-}
-
 void MapMeshBuilder::add_new_chunks2rendering()
 {
 	m_mutex__chunks4vbo_generation.lock();
@@ -107,6 +224,7 @@ void MapMeshBuilder::add_new_chunks2rendering()
 	);
 
 	for (Chunk* chunk : m_chunks4vbo_generation) {
+		chunk->set_is_rendering(true);
 		chunk->upate_vao();
 	}
 
@@ -122,18 +240,18 @@ void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 	glm::mat4 view = glm::lookAt(
 		glm::vec3(
 			m_player->get_position().x,
-			m_player->get_position().y + COORDS_IN_BLOCK * 0.8f,//m_size.y
+			m_player->get_position().y + 0.8f,//m_size.y
 			m_player->get_position().z
 		),
 		glm::vec3(
 			m_player->get_position().x - sin(m_player->m_camera_angle.x / 180 * PI),
-			m_player->get_position().y + COORDS_IN_BLOCK * 0.8f + tan(m_player->m_camera_angle.y / 180 * PI),
+			m_player->get_position().y +  0.8f + tan(m_player->m_camera_angle.y / 180 * PI),
 			m_player->get_position().z - cos(m_player->m_camera_angle.x / 180 * PI)
 		),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
-	static const float SPHERE_DIAMETER = sqrtf(3 * COORDS_IN_BLOCK*COORDS_IN_BLOCK*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK);
+	static const float SPHERE_DIAMETER = sqrtf(3.f);
 	static const int VISIBLE_COLUMNS_PER_LOOP = 20;
 	int visible_columns_count = 0;
 	auto add2verticies_generation = [&](int i, int k) {
@@ -157,9 +275,8 @@ void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 						for (int y = 0; y < CHUNKS_IN_WORLD_HEIGHT; ++y) {
 							Chunk& chunk = column[y];
 
-							if (!chunk.is_empty() && !chunk.is_vertices_created() && !chunk.is_rendering()) {
+							if (chunk.can_generate_verticies()) {
 								is_new = true;
-								chunk.set_is_rendering(true);
 								m_chunks4verticies_generation.push_back(&chunk);
 							}
 
@@ -223,109 +340,5 @@ void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 		--loc_start_z;
 		++loc_end_x;
 		++loc_end_z;
-	}
-}
-
-void MapMeshBuilder::unload_columns(RenderRange& range)
-{
-	m_mutex__chunks4rendering.lock();
-	for (auto it = m_chunks4rendering.begin(); it != m_chunks4rendering.end();) {
-		Chunk& chunk = *(*it);
-		auto& pos = chunk.get_pos();
-		if (pos.x < range.start_x || pos.z < range.start_z || pos.x > range.end_x || pos.z > range.end_z) {
-			chunk.set_is_rendering(false);
-			chunk.free_buffers();
-			it = m_chunks4rendering.erase(it);
-
-		}
-		else {
-			it++;
-		}
-	}
-
-	m_map->unload_columns(std::max(range.start_x - 5, 0), range.end_x + 5, std::max(range.start_z - 5, 0), range.end_z + 5);
-
-
-	m_mutex__chunks4rendering.unlock();
-}
-
-void MapMeshBuilder::generate_verticies()
-{
-	int center_index;
-	sf::Clock verticies_gen_timer;
-	sf::Clock loop_timer;
-	//sf::Clock middle_timer;
-
-	RenderRange range;
-
-	sf::Thread second_thread([&]() {
-		auto end = m_chunks4verticies_generation.begin();
-		advance(end, center_index);
-
-		for (auto it = m_chunks4verticies_generation.begin(); it != end; ++it) {
-			(*it)->update_vertices(m_mutex__chunks4vbo_generation);
-			m_mutex__chunks4vbo_generation.lock();
-			m_chunks4vbo_generation.push_back(*it);
-			m_mutex__chunks4vbo_generation.unlock();
-		}
-	});
-
-
-	while (m_window->isOpen()) {
-
-		loop_timer.restart();
-
-
-		range.chunk_x = Map::coord2chunk_coord(m_player->get_position().x);
-		range.chunk_z = Map::coord2chunk_coord(m_player->get_position().z);
-
-		range.start_x = range.chunk_x - RENDER_DISTANCE_CHUNKS / 2;
-		range.start_z = range.chunk_z - RENDER_DISTANCE_CHUNKS / 2;
-
-		range.end_x = range.chunk_x + RENDER_DISTANCE_CHUNKS / 2;
-		range.end_z = range.chunk_z + RENDER_DISTANCE_CHUNKS / 2;
-
-
-		//static int loop_counter = 0; 
-		//if (loop_counter >= 10) {
-			unload_columns(range);
-		//	loop_counter = 0;
-		//}
-		//++loop_counter;
-
-		//TODO bottleneck
-		add_chunks2verticies_generation(range);
-
-
-		size_t order_size = m_chunks4verticies_generation.size();
-		center_index = order_size / 2;
-
-		second_thread.launch();
-
-		auto it = m_chunks4verticies_generation.begin();
-		advance(it, center_index);
-
-		int inftest = 0;
-		for (; it != m_chunks4verticies_generation.end(); ++it) {
-
-			verticies_gen_timer.restart();
-			(*it)->update_vertices(m_mutex__chunks4vbo_generation);
-			float time = verticies_gen_timer.getElapsedTime().asMicroseconds() / 1000.0f;
-			int faces_count = (*it)->get_current_faces_count();
-			std::cout << std::setw(9) << time << "ms - " << std::setw(4) << faces_count << " faces" << std::endl;
-			inftest += time;
-
-			m_mutex__chunks4vbo_generation.lock();
-			m_chunks4vbo_generation.push_back(*it);
-			m_mutex__chunks4vbo_generation.unlock();
-		}
-
-		std::cout << "verticies generation time " << inftest << std::endl;
-
-		second_thread.wait();
-
-		m_chunks4verticies_generation.clear();
-
-		std::cout << "thread loop time " << loop_timer.getElapsedTime().asMilliseconds() << std::endl << std::endl;
 	}
 }

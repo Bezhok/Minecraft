@@ -32,6 +32,15 @@ App::App(sf::RenderWindow& window)
 
 void App::draw_SFML()
 {
+
+	if (m_player.m_is_under_water) {
+		static sf::RectangleShape underwater_filter;
+		underwater_filter.setSize({ static_cast<float>(m_window.getSize().x), static_cast<float>(m_window.getSize().y) });
+		underwater_filter.setFillColor({ 28, 40, 155, 150 });
+		underwater_filter.setPosition(0, 0);
+		m_renderer.draw_SFML(underwater_filter);
+	}
+
 	 //draw sfml
 	if (m_should_display_debug_info) {
 		m_text.setString(
@@ -44,9 +53,9 @@ void App::draw_SFML()
 			to_string(m_player.get_position().y) + " " +
 			to_string(m_player.get_position().z) + "\n" +
 
-			to_string(m_map_mesh_builder.m_chunks4rendering.size()) + " " +
+			to_string(m_map_mesh_builder.get_chunks4rendering_size()) + " " +
 			to_string(m_map->get_size()) + " " +
-			to_string(m_map_mesh_builder.m_chunks4verticies_generation.size()) + " " +
+			to_string(m_map_mesh_builder.get_chunks4verticies_generation_size()) + " " +
 			to_string(m_map->m_global_vao_vbo_buffers.size()) + " " +
 			"- chunks rendering, map size, updates, global buffer\n" +
 
@@ -85,33 +94,6 @@ void App::run()
 	menu.update_players_blocks(m_player);
 	m_menu = &menu;
 
-	/////////////////////////////////////
-	bool should_pregenerate_terrain = false;
-	if (should_pregenerate_terrain) {
-		int chunk_x = Map::coord2chunk_coord(m_player.get_position().x);
-		int chunk_z = Map::coord2chunk_coord(m_player.get_position().z);
-
-		//new
-		int start_x = chunk_x - RENDER_DISTANCE_CHUNKS / 2 < 1 ? 1 : chunk_x - RENDER_DISTANCE_CHUNKS / 3;
-		int start_z = chunk_z - RENDER_DISTANCE_CHUNKS / 2 < 1 ? 1 : chunk_z - RENDER_DISTANCE_CHUNKS / 3;
-
-		int end_x = chunk_x + RENDER_DISTANCE_CHUNKS / 3;
-		int end_z = chunk_z + RENDER_DISTANCE_CHUNKS / 3;
-
-		sf::Clock timemm;
-		float fltime = 0;
-		for (int i = start_x; i < end_x; ++i)
-			for (int j = start_z; j < end_z; ++j) {
-				timemm.restart();
-				m_map->get_column_or_generate(i, j);
-
-				float ltime = timemm.getElapsedTime().asMicroseconds() / 1000.0f;
-				fltime += ltime;
-				std::cout << ltime << std::endl;
-			}
-		std::cout << "----------terrain generation time " << fltime << std::endl << std::endl;
-	}
-	/////////////////////////////////////////
 	
 	m_map_mesh_builder.launch(m_map.get(), &m_player, &m_window);
 	while (m_window.isOpen())

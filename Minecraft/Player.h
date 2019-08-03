@@ -44,7 +44,8 @@ public:
 
 	void flight_on();
 	void flight_off();
-
+	bool m_is_in_water = false;
+	bool m_is_under_water = false;
 	/* getters */
 	const auto& get_inventory() { return m_inventory; };
 private:

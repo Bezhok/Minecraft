@@ -81,6 +81,9 @@
     <ClCompile Include="Minecraft\MapMeshBuilder.cpp">
       <Filter>Исходные файлы\World</Filter>
     </ClCompile>
+    <ClCompile Include="Minecraft\ChunkMeshBasic.cpp">
+      <Filter>Исходные файлы\World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minecraft\App.h">
@@ -134,12 +137,12 @@
     <ClInclude Include="Minecraft\Buffers.h">
       <Filter>Файлы заголовков\Supporting</Filter>
     </ClInclude>
+    <ClInclude Include="Minecraft\ChunkMeshBasic.h">
+      <Filter>Файлы заголовков\World</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\atlas.png">
-      <Filter>Файлы ресурсов</Filter>
-    </Image>
-    <Image Include="resources\hmp.bmp">
       <Filter>Файлы ресурсов</Filter>
     </Image>
   </ItemGroup>

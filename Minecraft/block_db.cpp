@@ -1,9 +1,7 @@
 #include "pch.h"
 #include "block_db.h"
 
-using std::array;
-using std::unordered_map;
-using std::string;
+
 using std::vector;
 using namespace World;
 
@@ -71,11 +69,11 @@ void DB::load_blocks()
 
 	id = block_id::Oak_leafage;
 	load_block(id);
-	init_xyz(id, { 5, 3 });
+	init_xyz(id, { 5, 3 });//4,3
 
 	id = block_id::Water;
 	load_block(id);
-	init_xyz(id, { 13, 12 });
+	init_xyz(id, { 15, 15 });//{ 13, 12 }
 
 	id = block_id::Sand;
 	load_block(id);

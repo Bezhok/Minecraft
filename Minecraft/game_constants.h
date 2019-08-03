@@ -7,8 +7,6 @@ extern const float DEFAULT_PLAYER_SPEED;
 extern const int BLOCK_RESOLUTION;
 extern const char PATH2ATLAS[];
 
-extern const float COORDS_IN_BLOCK;
-
 //TODO
 static const int BLOCKS_IN_CHUNK = 16;
 static const int CHUNKS_IN_WORLD_HEIGHT = 16;

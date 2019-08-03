@@ -7,12 +7,17 @@ using namespace World;
 
 TerrainGenerator::TerrainGenerator(Map* map) : m_map(map)
 {
-	srand(time(NULL));
+	
+	srand(m_noise.GetSeed());
 
-	m_noise.SetNoiseType(FastNoise::Perlin);
-	m_noise.SetFrequency(0.006f);
+	//m_noise.SetNoiseType(FastNoise::Perlin);
+	//m_noise.SetFrequency(0.006f);
 	//m_noise.SetFractalOctaves(5);
 
+	m_noise.SetNoiseType(FastNoise::PerlinFractal);
+	m_noise.SetFrequency(0.01f);
+	m_noise.SetFractalOctaves(1);
+	m_noise.SetInterp(FastNoise::Hermite);
 
 	m_biome_noise.SetNoiseType(FastNoise::ValueFractal);
 	m_biome_noise.SetFrequency(0.002f); //0.0009
@@ -21,7 +26,6 @@ TerrainGenerator::TerrainGenerator(Map* map) : m_map(map)
 	//m_noise.SetGradientPerturbAmp(5);
 	//m_noise.GradientPerturbFractal();
 }
-
 
 TerrainGenerator::~TerrainGenerator()
 {
@@ -35,18 +39,14 @@ inline void TerrainGenerator::generate_chunk_terrain(int chunk_x, int chunk_y, i
 
 void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT>& column, int chunk_x, int chunk_y, int chunk_z)
 {
-	sf::Clock timemm;
-
-	timemm.restart();
-
 	//auto& column = m_map->get_column(chunk_x, chunk_z);
 
 	Chunk& chunk = column[chunk_y];
-	if (!chunk.is_init()) {
-		chunk.init({ chunk_x, chunk_y, chunk_z }, m_map);
-	}
+	chunk.init({ chunk_x, chunk_y, chunk_z }, m_map);
 
 
+	int offset = 0;//30
+	static const int WATER_LEVEL = offset + 30;
 
 	std::vector<sf::Vector3i> tree_pos;
 	for (int block_x = 0; block_x < BLOCKS_IN_CHUNK; ++block_x)
@@ -54,13 +54,8 @@ void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN
 			int x = Map::chunk_coord2block_coord(chunk_x) + block_x;
 			int z = Map::chunk_coord2block_coord(chunk_z) + block_z;
 
-			//TODO bottleneck
-			int h = static_cast<int>((get_noise(x + 1, z + 1) + 1) * 20) + 20;
-			//float b = (m_biome_noise.GetNoise(x + 1, z + 1) / 2 + 0.5f);
-
-			//int h = 20;
-			float b = 0.8f;
-
+			int h = 0;
+			float b = (m_biome_noise.GetNoise(static_cast<float>(x) + 1, static_cast<float>(z) + 1) / 2 + 0.5f);
 
 			block_id top_block_type;
 			block_id below_block_type;
@@ -69,38 +64,50 @@ void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN
 				default_biom = true;
 				top_block_type = block_id::Grass;
 				below_block_type = block_id::Dirt;
+				h = static_cast<int>((get_noise(x + 1, z + 1) + 1) * 40) + offset;
 			}
 			else
 			{
 				default_biom = false;
 				top_block_type = below_block_type = block_id::Sand;
+				
+				h = static_cast<int>((get_noise(x + 1, z + 1) + 1) * 15) + offset+19;
 			}
 
 
 			for (int block_y = 0; block_y < BLOCKS_IN_CHUNK; ++block_y) {
 				int y = Map::chunk_coord2block_coord(chunk_y) + block_y;
+				block_id id = block_id::Air;
 
-				if (y > h) break;
 
 
-				block_id id;
-				if (y == h) {
-					if (glm::linearRand(0, 400) == 10) {
-						tree_pos.emplace_back(block_x, block_y + 1, block_z);
+				if (h < WATER_LEVEL && y >= h && y < WATER_LEVEL) {
+					id = block_id::Water;
+				}
+				else if (y > h) {
+					break;
+				}
+				else if (h - 4 < WATER_LEVEL && y > h - 4) {
+					id = block_id::Sand;
+				}
+				else {
+					if (y == h) {
+						if (glm::linearRand(0, 400) == 10) {
+							tree_pos.emplace_back(block_x, block_y + 1, block_z);
+							id = below_block_type;
+						}
+						else {
+							id = top_block_type;
+						}
+					}
+					else if (y > h - 5) {
 						id = below_block_type;
 					}
 					else {
-						id = top_block_type;
+						id = block_id::Stone;
 					}
 				}
-				else if (y > h - 5) {
-					id = below_block_type;
-				}
-				else {
-					id = block_id::Stone;
-				}
-
-				chunk.set_type(block_x, block_y, block_z, id);
+				chunk.set_block_type(block_x, block_y, block_z, id);
 			}
 
 			if (default_biom) {
@@ -164,6 +171,4 @@ void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN
 
 			tree_pos.clear();
 		}
-
-	//std::cout << "* " << timemm.getElapsedTime().asMicroseconds()/1000.f << std::endl;
 }
