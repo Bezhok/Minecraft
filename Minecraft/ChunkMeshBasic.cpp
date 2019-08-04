@@ -20,6 +20,13 @@ ChunkMeshBasic::~ChunkMeshBasic()
 		delete[] m_vertices;
 		--verticies_wasnt_free;
 	}
+
+	if (m_buffers.VAO != 0) {
+		glDeleteVertexArrays(1, &m_buffers.VAO);
+	}
+	if (m_buffers.VBO != 0) {
+		glDeleteBuffers(1, &m_buffers.VBO);
+	}
 }
 
 void ChunkMeshBasic::upate_vao()
@@ -32,7 +39,7 @@ void ChunkMeshBasic::upate_vao()
 			/**/
 
 			glBindBuffer(GL_ARRAY_BUFFER, m_buffers.VBO);
-			glBufferData(GL_ARRAY_BUFFER, m_i * sizeof(GLbyte), m_vertices, GL_DYNAMIC_DRAW); //GL_DYNAMIC_DRAW GL_STATIC_DRAW
+			glBufferData(GL_ARRAY_BUFFER, m_i * sizeof(GLbyte), m_vertices, GL_STATIC_DRAW); //GL_DYNAMIC_DRAW GL_STATIC_DRAW
 
 			// Position attribute
 			glVertexAttribPointer(0, 4, GL_UNSIGNED_BYTE, GL_FALSE, 6 * sizeof(GLbyte), (GLvoid*)0);

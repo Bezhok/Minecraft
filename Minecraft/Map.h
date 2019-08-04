@@ -4,7 +4,7 @@
 #include "Chunk.h"
 #include "TerrainGenerator.h"
 #include "Buffers.h"
-
+#include "Sounds.h"
 
 namespace World {
 	class TerrainGenerator;
@@ -23,13 +23,15 @@ namespace World {
 		block_id m_edited_block_type;
 		sf::Vector3i m_edited_block_pos;
 		Chunk* m_edited_chunk = nullptr;
+
+		Sounds m_sounds;
 	public:
 		int get_size() { return m_map.size(); };
 		void generate_chunk_terrain(Column&, int, int, int);
 
 		/* load world */
 		Map();
-
+		~Map();
 		/* eponymous */
 		bool is_solid(int mx, int my, int mz);
 		bool is_opaque(int mx, int my, int mz);

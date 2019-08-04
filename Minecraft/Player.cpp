@@ -191,88 +191,86 @@ void Player::flight_off()
 	}
 }
 
-void Player::put_block()
-{
-	float prev_x, prev_y, prev_z;
-	float x = m_pos.x,
-		y = m_pos.y+ m_size.y*0.8f,
-		z = m_pos.z;
-
-	prev_x = x; prev_y = y; prev_z = z;
-	bool able_create = false;
-
-	auto dist = [&]()->float { return std::sqrt((m_pos.x - x)*(m_pos.x - x) + (m_pos.y - y)*(m_pos.y - y) + (m_pos.y - y)*(m_pos.y - y)); };
-	while (dist() < 6.f) {
-		
-		x += -sinf(m_camera_angle.x / 180 * PI)/20.F;
-		y += tanf(m_camera_angle.y / 180 * PI)/20.F;
-		z += -cosf(m_camera_angle.x / 180 * PI)/20.F;
-
-		if (!m_map->is_air(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z)) &&
-			!m_map->is_water(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z))
-			) {
-			// is we in this block
-			for (int matrix_x = Map::coord2block_coord(m_pos.x - m_size.x); matrix_x < m_pos.x + m_size.x; matrix_x++) {
-				for (int matrix_y = Map::coord2block_coord(m_pos.y - m_size.y); matrix_y < m_pos.y + m_size.y; matrix_y++) {
-					for (int matrix_z = Map::coord2block_coord(m_pos.z - m_size.z); matrix_z < m_pos.z + m_size.z; matrix_z++) {
-						int x = Map::coord2block_coord(prev_x);
-						int y = Map::coord2block_coord(prev_y);
-						int z = Map::coord2block_coord(prev_z);
-						if (matrix_x == x && matrix_y == y && matrix_z == z) {
-							able_create = false;
-							break;
-						}
-					}
-				}
-			}
-
-			if (able_create) {
-				m_map->create_block(
-					Map::coord2block_coord(prev_x),
-					Map::coord2block_coord(prev_y),
-					Map::coord2block_coord(prev_z),
-					m_curr_block
-				);
-				break;
-			}
-		}
-
-		prev_x = x; prev_y = y; prev_z = z;
-		able_create = true;
-	}
-}
-
-void Player::delete_block()
+sf::Vector3i Player::get_block_look_at_pos(sf::Vector3i* prev_pos /*= nullptr*/)
 {
 	float x = m_pos.x,
 		y = m_pos.y + 0.8f,
 		z = m_pos.z;
 
-	bool able_create = false;
+	float prev_x = x,
+		prev_y = y,
+		prev_z = z;
 
-	auto dist = [&]()->float { return std::sqrt((m_pos.x - x)*(m_pos.x - x) + (m_pos.y - y)*(m_pos.y - y) + (m_pos.y - y)*(m_pos.y - y)); };
+	auto dist = [&]()->float { return std::sqrt((m_pos.x - x)*(m_pos.x - x) + (m_pos.y - y)*(m_pos.y - y) + (m_pos.z - z)*(m_pos.z - z)); };
 	while (dist() < 6) {
-		x += -sinf(m_camera_angle.x / 180 * PI)/20.F;
-		y += tanf(m_camera_angle.y / 180 * PI)/20.F;
-		z += -cosf(m_camera_angle.x / 180 * PI)/20.F;
-		if (!m_map->is_air(
-			Map::coord2block_coord(x),
-			Map::coord2block_coord(y),
-			Map::coord2block_coord(z)) &&
+		x += -sinf(m_camera_angle.x / 180 * PI) / 100.F;
+		y += tanf(m_camera_angle.y / 180 * PI) / 100.F;
+		z += -cosf(m_camera_angle.x / 180 * PI) / 100.F;
 
-			!m_map->is_water(
-			Map::coord2block_coord(x),
-			Map::coord2block_coord(y),
-			Map::coord2block_coord(z))
-			) {
-			m_map->delete_block(
+		if (!m_map->is_air(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z)) &&
+			!m_map->is_water(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z)))
+		{
+			if (prev_pos != nullptr) {
+				*prev_pos = {
+					Map::coord2block_coord(prev_x),
+					Map::coord2block_coord(prev_y),
+					Map::coord2block_coord(prev_z)
+				};
+			}
+
+			return {
 				Map::coord2block_coord(x),
 				Map::coord2block_coord(y),
 				Map::coord2block_coord(z)
+			};
+		}
+
+		prev_x = x; prev_y = y; prev_z = z;
+	}
+
+	return { -1,-1,-1 };
+}
+
+void Player::put_block()
+{
+	sf::Vector3i prev_pos;
+	sf::Vector3i pos = get_block_look_at_pos(&prev_pos);
+
+	if (pos.y != -1) {
+		bool able_create = true;
+		// is we in this block
+		for (int matrix_x = Map::coord2block_coord(m_pos.x - m_size.x); matrix_x < m_pos.x + m_size.x; matrix_x++) {
+			for (int matrix_y = Map::coord2block_coord(m_pos.y - m_size.y); matrix_y < m_pos.y + m_size.y; matrix_y++) {
+				for (int matrix_z = Map::coord2block_coord(m_pos.z - m_size.z); matrix_z < m_pos.z + m_size.z; matrix_z++) {
+
+					if (matrix_x == prev_pos.x && matrix_y == prev_pos.y && matrix_z == prev_pos.z) {
+						able_create = false;
+						break;
+					}
+				}
+			}
+		}
+
+		if (able_create) {
+			m_map->create_block(
+				prev_pos.x,
+				prev_pos.y,
+				prev_pos.z,
+				m_curr_block
 			);
-			break;
+			return;
 		}
 	}
+
+}
+
+void Player::delete_block()
+{
+	sf::Vector3i pos = get_block_look_at_pos();
+	if (pos.y != -1) {
+		m_map->delete_block(pos.x, pos.y, pos.z);
+	}
+
 }
 
 void Player::collision(float dx, float dy, float dz)
@@ -396,14 +394,21 @@ void Player::keyboard_input(sf::Event& e)
 void Player::mouse_input(sf::Event& e)
 {
 	static int curr_block_index = 0;
+	static sf::Clock mouse_timer;
 
-	if (e.type == sf::Event::MouseButtonReleased) {
-		if (e.key.code == sf::Mouse::Right) {
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+		if (mouse_timer.getElapsedTime().asMilliseconds() > 300) {
 			put_block();
-		} else if (e.key.code == sf::Mouse::Left) {
-			delete_block();
+			mouse_timer.restart();
 		}
-	} else if (e.type == sf::Event::MouseWheelMoved) {
+	}
+	else if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+		if (mouse_timer.getElapsedTime().asMilliseconds() > 250) {
+			delete_block();
+			mouse_timer.restart();
+		}
+	}
+	else if (e.type == sf::Event::MouseWheelMoved) {
 		// todo
 		if (curr_block_index + e.mouseWheel.delta >= (int)m_inventory.size()) { 
 			m_curr_block = m_inventory[0].first;

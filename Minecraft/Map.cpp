@@ -22,6 +22,14 @@ Map::Map() : m_terrain_generator(this)
 	}
 }
 
+World::Map::~Map()
+{
+	for (auto& e : m_global_vao_vbo_buffers) {
+		glDeleteVertexArrays(1, &e.VAO);
+		glDeleteBuffers(1, &e.VBO);
+	}
+}
+
 inline void World::Map::generate_chunk_terrain(Column& column, int chunk_x, int chunk_y, int chunk_z)
 {
 	m_terrain_generator.generate_chunk_terrain(column, chunk_x, chunk_y, chunk_z);
@@ -167,6 +175,13 @@ bool Map::create_block(int x, int y, int z, block_id id)
 			chunk.set_block_type(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z, id);
 
 			m_should_redraw_chunk = true;
+
+			static sf::Sound sound;
+			sound.stop();
+			sound.setVolume(50.f);
+			sound.setBuffer(m_sounds.m_sound_buffers[Sounds::SoundsNames::wood1]);
+			sound.play();
+
 			return true;
 		}
 		else {
@@ -223,6 +238,12 @@ bool Map::delete_block(int x, int y, int z)
 			m_edited_chunk = &chunk;
 			m_edited_block_type = block_id::Air;
 			chunk.set_block_type(block_in_chunk_x, block_in_chunk_y, block_in_chunk_z, block_id::Air);//block_id::transperent_type
+
+			static sf::Sound sound;
+			sound.stop();
+			sound.setVolume(50.f);
+			sound.setBuffer(m_sounds.m_sound_buffers[Sounds::SoundsNames::wood4]);
+			sound.play();
 
 			m_should_redraw_chunk = true;
 			return true;

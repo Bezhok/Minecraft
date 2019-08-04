@@ -103,7 +103,7 @@ void MapMeshBuilder::generate_verticies()
 			(*it)->update_vertices(m_mutex__chunks4vbo_generation);
 			float time = verticies_gen_timer.getElapsedTime().asMicroseconds() / 1000.0f;
 			int faces_count = (*it)->m_blocks_mesh.get_current_faces_count();
-			std::cout << std::setw(9) << time << "ms - " << std::setw(4) << faces_count << " faces" << std::endl;
+			//std::cout << std::setw(9) << time << "ms - " << std::setw(4) << faces_count << " faces" << std::endl;
 			inftest += time;
 
 			m_mutex__chunks4vbo_generation.lock();
@@ -111,13 +111,13 @@ void MapMeshBuilder::generate_verticies()
 			m_mutex__chunks4vbo_generation.unlock();
 		}
 
-		std::cout << "verticies generation time " << inftest << std::endl;
+		//std::cout << "verticies generation time " << inftest << std::endl;
 
 		//second_thread.wait();
 
 		m_chunks4verticies_generation.clear();
 
-		std::cout << "thread loop time " << loop_timer.getElapsedTime().asMilliseconds() << std::endl << std::endl;
+		//std::cout << "thread loop time " << loop_timer.getElapsedTime().asMilliseconds() << std::endl << std::endl;
 	}
 }
 
@@ -251,7 +251,7 @@ void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
 
-	static const float SPHERE_DIAMETER = sqrtf(3.f);
+	static const float SPHERE_DIAMETER = sqrtf(3.f*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK);
 	static const int VISIBLE_COLUMNS_PER_LOOP = 20;
 	int visible_columns_count = 0;
 	auto add2verticies_generation = [&](int i, int k) {

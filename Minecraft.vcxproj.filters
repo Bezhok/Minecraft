@@ -84,6 +84,9 @@
     <ClCompile Include="Minecraft\ChunkMeshBasic.cpp">
       <Filter>Исходные файлы\World</Filter>
     </ClCompile>
+    <ClCompile Include="Minecraft\Sounds.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minecraft\App.h">
@@ -140,6 +143,9 @@
     <ClInclude Include="Minecraft\ChunkMeshBasic.h">
       <Filter>Файлы заголовков\World</Filter>
     </ClInclude>
+    <ClInclude Include="Minecraft\Sounds.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\atlas.png">
@@ -151,6 +157,12 @@
       <Filter>Файлы ресурсов\Shaders</Filter>
     </None>
     <None Include="shaders\shader.vert.glsl">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+    <None Include="shaders\block_wrapper.frag.glsl">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+    <None Include="shaders\block_wrapper.vert.glsl">
       <Filter>Файлы ресурсов\Shaders</Filter>
     </None>
   </ItemGroup>

@@ -46,8 +46,11 @@ public:
 	void flight_off();
 	bool m_is_in_water = false;
 	bool m_is_under_water = false;
+
 	/* getters */
 	const auto& get_inventory() { return m_inventory; };
+
+	sf::Vector3i get_block_look_at_pos(sf::Vector3i* prev_pos = nullptr);
 private:
 	void collision(float dx, float dy, float dz);
 	void put_block();

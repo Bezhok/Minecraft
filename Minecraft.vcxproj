@@ -146,6 +146,7 @@
     <ClCompile Include="Minecraft\Player.cpp" />
     <ClCompile Include="Minecraft\Renderer.cpp" />
     <ClCompile Include="Minecraft\Map.cpp" />
+    <ClCompile Include="Minecraft\Sounds.cpp" />
     <ClCompile Include="Minecraft\TerrainGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -166,12 +167,15 @@
     <ClInclude Include="Minecraft\Player.h" />
     <ClInclude Include="Minecraft\Renderer.h" />
     <ClInclude Include="Minecraft\Map.h" />
+    <ClInclude Include="Minecraft\Sounds.h" />
     <ClInclude Include="Minecraft\TerrainGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\atlas.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\block_wrapper.frag.glsl" />
+    <None Include="shaders\block_wrapper.vert.glsl" />
     <None Include="shaders\shader.frag.glsl" />
     <None Include="shaders\shader.vert.glsl" />
   </ItemGroup>
