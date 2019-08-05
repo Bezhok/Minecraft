@@ -34,6 +34,7 @@ namespace World {
 		void unload_columns(RenderRange& range);
 
 	public:
+		void wait() { m_verticies_generator_thread.wait(); };
 		void generate_verticies();
 		void add_new_chunks2rendering();
 		void regenerate_edited_chunk_verticies();

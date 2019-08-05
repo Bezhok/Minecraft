@@ -65,86 +65,6 @@ void Renderer::draw_SFML(const sf::Drawable& drawable)
 	m_SFML.push(&drawable);
 }
 
-void Renderer::draw_wrapper(sf::Vector3i& pos, glm::mat4& projection, glm::mat4& view)
-{
-	float mat[] = {
-		1.f, 0, 0, 0,
-		0, 1.f, 0, 0,
-		0, 0, 1.f, 0,
-		0, 0, 0, 1.f,
-	};
-
-	glLineWidth(4);
-
-	sf::Shader::bind(&m_wrapper_shader);
-	m_wrapper_shader.setUniform("view", sf::Glsl::Mat4(glm::value_ptr(view)));
-	m_wrapper_shader.setUniform("projection", sf::Glsl::Mat4(glm::value_ptr(projection)));
-
-	GLint model_location = glGetUniformLocation(m_wrapper_shader.getNativeHandle(), "model");
-
-	sf::Vector3i bpos = {
-		Map::coord2block_coord_in_chunk(pos.x),
-		Map::coord2block_coord_in_chunk(pos.y),
-		Map::coord2block_coord_in_chunk(pos.z)
-	};
-
-	float m = 0.005f;
-	float p = 1 + m;
-	GLfloat wrapper_verticies[] = {
-		bpos.x - m, bpos.y + p, bpos.z - m,
-		bpos.x + p, bpos.y + p, bpos.z - m,
-		bpos.x + p, bpos.y + p, bpos.z + p,
-		bpos.x - m, bpos.y + p, bpos.z + p,
-		bpos.x - m, bpos.y + p, bpos.z - m,
-
-		bpos.x - m, bpos.y - m, bpos.z - m,
-		bpos.x + p, bpos.y - m, bpos.z - m,
-		bpos.x + p, bpos.y - m, bpos.z + p,
-		bpos.x - m, bpos.y - m, bpos.z + p,
-		bpos.x - m, bpos.y - m, bpos.z - m,
-
-		bpos.x + p, bpos.y - m, bpos.z - m,
-		bpos.x + p, bpos.y + p, bpos.z - m,
-		bpos.x + p, bpos.y + p, bpos.z + p,
-		bpos.x + p, bpos.y - m, bpos.z + p,
-		bpos.x + p, bpos.y - m, bpos.z - m,
-
-		bpos.x - m, bpos.y - m, bpos.z - m,
-		bpos.x - m, bpos.y + p, bpos.z - m,
-		bpos.x - m, bpos.y + p, bpos.z + p,
-		bpos.x - m, bpos.y - m, bpos.z + p,
-		bpos.x - m, bpos.y - m, bpos.z - m
-	};
-
-
-	glBindVertexArray(m_wrapper_VAO);
-	/**/
-
-	glBindBuffer(GL_ARRAY_BUFFER, m_wrapper_VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(wrapper_verticies), wrapper_verticies, GL_STATIC_DRAW); //GL_DYNAMIC_DRAW GL_STATIC_DRAW GL_STREAM_DRAW
-
-	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GL_FLOAT), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-
-	/**/
-	glBindVertexArray(0); // Unbind VAO
-
-
-	mat[12] = static_cast<float>(Map::coord2chunk_coord(pos.x) * BLOCKS_IN_CHUNK);
-	mat[13] = static_cast<float>(Map::coord2chunk_coord(pos.y) * BLOCKS_IN_CHUNK);
-	mat[14] = static_cast<float>(Map::coord2chunk_coord(pos.z) * BLOCKS_IN_CHUNK);
-
-	glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
-
-	glBindVertexArray(m_wrapper_VAO);
-	glDrawArrays(GL_LINE_STRIP, 0, 20);
-	glBindVertexArray(0);
-
-
-	glLineWidth(1);
-}
-
 void Renderer::finish_render(sf::RenderWindow& window, Player& player, phmap::parallel_node_hash_set<World::Chunk*>& m_chunks4rendering, sf::Mutex& mutex_chunks4rendering)
 {
 	glClearColor(0.57f, 0.73f, 0.99f, 0.0f);
@@ -239,4 +159,84 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, phmap::pa
 	window.popGLStates();
 
 	window.display();
+}
+
+void Renderer::draw_wrapper(sf::Vector3i& pos, glm::mat4& projection, glm::mat4& view)
+{
+	float mat[] = {
+		1.f, 0, 0, 0,
+		0, 1.f, 0, 0,
+		0, 0, 1.f, 0,
+		0, 0, 0, 1.f,
+	};
+
+	glLineWidth(4);
+
+	sf::Shader::bind(&m_wrapper_shader);
+	m_wrapper_shader.setUniform("view", sf::Glsl::Mat4(glm::value_ptr(view)));
+	m_wrapper_shader.setUniform("projection", sf::Glsl::Mat4(glm::value_ptr(projection)));
+
+	GLint model_location = glGetUniformLocation(m_wrapper_shader.getNativeHandle(), "model");
+
+	sf::Vector3i bpos = {
+		Map::coord2block_coord_in_chunk(pos.x),
+		Map::coord2block_coord_in_chunk(pos.y),
+		Map::coord2block_coord_in_chunk(pos.z)
+	};
+
+	float m = 0.005f;
+	float p = 1 + m;
+	GLfloat wrapper_verticies[] = {
+		bpos.x - m, bpos.y + p, bpos.z - m,
+		bpos.x + p, bpos.y + p, bpos.z - m,
+		bpos.x + p, bpos.y + p, bpos.z + p,
+		bpos.x - m, bpos.y + p, bpos.z + p,
+		bpos.x - m, bpos.y + p, bpos.z - m,
+
+		bpos.x - m, bpos.y - m, bpos.z - m,
+		bpos.x + p, bpos.y - m, bpos.z - m,
+		bpos.x + p, bpos.y - m, bpos.z + p,
+		bpos.x - m, bpos.y - m, bpos.z + p,
+		bpos.x - m, bpos.y - m, bpos.z - m,
+
+		bpos.x + p, bpos.y - m, bpos.z - m,
+		bpos.x + p, bpos.y + p, bpos.z - m,
+		bpos.x + p, bpos.y + p, bpos.z + p,
+		bpos.x + p, bpos.y - m, bpos.z + p,
+		bpos.x + p, bpos.y - m, bpos.z - m,
+
+		bpos.x - m, bpos.y - m, bpos.z - m,
+		bpos.x - m, bpos.y + p, bpos.z - m,
+		bpos.x - m, bpos.y + p, bpos.z + p,
+		bpos.x - m, bpos.y - m, bpos.z + p,
+		bpos.x - m, bpos.y - m, bpos.z - m
+	};
+
+
+	glBindVertexArray(m_wrapper_VAO);
+	/**/
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_wrapper_VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(wrapper_verticies), wrapper_verticies, GL_STATIC_DRAW); //GL_DYNAMIC_DRAW GL_STATIC_DRAW GL_STREAM_DRAW
+
+	// Position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GL_FLOAT), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+
+	/**/
+	glBindVertexArray(0); // Unbind VAO
+
+
+	mat[12] = static_cast<float>(Map::coord2chunk_coord(pos.x) * BLOCKS_IN_CHUNK);
+	mat[13] = static_cast<float>(Map::coord2chunk_coord(pos.y) * BLOCKS_IN_CHUNK);
+	mat[14] = static_cast<float>(Map::coord2chunk_coord(pos.z) * BLOCKS_IN_CHUNK);
+
+	glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
+
+	glBindVertexArray(m_wrapper_VAO);
+	glDrawArrays(GL_LINE_STRIP, 0, 20);
+	glBindVertexArray(0);
+
+
+	glLineWidth(1);
 }

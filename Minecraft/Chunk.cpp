@@ -34,24 +34,25 @@ void Chunk::generate_vertices()
 
 					if (!is_air__in_chunk(i, j, k)) {
 						// local(in chunk) pos
-						//TODO dirty hack))
 
-						uint8_t x = static_cast<uint8_t>(i)*divider;
-						uint8_t y = static_cast<uint8_t>(j)*divider;
-						uint8_t z = static_cast<uint8_t>(k)*divider;
+						VertexType x = static_cast<VertexType>(i);
+						VertexType y = static_cast<VertexType>(j);
+						VertexType z = static_cast<VertexType>(k);
 
+						static VertexType side = 1;
+						static VertexType pixel = 1.005/BLOCK_RESOLUTION;
 						block_id id = get_block_type(i, j, k);
 
 
 						if (id == block_id::Cactus) {
-							m_blocks_mesh.generate_verticies4negative_x(x + 1, y, z, id, side);
-							m_blocks_mesh.generate_verticies4positive_x(x - 1, y, z, id, side);
+							m_blocks_mesh.generate_verticies4negative_x(x + pixel, y, z, id, side);
+							m_blocks_mesh.generate_verticies4positive_x(x - pixel, y, z, id, side);
 
 							m_blocks_mesh.generate_verticies4negative_y(x, y, z, id, side);
 							m_blocks_mesh.generate_verticies4positive_y(x, y, z, id, side);
 
-							m_blocks_mesh.generate_verticies4negative_z(x, y, z + 1, id, side);
-							m_blocks_mesh.generate_verticies4positive_z(x, y, z - 1, id, side);
+							m_blocks_mesh.generate_verticies4negative_z(x, y, z + pixel, id, side);
+							m_blocks_mesh.generate_verticies4positive_z(x, y, z - pixel, id, side);
 						}
 						else if (id == block_id::Water) {
 							if (!is_water__in_chunk(i - 1, j, k)) {

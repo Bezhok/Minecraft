@@ -30,12 +30,27 @@ void Player::input(sf::Event& e)
 	mouse_input(e);
 }
 
-void Player::update(float dtime)
+void Player::update(double dtime)
 {
-	static float acceleration = 2.f*m_speed;// DEFAULT_PLAYER_SPEED m_speed;
+	if (m_pos.y < -10) {
+		m_pos.y = -9;
+		//death
+	}
+	else if (m_pos.x < 10) {
+		m_pos.x = 11;
+	}
+	else if (m_pos.z < 10) {
+		m_pos.z = 11;
+	}
+	else if (m_pos.y > BLOCKS_IN_CHUNK*CHUNKS_IN_WORLD_HEIGHT + 5) {
+		m_pos.y = BLOCKS_IN_CHUNK * CHUNKS_IN_WORLD_HEIGHT + 4;
+	}
+
+
+	static double acceleration = 2.5*m_speed;// DEFAULT_PLAYER_SPEED m_speed;
 	
-	auto get_oveclocking_moving = [&](Key key) -> float {
-		float dmoving = m_speed*dtime;
+	auto get_oveclocking_moving = [&](Key key) -> double {
+		double dmoving = m_speed*dtime;
 
 		if (m_direction_speed[key] < m_speed) {
 			dmoving = m_direction_speed[key];
@@ -46,14 +61,14 @@ void Player::update(float dtime)
 			dmoving *= dtime / 2;
 		}
 		else {
-			m_direction_speed[key] = m_speed;
+			m_direction_speed[key] = m_speed+0.001;
 		}
 
 		return dmoving;
 	};
 
-	auto get_braking_moving = [&](Key key) -> float {
-		float dmoving = 0.f;
+	auto get_braking_moving = [&](Key key) -> double {
+		double dmoving = 0.f;
 		if (m_direction_speed[key] > 0) {
 			dmoving = m_direction_speed[key];
 
@@ -63,13 +78,13 @@ void Player::update(float dtime)
 			dmoving *= dtime / 2;
 		}
 		else {
-			m_direction_speed[key] = 0.f;
+			m_direction_speed[key] = 0.0;
 		}
 
 		return dmoving;
 	};
 
-	auto get_moving = [&](Key key) -> float {
+	auto get_moving = [&](Key key) -> double {
 		if (m_is_keys_pressed[key])
 		{
 			return get_oveclocking_moving(key);
@@ -79,95 +94,86 @@ void Player::update(float dtime)
 		}
 	};
 
-	m_dpos.x = 0.f;
-	m_dpos.y = 0.f;
-	m_dpos.z = 0.f;
+	m_dpos.x = 0.0;
+	m_dpos.y = 0.0;
+	m_dpos.z = 0.0;
 
 	// forward
-	float dmoving = get_moving(Key::W)*1.5f;
+	double dmoving = get_moving(Key::W);
 	m_dpos.x += -sinf(m_camera_angle.x / 180 * PI) * dmoving;
 	m_dpos.z += -cosf(m_camera_angle.x / 180 * PI) * dmoving;
 
 	// back
-	dmoving = get_moving(Key::S)*1.5f;
+	dmoving = get_moving(Key::S);
 	m_dpos.x += +sinf(m_camera_angle.x / 180 * PI) * dmoving;
 	m_dpos.z += +cosf(m_camera_angle.x / 180 * PI) * dmoving;
 	
 	// left
-	dmoving = get_moving(Key::A)*1.5f;
+	dmoving = get_moving(Key::A);
 	m_dpos.x += +sinf((m_camera_angle.x - 90) / 180 * PI) * dmoving;
 	m_dpos.z += +cosf((m_camera_angle.x - 90) / 180 * PI) * dmoving;
 
 	//rigth
-	dmoving = get_moving(Key::D)*1.5f;
+	dmoving = get_moving(Key::D);
 	m_dpos.x += +sinf((m_camera_angle.x + 90) / 180 * PI) * dmoving;
 	m_dpos.z += +cosf((m_camera_angle.x + 90) / 180 * PI) * dmoving;
 
 	// up(jump)
-	if (m_is_keys_pressed[Key::Space])
-	{
-		if (m_flying) {
-			dmoving = get_moving(Key::Space);
+	if (m_flying) {
+		dmoving = get_moving(Key::Space);
 
-			m_dpos.y += dmoving;
+		m_dpos.y += dmoving;
+		m_on_ground = false;
+	}
+	else if (m_is_keys_pressed[Key::Space]) {
+		if (m_is_in_water) {
+			m_dpos.y += 3.0 *dtime;
 			m_on_ground = false;
-		}
-		else {
-			if (m_is_in_water) {
-				m_dpos.y += 3.f *dtime;
-				m_on_ground = false;
-				m_direction_speed[Key::Space] = 2.5f;
-			} else if (m_on_ground) {
-				m_on_ground = false;
-				m_direction_speed[Key::Space] = 3.f;
-			}
+			m_direction_speed[Key::Space] = 1.5;
+		} else if (m_on_ground) {
+			m_on_ground = false;
+			m_direction_speed[Key::Space] = 9.5;
 		}
 	}
 
 	// lshift
 	dmoving = get_moving(Key::LShift);
-	if (m_is_keys_pressed[Key::LShift])
-	{
-		if (m_flying) {
-			m_dpos.y -= dmoving;
-		}
+	if (m_flying) {
+		m_dpos.y -= dmoving;
 	}
-
 
 	if (!m_flying) {
 		if (!m_on_ground) {
-			float s = m_direction_speed[Key::Space];
+			double s = m_direction_speed[Key::Space];
 
-			if (s < 50.f) {
-
-
+			if (s > -30.0) {
 				if (m_is_in_water) {
 					if (!m_is_keys_pressed[Key::Space]) {
 						m_dpos.y -= 3.f*dtime;
 					}
 				}
 				else {
-					m_direction_speed[Key::Space] -= 9.8f * dtime;
+					static double a = 3 * 9.8;
+					s = m_direction_speed[Key::Space] * dtime - a*dtime*dtime / 2.0;
+					m_dpos.y += s;
 
-					s += m_direction_speed[Key::Space];
-					s *= dtime / 2.f;
-					m_dpos.y += s*3;
+					m_direction_speed[Key::Space] -= a*dtime;
 				}
 			}
 			else {
-				m_direction_speed[Key::Space] = 50.f;
-				m_dpos.y += m_direction_speed[Key::Space];
+				m_direction_speed[Key::Space] = -31.0;
+				m_dpos.y += m_direction_speed[Key::Space] * dtime;
 			}
 
 		}
 	}
 	m_on_ground = false; //reset
 
-	m_pos.x += m_dpos.x;
-	collision(m_dpos.x, 0, 0);
-
 	m_pos.y += m_dpos.y;
 	collision(0, m_dpos.y, 0);
+
+	m_pos.x += m_dpos.x;
+	collision(m_dpos.x, 0, 0);
 
 	m_pos.z += m_dpos.z;
 	collision(0, 0, m_dpos.z);
@@ -203,12 +209,14 @@ sf::Vector3i Player::get_block_look_at_pos(sf::Vector3i* prev_pos /*= nullptr*/)
 
 	auto dist = [&]()->float { return std::sqrt((m_pos.x - x)*(m_pos.x - x) + (m_pos.y - y)*(m_pos.y - y) + (m_pos.z - z)*(m_pos.z - z)); };
 	while (dist() < 6) {
-		x += -sinf(m_camera_angle.x / 180 * PI) / 100.F;
-		y += tanf(m_camera_angle.y / 180 * PI) / 100.F;
-		z += -cosf(m_camera_angle.x / 180 * PI) / 100.F;
+		x += -sinf(m_camera_angle.x / 180 * PI) / 80.F;
+		y += tanf(m_camera_angle.y / 180 * PI) / 80.F;
+		z += -cosf(m_camera_angle.x / 180 * PI) / 80.F;
 
 		if (!m_map->is_air(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z)) &&
-			!m_map->is_water(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z)))
+			!m_map->is_water(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z)) &&
+			Map::coord2block_coord(y) >= 0 && Map::coord2block_coord(y) < BLOCKS_IN_CHUNK*CHUNKS_IN_WORLD_HEIGHT
+			)
 		{
 			if (prev_pos != nullptr) {
 				*prev_pos = {
@@ -337,8 +345,9 @@ void Player::keyboard_input(sf::Event& e)
 			break;
 		case sf::Keyboard::Space:
 			m_is_keys_pressed[Key::Space] = true;
-			m_direction_speed[Key::Space] = start_direction_speed;
-
+			if (m_flying) {
+				m_direction_speed[Key::Space] = start_direction_speed;
+			}
 			break;
 		case sf::Keyboard::LShift:
 			m_is_keys_pressed[Key::LShift] = true;

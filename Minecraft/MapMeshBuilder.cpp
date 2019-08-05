@@ -69,11 +69,11 @@ void MapMeshBuilder::generate_verticies()
 		range.chunk_x = Map::coord2chunk_coord(m_player->get_position().x);
 		range.chunk_z = Map::coord2chunk_coord(m_player->get_position().z);
 
-		range.start_x = range.chunk_x - RENDER_DISTANCE_CHUNKS / 2;
-		range.start_z = range.chunk_z - RENDER_DISTANCE_CHUNKS / 2;
+		range.start_x = range.chunk_x - RENDER_DISTANCE_IN_CHUNKS / 2;
+		range.start_z = range.chunk_z - RENDER_DISTANCE_IN_CHUNKS / 2;
 
-		range.end_x = range.chunk_x + RENDER_DISTANCE_CHUNKS / 2;
-		range.end_z = range.chunk_z + RENDER_DISTANCE_CHUNKS / 2;
+		range.end_x = range.chunk_x + RENDER_DISTANCE_IN_CHUNKS / 2;
+		range.end_z = range.chunk_z + RENDER_DISTANCE_IN_CHUNKS / 2;
 
 		//RenderRange terrain_generation_range = range;
 
@@ -250,14 +250,17 @@ void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 		),
 		glm::vec3(0.0f, 1.0f, 0.0f)
 	);
+	glm::mat4 pv = projection * view;
 
 	static const float SPHERE_DIAMETER = sqrtf(3.f*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK);
 	static const int VISIBLE_COLUMNS_PER_LOOP = 20;
 	int visible_columns_count = 0;
+
+	
 	auto add2verticies_generation = [&](int i, int k) {
 		if (i >= 0 && k >= 0) {
 			for (int j = 0; j < CHUNKS_IN_WORLD_HEIGHT; ++j) {
-				glm::vec4 norm_coords = (projection * view) * glm::vec4(i * BLOCKS_IN_CHUNK, j * BLOCKS_IN_CHUNK, k * BLOCKS_IN_CHUNK, 1.F);
+				glm::vec4 norm_coords = pv * glm::vec4(i * BLOCKS_IN_CHUNK, j * BLOCKS_IN_CHUNK, k * BLOCKS_IN_CHUNK, 1.F);
 				norm_coords.x /= norm_coords.w;
 				norm_coords.y /= norm_coords.w;
 

@@ -8,7 +8,7 @@
 using namespace World;
 
 
-inline void ChunkMeshBasic::add_byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w)
+inline void ChunkMeshBasic::add_byte4(VertexType x, VertexType y, VertexType z, VertexType w)
 {
 	m_vertices[m_i++] = x; m_vertices[m_i++] = y; m_vertices[m_i++] = z; m_vertices[m_i++] = w;
 	m_i += 2;
@@ -39,14 +39,14 @@ void ChunkMeshBasic::upate_vao()
 			/**/
 
 			glBindBuffer(GL_ARRAY_BUFFER, m_buffers.VBO);
-			glBufferData(GL_ARRAY_BUFFER, m_i * sizeof(GLbyte), m_vertices, GL_STATIC_DRAW); //GL_DYNAMIC_DRAW GL_STATIC_DRAW
+			glBufferData(GL_ARRAY_BUFFER, m_i * sizeof(VertexType), m_vertices, GL_STATIC_DRAW); //GL_DYNAMIC_DRAW GL_STATIC_DRAW
 
 			// Position attribute
-			glVertexAttribPointer(0, 4, GL_UNSIGNED_BYTE, GL_FALSE, 6 * sizeof(GLbyte), (GLvoid*)0);
+			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(VertexType), (GLvoid*)0);
 			glEnableVertexAttribArray(0);
 
 			// TexCoord attribute
-			glVertexAttribPointer(1, 2, GL_BYTE, GL_FALSE, 6 * sizeof(GLbyte), (GLvoid*)(4 * sizeof(GLbyte)));
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(VertexType), (GLvoid*)(4 * sizeof(VertexType)));
 			glEnableVertexAttribArray(1);
 
 			/**/
@@ -80,7 +80,7 @@ void ChunkMeshBasic::update_vertices_using_old_buffers()
 	}
 
 	m_i = 0;
-	m_vertices = new GLbyte[BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK * 36 * 6];
+	m_vertices = new VertexType[BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK * 36 * 6];
 	m_is_vertices_created = true;
 	++verticies_wasnt_free;
 }
@@ -93,6 +93,7 @@ void World::ChunkMeshBasic::free_buffers(Map* map)
 	}
 }
 
+//TODO divide by BLOCK_RESOLUTION
 void ChunkMeshBasic::bind_texture_first_order(block_id id, const sf::Vector2i& p)
 {
 	m_vertices[m_i + 4] = p.x; m_vertices[m_i + 5] = (p.y + 1);
@@ -138,7 +139,7 @@ inline void ChunkMeshBasic::bind_texture2positive_z(block_id id) {
 	bind_texture_first_order(id, DB::s_atlas_db(id, sides::positive_z));
 }
 
-void World::ChunkMeshBasic::generate_verticies4positive_x(uint8_t x, uint8_t y, uint8_t z, block_id id, uint8_t side)
+void World::ChunkMeshBasic::generate_verticies4positive_x(VertexType x, VertexType y, VertexType z, block_id id, VertexType side)
 {
 	bind_texture2positive_x(id);
 	add_byte4(x + BS, y, z, side);
@@ -149,7 +150,7 @@ void World::ChunkMeshBasic::generate_verticies4positive_x(uint8_t x, uint8_t y, 
 	add_byte4(x + BS, y, z + BS, side);
 }
 
-void World::ChunkMeshBasic::generate_verticies4negative_x(uint8_t x, uint8_t y, uint8_t z, block_id id, uint8_t side)
+void World::ChunkMeshBasic::generate_verticies4negative_x(VertexType x, VertexType y, VertexType z, block_id id, VertexType side)
 {
 	bind_texture2negative_x(id);
 	add_byte4(x, y, z, side);
@@ -160,7 +161,7 @@ void World::ChunkMeshBasic::generate_verticies4negative_x(uint8_t x, uint8_t y, 
 	add_byte4(x, y + BS, z + BS, side);
 }
 
-void World::ChunkMeshBasic::generate_verticies4negative_y(uint8_t x, uint8_t y, uint8_t z, block_id id, uint8_t side)
+void World::ChunkMeshBasic::generate_verticies4negative_y(VertexType x, VertexType y, VertexType z, block_id id, VertexType side)
 {
 	bind_texture2negative_y(id);
 	add_byte4(x, y, z, side);
@@ -171,7 +172,7 @@ void World::ChunkMeshBasic::generate_verticies4negative_y(uint8_t x, uint8_t y, 
 	add_byte4(x, y, z + BS, side);
 }
 
-void World::ChunkMeshBasic::generate_verticies4positive_y(uint8_t x, uint8_t y, uint8_t z, block_id id, uint8_t side)
+void World::ChunkMeshBasic::generate_verticies4positive_y(VertexType x, VertexType y, VertexType z, block_id id, VertexType side)
 {
 	bind_texture2positive_y(id);
 	add_byte4(x, y + BS, z, 0);
@@ -182,7 +183,7 @@ void World::ChunkMeshBasic::generate_verticies4positive_y(uint8_t x, uint8_t y, 
 	add_byte4(x + BS, y + BS, z + BS, 0);
 }
 
-void World::ChunkMeshBasic::generate_verticies4negative_z(uint8_t x, uint8_t y, uint8_t z, block_id id, uint8_t side)
+void World::ChunkMeshBasic::generate_verticies4negative_z(VertexType x, VertexType y, VertexType z, block_id id, VertexType side)
 {
 	bind_texture2negative_z(id);
 	add_byte4(x, y, z, side);
@@ -193,7 +194,7 @@ void World::ChunkMeshBasic::generate_verticies4negative_z(uint8_t x, uint8_t y, 
 	add_byte4(x + BS, y, z, side);
 }
 
- void World::ChunkMeshBasic::generate_verticies4positive_z(uint8_t x, uint8_t y, uint8_t z, block_id id, uint8_t side)
+ void World::ChunkMeshBasic::generate_verticies4positive_z(VertexType x, VertexType y, VertexType z, block_id id, VertexType side)
 {
 	bind_texture2positive_z(id);
 	add_byte4(x, y, z + BS, side);

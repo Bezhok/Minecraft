@@ -111,6 +111,8 @@ void App::run()
 			m_debug_data.count();
 		}
 	}
+
+	m_map_mesh_builder.wait();
 }
 
 void App::handle_events()
@@ -153,7 +155,9 @@ void App::input()
 			switch (event.key.code)
 			{
 			case sf::Keyboard::Escape:
+				m_window.setMouseCursorVisible(m_should_fix_cursor);
 				m_should_fix_cursor = !m_should_fix_cursor;
+
 				break;
 			case sf::Keyboard::F3:
 				m_should_display_debug_info = !m_should_display_debug_info;

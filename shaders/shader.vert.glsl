@@ -13,8 +13,6 @@ void main()
 {
 	position = loc_position;
 
-	position /= 15;
-
     gl_Position = projection * view * model * vec4(position.xyz, 1.0f);
-    tex_coord = vec2(loc_tex_coord.x/16.0f, 1-loc_tex_coord.y/16.0f); // 16 blocks in x and blocks in y
+    tex_coord = vec2(loc_tex_coord.x/16.0f, 1-loc_tex_coord.y/16.0f); // TODO should get this data: 16 blocks in x and 16 blocks in y
 } 

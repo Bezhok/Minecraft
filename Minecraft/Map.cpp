@@ -9,7 +9,7 @@ using namespace World;
 
 Map::Map() : m_terrain_generator(this)
 {
-	int chunks_count = RENDER_DISTANCE_CHUNKS * RENDER_DISTANCE_CHUNKS * CHUNKS_IN_WORLD_HEIGHT*2;
+	int chunks_count = RENDER_DISTANCE_IN_CHUNKS * RENDER_DISTANCE_IN_CHUNKS * CHUNKS_IN_WORLD_HEIGHT*2;
 
 	m_should_be_updated_neighbours.reserve(6);
 
@@ -178,7 +178,6 @@ bool Map::create_block(int x, int y, int z, block_id id)
 
 			static sf::Sound sound;
 			sound.stop();
-			sound.setVolume(50.f);
 			sound.setBuffer(m_sounds.m_sound_buffers[Sounds::SoundsNames::wood1]);
 			sound.play();
 
@@ -241,7 +240,6 @@ bool Map::delete_block(int x, int y, int z)
 
 			static sf::Sound sound;
 			sound.stop();
-			sound.setVolume(50.f);
 			sound.setBuffer(m_sounds.m_sound_buffers[Sounds::SoundsNames::wood4]);
 			sound.play();
 
