@@ -20,21 +20,20 @@ ChunkMeshBasic::~ChunkMeshBasic()
 		delete[] m_vertices;
 		--verticies_wasnt_free;
 	}
-
-	if (m_buffers.VAO != 0) {
-		glDeleteVertexArrays(1, &m_buffers.VAO);
-	}
-	if (m_buffers.VBO != 0) {
-		glDeleteBuffers(1, &m_buffers.VBO);
-	}
 }
 
 void ChunkMeshBasic::upate_vao()
 {
 	if (m_is_vertices_created) {
-		m_old_i = m_i;
+		m_old_i = m_i;// = 0;
 
 		if (m_i > 0) {
+
+			if (get_VAO() == 0) {
+				glGenVertexArrays(1, &m_buffers.VAO);
+				glGenBuffers(1, &m_buffers.VBO);
+			}
+
 			glBindVertexArray(m_buffers.VAO);
 			/**/
 
@@ -59,20 +58,7 @@ void ChunkMeshBasic::upate_vao()
 	}
 }
 
-void ChunkMeshBasic::update_vertices(sf::Mutex& mutex__for_vbo_generation, Map* map)
-{
-	update_vertices_using_old_buffers();
-
-	//mutex__for_vbo_generation.lock();
-
-	assert(!map->m_global_vao_vbo_buffers.empty());
-	m_buffers = map->m_global_vao_vbo_buffers.back();
-	map->m_global_vao_vbo_buffers.pop_back();
-
-	//mutex__for_vbo_generation.unlock();
-}
-
-void ChunkMeshBasic::update_vertices_using_old_buffers()
+void ChunkMeshBasic::update_vertices()
 {
 	if (m_is_vertices_created) {
 		delete[] m_vertices;
@@ -87,8 +73,8 @@ void ChunkMeshBasic::update_vertices_using_old_buffers()
 
 void World::ChunkMeshBasic::free_buffers(Map* map)
 {
-	if (get_VAO()) {
-		map->m_global_vao_vbo_buffers.push_back(get_buffers());
+	if (get_VAO()!=0) {
+		map->m_should_be_freed_buffers.push_back(get_buffers());
 		m_buffers = Buffers();
 	}
 }

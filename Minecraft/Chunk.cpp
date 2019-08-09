@@ -55,27 +55,27 @@ void Chunk::generate_vertices()
 							m_blocks_mesh.generate_verticies4positive_z(x, y, z - pixel, id, side);
 						}
 						else if (id == block_id::Water) {
-							if (!is_water__in_chunk(i - 1, j, k)) {
+							if (!is_water__in_chunk(i - 1, j, k) && !is_opaque__in_chunk(i - 1, j, k)) {
 								m_water_mesh.generate_verticies4negative_x(x, y, z, id, side);
 							}
 
-							if (!is_water__in_chunk(i + 1, j, k)) {
+							if (!is_water__in_chunk(i + 1, j, k) && !is_opaque__in_chunk(i + 1, j, k)) {
 								m_water_mesh.generate_verticies4positive_x(x, y, z, id, side);
 							}
 
-							if (!is_water__in_chunk(i, j - 1, k)) {
+							if (!is_water__in_chunk(i, j - 1, k) && !is_opaque__in_chunk(i, j - 1, k)) {
 								m_water_mesh.generate_verticies4negative_y(x, y, z, id, side);
 							}
 
-							if (!is_water__in_chunk(i, j + 1, k)) {
+							if (!is_water__in_chunk(i, j + 1, k) && !is_opaque__in_chunk(i, j + 1, k)) {
 								m_water_mesh.generate_verticies4positive_y(x, y, z, id, side);
 							}
 
-							if (!is_water__in_chunk(i, j, k - 1)) {
+							if (!is_water__in_chunk(i, j, k - 1) && !is_opaque__in_chunk(i, j, k - 1)) {
 								m_water_mesh.generate_verticies4negative_z(x, y, z, id, side);
 							}
 
-							if (!is_water__in_chunk(i, j, k + 1)) {
+							if (!is_water__in_chunk(i, j, k + 1) && !is_opaque__in_chunk(i, j, k + 1)) {
 								m_water_mesh.generate_verticies4positive_z(x, y, z, id, side);
 							}
 						}
@@ -116,25 +116,16 @@ void World::Chunk::upate_vao()
 	m_is_blocked_verticies_generation = false;
 }
 
-void World::Chunk::update_vertices(sf::Mutex & mutex__for_vbo_generation)
+void World::Chunk::update_vertices()
 {
 	if (!m_is_blocked_verticies_generation) {
 		m_is_blocked_verticies_generation = true;
-		m_blocks_mesh.update_vertices(mutex__for_vbo_generation, m_map);
-		m_water_mesh.update_vertices(mutex__for_vbo_generation, m_map);
+		m_blocks_mesh.update_vertices();
+		m_water_mesh.update_vertices();
 		generate_vertices();
 	}
 }
 
-void World::Chunk::update_vertices_using_old_buffers()
-{
-	if (!m_is_blocked_verticies_generation) {
-		m_is_blocked_verticies_generation = true;
-		m_blocks_mesh.update_vertices_using_old_buffers();
-		m_water_mesh.update_vertices_using_old_buffers();
-		generate_vertices();
-	}
-}
 
 void World::Chunk::free_buffers()
 {
@@ -266,7 +257,7 @@ void Chunk::ChunkLayer::update(block_id type)
 
 bool World::Chunk::is_block_type_transperent(block_id type)
 {
-	return type == block_id::Air || type == block_id::Cactus  || type == block_id::Water || type == block_id::Oak_leafage;// || type == block_id::Glass; //... || type == block_id::Oak_leafage
+	return type == block_id::Air || type == block_id::Cactus  || type == block_id::Water /*|| type == block_id::Oak_leafage*/;// || type == block_id::Glass; //... || type == block_id::Oak_leafage
 }
 
 bool World::Chunk::is_block_type_solid(block_id type)

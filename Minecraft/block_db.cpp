@@ -69,7 +69,7 @@ void DB::load_blocks()
 
 	id = block_id::Oak_leafage;
 	load_block(id);
-	init_xyz(id, { 5-1, 3 });//4,3
+	init_xyz(id, { 5, 3 });//4,3
 
 	id = block_id::Water;
 	load_block(id);

@@ -34,6 +34,12 @@
     <Filter Include="Файлы ресурсов\Shaders">
       <UniqueIdentifier>{b52c6218-0de7-4fc0-b529-bedcb99ff510}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы заголовков\Biome">
+      <UniqueIdentifier>{aaa29f9e-6850-4a58-9507-4636ef88f2c7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\Biome">
+      <UniqueIdentifier>{0c26a741-b375-42ab-8ed4-fb2c16151b4f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Minecraft\App.cpp">

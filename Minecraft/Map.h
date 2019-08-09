@@ -75,7 +75,7 @@ namespace World {
 		Column& get_column_or_generate(int i, int k);
 
 
-		std::vector<Buffers> m_global_vao_vbo_buffers;
+		std::vector<Buffers> m_should_be_freed_buffers;
 
 		void set_block(sf::Vector3i pos_in_chunk, Map::Column& column, int y, block_id type);
 

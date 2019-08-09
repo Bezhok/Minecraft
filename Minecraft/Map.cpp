@@ -7,27 +7,14 @@
 using namespace World;
 
 
-Map::Map() : m_terrain_generator(this)
+Map::Map() : m_terrain_generator(this), m_should_be_updated_neighbours(6)
 {
-	int chunks_count = RENDER_DISTANCE_IN_CHUNKS * RENDER_DISTANCE_IN_CHUNKS * CHUNKS_IN_WORLD_HEIGHT*2;
-
-	m_should_be_updated_neighbours.reserve(6);
-
-	m_map.reserve(chunks_count/ CHUNKS_IN_WORLD_HEIGHT);
-	m_global_vao_vbo_buffers.resize(chunks_count);
-
-	for (auto& e : m_global_vao_vbo_buffers) {
-		glGenVertexArrays(1, &e.VAO);
-		glGenBuffers(1, &e.VBO);
-	}
+	int columns_count = RENDER_DISTANCE_IN_CHUNKS * RENDER_DISTANCE_IN_CHUNKS*2;
+	m_map.reserve(columns_count);
 }
 
 World::Map::~Map()
 {
-	for (auto& e : m_global_vao_vbo_buffers) {
-		glDeleteVertexArrays(1, &e.VAO);
-		glDeleteBuffers(1, &e.VBO);
-	}
 }
 
 inline void World::Map::generate_chunk_terrain(Column& column, int chunk_x, int chunk_y, int chunk_z)
@@ -322,6 +309,10 @@ void Map::unload_columns(int start_x, int end_x, int start_z, int end_z)
 		auto& column = it->second;
 		auto& pos = column[0].get_pos();
 		if (pos.x < start_x || pos.z < start_z || pos.x > end_x || pos.z > end_z) {
+			for (int i = 0; i < CHUNKS_IN_WORLD_HEIGHT; ++i) {
+				column[i].free_buffers();
+			}
+
 			it = m_map.erase(it);
 		}
 		else {

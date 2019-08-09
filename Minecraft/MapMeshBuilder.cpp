@@ -40,25 +40,28 @@ void World::MapMeshBuilder::launch(Map* map, Player* player, sf::Window* window)
 	m_verticies_generator_thread.launch();
 }
 
+void World::MapMeshBuilder::wait()
+{
+	m_verticies_generator_thread.wait();
+	for (Chunk* chunk : m_chunks4rendering) {
+		chunk->free_buffers();
+	}
+	m_chunks4rendering.clear();
+
+	for (auto& e : m_map->m_should_be_freed_buffers) {
+		glDeleteVertexArrays(1, &e.VAO);
+		glDeleteBuffers(1, &e.VBO);
+	}
+	m_map->m_should_be_freed_buffers.clear();
+}
+
 void MapMeshBuilder::generate_verticies()
 {
-	int center_index;
+
 	sf::Clock verticies_gen_timer;
 	sf::Clock loop_timer;
 
 	RenderRange range;
-
-	sf::Thread second_thread([&]() {
-		auto end = m_chunks4verticies_generation.begin();
-		advance(end, center_index);
-
-		for (auto it = m_chunks4verticies_generation.begin(); it != end; ++it) {
-			(*it)->update_vertices(m_mutex__chunks4vbo_generation);
-			m_mutex__chunks4vbo_generation.lock();
-			m_chunks4vbo_generation.push_back(*it);
-			m_mutex__chunks4vbo_generation.unlock();
-		}
-	});
 
 
 	while (m_window->isOpen()) {
@@ -75,32 +78,17 @@ void MapMeshBuilder::generate_verticies()
 		range.end_x = range.chunk_x + RENDER_DISTANCE_IN_CHUNKS / 2;
 		range.end_z = range.chunk_z + RENDER_DISTANCE_IN_CHUNKS / 2;
 
-		//RenderRange terrain_generation_range = range;
-
-		//terrain_generation_range.end_x += 3;
-		//terrain_generation_range.end_z += 3;
-
-		//terrain_generation_range.start_x -= 3;
-		//terrain_generation_range.start_z -= 3;
-
 
 		unload_columns(range);
 		add_chunks2verticies_generation(range);
 
 
-		size_t order_size = m_chunks4verticies_generation.size();
-		center_index = order_size / 2;
-
-		//second_thread.launch();
-
-		auto it = m_chunks4verticies_generation.begin();
-		//advance(it, center_index);
 
 		float inftest = 0;
-		for (; it != m_chunks4verticies_generation.end(); ++it) {
+		for (auto it = m_chunks4verticies_generation.begin(); it != m_chunks4verticies_generation.end(); ++it) {
 
 			verticies_gen_timer.restart();
-			(*it)->update_vertices(m_mutex__chunks4vbo_generation);
+			(*it)->update_vertices();
 			float time = verticies_gen_timer.getElapsedTime().asMicroseconds() / 1000.0f;
 			int faces_count = (*it)->m_blocks_mesh.get_current_faces_count();
 			//std::cout << std::setw(9) << time << "ms - " << std::setw(4) << faces_count << " faces" << std::endl;
@@ -110,13 +98,9 @@ void MapMeshBuilder::generate_verticies()
 			m_chunks4vbo_generation.push_back(*it);
 			m_mutex__chunks4vbo_generation.unlock();
 		}
-
-		//std::cout << "verticies generation time " << inftest << std::endl;
-
-		//second_thread.wait();
-
 		m_chunks4verticies_generation.clear();
 
+		//std::cout << "verticies generation time " << inftest << std::endl;
 		//std::cout << "thread loop time " << loop_timer.getElapsedTime().asMilliseconds() << std::endl << std::endl;
 	}
 }
@@ -129,7 +113,7 @@ void MapMeshBuilder::unload_columns(RenderRange& range)
 		auto& pos = chunk.get_pos();
 		if (pos.x < range.start_x || pos.z < range.start_z || pos.x > range.end_x || pos.z > range.end_z) {
 			chunk.set_is_rendering(false);
-			chunk.free_buffers();
+			//chunk.free_buffers();
 			it = m_chunks4rendering.erase(it);
 
 		}
@@ -155,26 +139,23 @@ void MapMeshBuilder::regenerate_edited_chunk_verticies()
 
 		Chunk& chunk = *m_map->get_edited_chunk();
 
-		if (chunk.is_rendering()) {
-			chunk.update_vertices_using_old_buffers();
-		}
-		else {
+		if (!chunk.is_rendering()) {
 			chunk.set_is_rendering(true);
-			chunk.update_vertices(m_mutex__chunks4vbo_generation);
-
 			is_new_chunk = true;
 		}
-
+		chunk.update_vertices();
 
 		priority4_rendering.push_back(&chunk);
-		for (sf::Vector3i& pos : m_map->m_should_be_updated_neighbours) {
-			Chunk& chunk = m_map->get_chunk_or_generate(pos.x, pos.y, pos.z);
 
-			if (chunk.is_rendering()) {
-				chunk.update_vertices_using_old_buffers();
-				priority4_rendering.push_back(&chunk);
-			}
-		}
+		//TODO critical error
+		//for (sf::Vector3i& pos : m_map->m_should_be_updated_neighbours) {
+		//	Chunk& chunk = m_map->get_chunk_or_generate(pos.x, pos.y, pos.z);
+
+		//	if (chunk.is_rendering()) {
+		//		chunk.update_vertices();
+		//		priority4_rendering.push_back(&chunk);
+		//	}
+		//}
 		should_update_priority_chunks = true;
 
 		is_thread_free = true;
@@ -208,7 +189,7 @@ void MapMeshBuilder::regenerate_edited_chunk_verticies()
 		priority4_rendering.clear();
 
 		m_map->apply_chunk_changes();
-		should_update_priority_chunks = false;	
+		should_update_priority_chunks = false;
 	}
 }
 
@@ -236,6 +217,12 @@ void MapMeshBuilder::add_new_chunks2rendering()
 
 void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 {
+	//auto terrain_generation_range = range;
+	//terrain_generation_range.start_x -= 1;
+	//terrain_generation_range.start_z -= 1;
+	//terrain_generation_range.end_x += 1;
+	//terrain_generation_range.end_z += 1;
+
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)m_window->getSize().x / (GLfloat)m_window->getSize().y, 0.1f, RENDER_DISTANCE);
 	glm::mat4 view = glm::lookAt(
 		glm::vec3(
@@ -245,7 +232,7 @@ void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 		),
 		glm::vec3(
 			m_player->get_position().x - sin(m_player->m_camera_angle.x / 180 * PI),
-			m_player->get_position().y +  0.8f + tan(m_player->m_camera_angle.y / 180 * PI),
+			m_player->get_position().y + 0.8f + tan(m_player->m_camera_angle.y / 180 * PI),
 			m_player->get_position().z - cos(m_player->m_camera_angle.x / 180 * PI)
 		),
 		glm::vec3(0.0f, 1.0f, 0.0f)
@@ -256,17 +243,23 @@ void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 	static const int VISIBLE_COLUMNS_PER_LOOP = 20;
 	int visible_columns_count = 0;
 
-	
+
 	auto add2verticies_generation = [&](int i, int k) {
 		if (i >= 0 && k >= 0) {
 			for (int j = 0; j < CHUNKS_IN_WORLD_HEIGHT; ++j) {
-				glm::vec4 norm_coords = pv * glm::vec4(i * BLOCKS_IN_CHUNK, j * BLOCKS_IN_CHUNK, k * BLOCKS_IN_CHUNK, 1.F);
+				float chunk_center = BLOCKS_IN_CHUNK / 2.f - 1.f;
+				glm::vec4 norm_coords = pv * glm::vec4(
+					i * BLOCKS_IN_CHUNK+chunk_center,
+					j * BLOCKS_IN_CHUNK+chunk_center,
+					k * BLOCKS_IN_CHUNK+chunk_center,
+					1.F);
+
 				norm_coords.x /= norm_coords.w;
 				norm_coords.y /= norm_coords.w;
 
-				bool is_chunk_visible = norm_coords.z >= -1 * SPHERE_DIAMETER / fabsf(norm_coords.w)
-					&& fabsf(norm_coords.x) <= 1 + 1 * SPHERE_DIAMETER / fabsf(norm_coords.w)
-					&& fabsf(norm_coords.y) <= 1 + 1 * SPHERE_DIAMETER / fabsf(norm_coords.w);
+				bool is_chunk_visible = norm_coords.z > -1 * SPHERE_DIAMETER
+					&& fabsf(norm_coords.x) < 1 + 1 * SPHERE_DIAMETER / fabsf(norm_coords.w)
+					&& fabsf(norm_coords.y) < 1 + 1 * SPHERE_DIAMETER / fabsf(norm_coords.w);
 
 
 				if (is_chunk_visible) {
@@ -280,6 +273,8 @@ void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 
 							if (chunk.can_generate_verticies()) {
 								is_new = true;
+
+
 								m_chunks4verticies_generation.push_back(&chunk);
 							}
 

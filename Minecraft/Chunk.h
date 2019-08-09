@@ -47,8 +47,7 @@ namespace World {
 		bool can_generate_verticies() { return !is_empty() && !is_rendering() && !m_is_blocked_verticies_generation; };
 		void set_is_rendering(bool flag) { m_is_rendering = flag; };
 		void upate_vao();
-		void update_vertices(sf::Mutex& mutex__for_vbo_generation);
-		void update_vertices_using_old_buffers();
+		void update_vertices();
 		void free_buffers();
 
 		/* Main */

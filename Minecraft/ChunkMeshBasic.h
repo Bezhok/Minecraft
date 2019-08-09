@@ -17,6 +17,7 @@ namespace World {
 		bool m_is_vertices_created = false;
 		VertexType* m_vertices = nullptr;
 
+
 		//verticies count in current time
 		int m_i = 0;
 
@@ -45,8 +46,7 @@ namespace World {
 		~ChunkMeshBasic();
 
 		void upate_vao();
-		void update_vertices(sf::Mutex& mutex__for_vbo_generation, Map* map);
-		void update_vertices_using_old_buffers();
+		void update_vertices();
 		void free_buffers(Map* map);
 		int get_final_points_count() { return m_old_i / 6; };
 		int get_current_faces_count() { return m_i / 36; };

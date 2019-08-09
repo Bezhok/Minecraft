@@ -16,6 +16,9 @@ TerrainGenerator::TerrainGenerator(Map* map) : m_map(map)
 
 	m_noise.SetNoiseType(FastNoise::PerlinFractal);
 	m_noise.SetFrequency(0.01f);
+	//m_noise.SetFractalGain(10.5);
+	//m_noise.SetFractalLacunarity(0.99);
+	//m_noise.SetFractalType(FastNoise::Billow);
 	m_noise.SetFractalOctaves(1);
 	m_noise.SetInterp(FastNoise::Hermite);
 
@@ -44,6 +47,7 @@ void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN
 	Chunk& chunk = column[chunk_y];
 	chunk.init({ chunk_x, chunk_y, chunk_z }, m_map);
 
+	srand(chunk_x+chunk_z*chunk_z);
 
 	int offset = 0;//30
 	static const int WATER_LEVEL = offset + 30;
@@ -55,20 +59,29 @@ void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN
 			int z = Map::chunk_coord2block_coord(chunk_z) + block_z;
 
 			int h = 0;
-			float b = (m_biome_noise.GetNoise(static_cast<float>(x) + 1, static_cast<float>(z) + 1) / 2 + 0.5f);
+			//float b = (m_biome_noise.GetNoise(static_cast<float>(x) + 1, static_cast<float>(z) + 1) / 2 + 0.5f);
+			float b = m_biome_noise.GetNoise(static_cast<float>(x) + 1, static_cast<float>(z) + 1);
 
+			//std::cout << b << std::endl;
+
+			int biome_type = 0;
+			static int tree_freeq[] = {200, 1000, 50};
 			block_id top_block_type;
 			block_id below_block_type;
-			bool default_biom = true;
-			if (b > 0.71) {
-				default_biom = true;
+			//bool default_biom = true;
+			if (b >= 0) {
+				biome_type = 2;
+				if (b > 0.2) {
+					biome_type = 0;
+				}
+
 				top_block_type = block_id::Grass;
 				below_block_type = block_id::Dirt;
 				h = static_cast<int>((get_noise(x + 1, z + 1) + 1) * 40) + offset;
 			}
 			else
 			{
-				default_biom = false;
+				biome_type = 1;
 				top_block_type = below_block_type = block_id::Sand;
 				
 				h = static_cast<int>((get_noise(x + 1, z + 1) + 1) * 15) + offset+19;
@@ -92,7 +105,7 @@ void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN
 				}
 				else {
 					if (y == h) {
-						if (glm::linearRand(0, 400) == 10) {
+						if (glm::linearRand(0, tree_freeq[biome_type]) == 1) {
 							tree_pos.emplace_back(block_x, block_y + 1, block_z);
 							id = below_block_type;
 						}
@@ -110,7 +123,7 @@ void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN
 				chunk.set_block_type(block_x, block_y, block_z, id);
 			}
 
-			if (default_biom) {
+			if (biome_type==0 || biome_type == 2) {
 
 				for (auto& pos : tree_pos) {
 					int tree_height = glm::linearRand(5, 7);

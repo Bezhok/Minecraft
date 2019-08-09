@@ -146,7 +146,7 @@ void Player::update(double dtime)
 		if (!m_on_ground) {
 			double s = m_direction_speed[Key::Space];
 
-			if (s > -30.0) {
+			if (s > -80.0) {
 				if (m_is_in_water) {
 					if (!m_is_keys_pressed[Key::Space]) {
 						m_dpos.y -= 3.f*dtime;
@@ -161,7 +161,7 @@ void Player::update(double dtime)
 				}
 			}
 			else {
-				m_direction_speed[Key::Space] = -31.0;
+				m_direction_speed[Key::Space] = -81.0;
 				m_dpos.y += m_direction_speed[Key::Space] * dtime;
 			}
 

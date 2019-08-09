@@ -56,7 +56,7 @@ void App::draw_SFML()
 			to_string(m_map_mesh_builder.get_chunks4rendering_size()) + " " +
 			to_string(m_map->get_size()) + " " +
 			to_string(m_map_mesh_builder.get_chunks4verticies_generation_size()) + " " +
-			to_string(m_map->m_global_vao_vbo_buffers.size()) + " " +
+			//to_string(m_map->m_global_vao_vbo_buffers.size()) + " " +
 			"- chunks rendering, map size, updates, global buffer\n" +
 
 			to_string(verticies_wasnt_free) + " - chunks which veticies memory is not freed"
@@ -99,7 +99,15 @@ void App::run()
 	while (m_window.isOpen())
 	{
 		m_debug_data.start();
-
+		//
+		m_map_mesh_builder.m_mutex__chunks4rendering.lock();
+		for (auto& e : m_map->m_should_be_freed_buffers) {
+			glDeleteVertexArrays(1, &e.VAO);
+			glDeleteBuffers(1, &e.VBO);
+		}
+		m_map->m_should_be_freed_buffers.clear();
+		m_map_mesh_builder.m_mutex__chunks4rendering.unlock();
+		//
 		update();
 
 		draw_openGL();
@@ -128,8 +136,8 @@ void App::handle_events()
 		int x = m_window.getSize().x / 2;
 		int y = m_window.getSize().y / 2;
 
-		m_player.m_camera_angle.x += float(x - mouse_xy.x) / 8;
-		m_player.m_camera_angle.y += float(y - mouse_xy.y) / 8;
+		m_player.m_camera_angle.x += float(x - mouse_xy.x) / 12;
+		m_player.m_camera_angle.y += float(y - mouse_xy.y) / 12;
 
 		if (m_player.m_camera_angle.y < -89) { m_player.m_camera_angle.y = -89; }
 		if (m_player.m_camera_angle.y > 89) { m_player.m_camera_angle.y = 89; }
