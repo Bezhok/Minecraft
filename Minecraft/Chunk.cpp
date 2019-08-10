@@ -39,7 +39,7 @@ void Chunk::generate_vertices()
 						VertexType y = static_cast<VertexType>(j);
 						VertexType z = static_cast<VertexType>(k);
 
-						static VertexType side = 1;
+						static VertexType side = 16;
 						static VertexType pixel = 1.005/BLOCK_RESOLUTION;
 						block_id id = get_block_type(i, j, k);
 

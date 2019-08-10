@@ -67,7 +67,20 @@ void Renderer::draw_SFML(const sf::Drawable& drawable)
 
 void Renderer::finish_render(sf::RenderWindow& window, Player& player, phmap::parallel_node_hash_set<World::Chunk*>& m_chunks4rendering, sf::Mutex& mutex_chunks4rendering)
 {
-	glClearColor(0.57f, 0.73f, 0.99f, 0.0f);
+	bool is_day = true;
+
+	static float sun_angle_degrees = 89.9f;
+	if (sun_angle_degrees > 180) {
+		is_day = false;
+	}
+
+	if (is_day) {
+		glClearColor(0.57f, 0.73f, 0.99f, 0.0f);
+	}
+	else {
+		glClearColor(0.109f, 0.156f, 0.313f, 0.0f);
+	}
+
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -91,9 +104,60 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, phmap::pa
 	);
 
 	glm::mat4 projection_view = projection*view;
+
+
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+		sun_angle_degrees += 0.2f;
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
+		sun_angle_degrees -= 0.2f;
+	}
+
+
+	if (sun_angle_degrees > 360) {
+		sun_angle_degrees = 0;
+	}
+
+	if (sun_angle_degrees < 0) {
+		sun_angle_degrees = 360;
+	}
+
+	//visual//
+	float radians = sun_angle_degrees /180*PI;
+	float sun_y = RENDER_DISTANCE / sqrtf(1 + powf(1.f/tanf(radians), 2));
+	float sun_x = sun_y / tanf(radians);
+	sun_x += player.get_position().x;
+	//todo
+	sun_y += 30; //water level
+	float sun_z = player.get_position().z;
+	//visual//
+
+	m_shader_program.setUniform("sun_dir", sf::Glsl::Vec3{ cosf(radians), abs(sinf(radians)), 0 });
+	m_shader_program.setUniform("is_day", is_day);
+
 	GLint pvm_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "pvm");
+	GLint model_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "model");
+
+
+
+	sf::Vector3i player_pos = { 
+		Map::coord2chunk_coord(player.get_position().x)+2,
+		Map::coord2chunk_coord(player.get_position().y)+2,
+		Map::coord2chunk_coord(player.get_position().z)+2
+	};
 
 	static const float SPHERE_DIAMETER = sqrtf(3.f*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK);
+
+	float mat[] = {
+		1., 0, 0, 0,
+		0, 1., 0, 0,
+		0, 0, 1., 0,
+		0, 0, 0, 1.,
+	};
+
+	float chunk_center = BLOCKS_IN_CHUNK / 2.f - 1.f;
 
 	glEnable(GL_CULL_FACE);
 	mutex_chunks4rendering.lock();
@@ -101,9 +165,15 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, phmap::pa
 		if (chunk->m_blocks_mesh.get_final_points_count() > 0) {
 			auto &pos = chunk->get_pos();
 
-			auto pvm = glm::translate(projection_view, glm::vec3(pos.x * BLOCKS_IN_CHUNK, pos.y * BLOCKS_IN_CHUNK, pos.z * BLOCKS_IN_CHUNK));
+			//fixs white lines between chunks
+			auto delta = pos - player_pos;
+			glm::mat4 pvm = glm::translate(projection_view,
+				glm::fvec3(
+				pos.x * BLOCKS_IN_CHUNK-delta.x/2000.f,
+				pos.y * BLOCKS_IN_CHUNK-delta.y/2000.f,
+				pos.z * BLOCKS_IN_CHUNK-delta.z/2000.f)
+			);
 
-			float chunk_center = BLOCKS_IN_CHUNK / 2.f - 1.f;
 			glm::vec4 norm_coords = pvm * glm::vec4(chunk_center, chunk_center, chunk_center, 1.F);
 			norm_coords.x /= norm_coords.w;
 			norm_coords.y /= norm_coords.w;
@@ -116,7 +186,12 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, phmap::pa
 			if (is_chunk_visible) {
 				assert(pos.y >= 0);
 
+				mat[12] = static_cast<float>((pos.x) * BLOCKS_IN_CHUNK);
+				mat[13] = static_cast<float>((pos.y) * BLOCKS_IN_CHUNK);
+				mat[14] = static_cast<float>((pos.z) * BLOCKS_IN_CHUNK);
+
 				glUniformMatrix4fv(pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
+				glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
 
 				glBindVertexArray(chunk->m_blocks_mesh.get_VAO());
 				glDrawArrays(GL_TRIANGLES, 0, chunk->m_blocks_mesh.get_final_points_count());
@@ -131,9 +206,22 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, phmap::pa
 			auto &pos = chunk->get_pos();
 			assert(pos.y >= 0);
 
-			auto pvm = glm::translate(projection_view, glm::vec3(pos.x * BLOCKS_IN_CHUNK, pos.y * BLOCKS_IN_CHUNK, pos.z * BLOCKS_IN_CHUNK));
+
+			auto delta = pos - player_pos;
+			glm::mat4 pvm = glm::translate(projection_view,
+				glm::fvec3(
+					pos.x * BLOCKS_IN_CHUNK - delta.x / 2000.f,
+					pos.y * BLOCKS_IN_CHUNK - delta.y / 2000.f,
+					pos.z * BLOCKS_IN_CHUNK - delta.z / 2000.f)
+			);
+
+
+			mat[12] = static_cast<float>((pos.x) * BLOCKS_IN_CHUNK);
+			mat[13] = static_cast<float>((pos.y) * BLOCKS_IN_CHUNK);
+			mat[14] = static_cast<float>((pos.z) * BLOCKS_IN_CHUNK);
 
 			glUniformMatrix4fv(pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
+			glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
 
 			glBindVertexArray(chunk->m_water_mesh.get_VAO());
 			glDrawArrays(GL_TRIANGLES, 0, chunk->m_water_mesh.get_final_points_count());

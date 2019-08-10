@@ -40,6 +40,7 @@ namespace World {
 		void add_byte4(VertexType x, VertexType y, VertexType z, VertexType w);
 		ChunkMeshBasic();
 
+		void add_normal(VertexType x, VertexType y, VertexType z);
 	public:
 		/* Min */
 		ChunkMeshBasic(Chunk* c) : chunk(c) {};

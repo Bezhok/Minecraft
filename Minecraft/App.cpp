@@ -142,6 +142,14 @@ void App::handle_events()
 		if (m_player.m_camera_angle.y < -89) { m_player.m_camera_angle.y = -89; }
 		if (m_player.m_camera_angle.y > 89) { m_player.m_camera_angle.y = 89; }
 
+		if (m_player.m_camera_angle.x > 361) { 
+			m_player.m_camera_angle.x -= 360;
+		}
+
+		if (m_player.m_camera_angle.x < -361) { 
+			m_player.m_camera_angle.x += 360;
+		}
+
 		sf::Mouse::setPosition(sf::Vector2i(x, y), m_window);
 	}
 }
