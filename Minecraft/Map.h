@@ -26,7 +26,7 @@ namespace World {
 
 		Sounds m_sounds;
 	public:
-		int get_size() { return m_map.size(); };
+		size_t get_size() { return m_map.size(); };
 		void generate_chunk_terrain(Column&, int, int, int);
 
 		/* load world */

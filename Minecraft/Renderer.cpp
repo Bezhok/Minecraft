@@ -4,6 +4,7 @@
 #include "block_db.h"
 #include "Chunk.h"
 #include "Map.h"
+#include "Light.h"
 
 using namespace World;
 
@@ -23,6 +24,9 @@ Renderer::Renderer()
 
 	m_wrapper_shader.loadFromFile("shaders\\block_wrapper.vert.glsl", "shaders\\block_wrapper.frag.glsl");
 	m_shader_program.loadFromFile("shaders\\shader.vert.glsl", "shaders\\shader.frag.glsl");
+	m_shadow_shader.loadFromFile("shaders\\shadow.vert.glsl", "shaders\\shadow.frag.glsl");
+	m_water_shader.loadFromFile("shaders\\water.vert.glsl", "shaders\\water.frag.glsl");
+
 	m_image_atlas.loadFromFile(PATH2ATLAS);
 	m_image_atlas.flipVertically();
 
@@ -47,12 +51,35 @@ Renderer::Renderer()
 
 	glGenVertexArrays(1, &m_wrapper_VAO);
 	glGenBuffers(1, &m_wrapper_VBO);
+
+
+	//shadows
+	glGenFramebuffers(1, &m_depth_map_FBO);
+	glGenTextures(1, &m_depth_map);
+	glBindTexture(GL_TEXTURE_2D, m_depth_map);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+		SHADOW_SIZE, SHADOW_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	float border_ñolor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border_ñolor);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_depth_map_FBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depth_map, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 Renderer::~Renderer()
 {
 	glDeleteVertexArrays(1, &m_wrapper_VAO);
 	glDeleteBuffers(1, &m_wrapper_VBO);
+
+	glDeleteFramebuffers(1, &m_depth_map_FBO);
+	glDeleteTextures(1, &m_depth_map);
 }
 
 void Renderer::reset_view(sf::Vector2f size)
@@ -65,178 +92,224 @@ void Renderer::draw_SFML(const sf::Drawable& drawable)
 	m_SFML.push(&drawable);
 }
 
+void draw_depth_map(GLuint depth_map)
+{
+	std::string vert =
+		"#version 330 core \n"
+		"layout(location = 0) in vec3 aPos;\n"
+		"layout(location = 1) in vec2 aTexCoords;\n"
+
+		"out vec2 TexCoords;\n"
+
+		"void main()\n"
+		"{"
+		"TexCoords = aTexCoords;\n"
+		"gl_Position = vec4(aPos, 1.0);\n"
+		"}";
+
+	std::string frag =
+		"#version 330 core \n"
+		"out vec4 FragColor;\n"
+		"in vec2 TexCoords;\n"
+		"uniform sampler2D depthMap;\n"
+
+
+		"void main()\n"
+		"{"
+		"float depthValue = texture(depthMap, TexCoords).r;\n"
+		"FragColor = vec4(vec3(depthValue), 1.0);\n"
+		"}";
+
+	glViewport(0, 0, 200, 200);
+
+
+	sf::Shader shader;
+	shader.loadFromMemory(vert, frag);
+	sf::Shader::bind(&shader);
+
+	glBindTexture(GL_TEXTURE_2D, depth_map);
+
+	static GLuint VAO = 0;
+	static GLuint VBO = 0;
+
+	if (VAO == 0)
+	{
+		static float vertices[] = {
+			-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+			-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+			 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+			 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		};
+
+		glGenVertexArrays(1, &VAO);
+		glGenBuffers(1, &VBO);
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	}
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
 void Renderer::finish_render(sf::RenderWindow& window, Player& player, phmap::parallel_node_hash_set<World::Chunk*>& m_chunks4rendering, sf::Mutex& mutex_chunks4rendering)
 {
-	bool is_day = true;
+	static Light light;
 
-	static float sun_angle_degrees = 89.9f;
-	if (sun_angle_degrees > 180) {
-		is_day = false;
+	static int counter = 0;
+	counter++;
+	static const int shadow_update_per_frames = 10;
+	if (counter == shadow_update_per_frames) {
+		light.update(player.get_position());
 	}
 
-	if (is_day) {
-		glClearColor(0.57f, 0.73f, 0.99f, 0.0f);
-	}
-	else {
-		glClearColor(0.109f, 0.156f, 0.313f, 0.0f);
-	}
+	auto color = light.get_gl_sky_color();
+	glClearColor(color.x, color.y, color.z, 1.0f);
 
-	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	auto window_size = window.getSize();
+	glm::mat4 projection_view = player.get_projection_view(window_size);
+	glm::mat4 light_pv = light.get_light_projection_view();
+
+
+	sf::Vector3i player_pos = {
+		Map::coord2chunk_coord(player.get_position().x),
+		Map::coord2chunk_coord(player.get_position().y),
+		Map::coord2chunk_coord(player.get_position().z)
+	};
+
+
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-
-	sf::Shader::bind(&m_shader_program);
-	sf::Texture::bind(&m_texture_atlas);
-
-	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)window.getSize().x / (GLfloat)window.getSize().y, 0.1f, RENDER_DISTANCE);
-	glm::mat4 view = glm::lookAt(
-		glm::vec3(
-			player.get_position().x,
-			player.get_position().y + 0.8f,//m_size.y
-			player.get_position().z
-		),
-		glm::vec3(
-			player.get_position().x - sin(player.m_camera_angle.x / 180.0f * PI),
-			player.get_position().y + 0.8f + tan(player.m_camera_angle.y / 180.0f * PI),
-			player.get_position().z - cos(player.m_camera_angle.x / 180.0f * PI)
-		),
-		glm::vec3(0.0f, 1.0f, 0.0f)
-	);
-
-	glm::mat4 projection_view = projection*view;
-
-
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-		sun_angle_degrees += 0.2f;
-	}
-
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-		sun_angle_degrees -= 0.2f;
-	}
-
-
-	if (sun_angle_degrees > 360) {
-		sun_angle_degrees = 0;
-	}
-
-	if (sun_angle_degrees < 0) {
-		sun_angle_degrees = 360;
-	}
-
-	//visual//
-	float radians = sun_angle_degrees /180*PI;
-	float sun_y = RENDER_DISTANCE / sqrtf(1 + powf(1.f/tanf(radians), 2));
-	float sun_x = sun_y / tanf(radians);
-	sun_x += player.get_position().x;
-	//todo
-	sun_y += 30; //water level
-	float sun_z = player.get_position().z;
-	//visual//
-
-	m_shader_program.setUniform("sun_dir", sf::Glsl::Vec3{ cosf(radians), abs(sinf(radians)), 0 });
-	m_shader_program.setUniform("is_day", is_day);
-
-	GLint pvm_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "pvm");
-	GLint model_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "model");
-
-
-
-	sf::Vector3i player_pos = { 
-		Map::coord2chunk_coord(player.get_position().x)+2,
-		Map::coord2chunk_coord(player.get_position().y)+2,
-		Map::coord2chunk_coord(player.get_position().z)+2
-	};
-
-	static const float SPHERE_DIAMETER = sqrtf(3.f*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK);
-
-	float mat[] = {
-		1., 0, 0, 0,
-		0, 1., 0, 0,
-		0, 0, 1., 0,
-		0, 0, 0, 1.,
-	};
-
-	float chunk_center = BLOCKS_IN_CHUNK / 2.f - 1.f;
-
 	glEnable(GL_CULL_FACE);
+
+
+	//if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
+	//	counter = 1000;
+	//}
+
+
 	mutex_chunks4rendering.lock();
-	for (auto &chunk : m_chunks4rendering) {
-		if (chunk->m_blocks_mesh.get_final_points_count() > 0) {
-			auto &pos = chunk->get_pos();
+	if (counter == shadow_update_per_frames) {
+		counter = 0;
 
-			//fixs white lines between chunks
-			auto delta = pos - player_pos;
-			glm::mat4 pvm = glm::translate(projection_view,
-				glm::fvec3(
-				pos.x * BLOCKS_IN_CHUNK-delta.x/2000.f,
-				pos.y * BLOCKS_IN_CHUNK-delta.y/2000.f,
-				pos.z * BLOCKS_IN_CHUNK-delta.z/2000.f)
-			);
+		glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
+		sf::Shader::bind(&m_shadow_shader);
 
-			glm::vec4 norm_coords = pvm * glm::vec4(chunk_center, chunk_center, chunk_center, 1.F);
-			norm_coords.x /= norm_coords.w;
-			norm_coords.y /= norm_coords.w;
+		glBindFramebuffer(GL_FRAMEBUFFER, m_depth_map_FBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
 
-			bool is_chunk_visible = norm_coords.z > -1 * SPHERE_DIAMETER
-				&& fabsf(norm_coords.x) < 1 + SPHERE_DIAMETER / fabsf(norm_coords.w)
-				&& fabsf(norm_coords.y) < 1 + SPHERE_DIAMETER / fabsf(norm_coords.w);
+		sf::Texture::bind(&m_texture_atlas);
+		GLuint l_pvm_location = glGetUniformLocation(m_shadow_shader.getNativeHandle(), "pvm");
 
+		glm::vec3 global_pos(0.f);
+		glm::mat4 pvm(1.f);
+		for (auto &chunk : m_chunks4rendering) {
+			if (chunk->m_blocks_mesh.get_final_points_count() > 0) {
 
-			if (is_chunk_visible) {
-				assert(pos.y >= 0);
+				auto& chunk_pos = chunk->get_pos();
 
-				mat[12] = static_cast<float>((pos.x) * BLOCKS_IN_CHUNK);
-				mat[13] = static_cast<float>((pos.y) * BLOCKS_IN_CHUNK);
-				mat[14] = static_cast<float>((pos.z) * BLOCKS_IN_CHUNK);
+				if (abs(chunk_pos.x - player_pos.x) < 12 && abs(chunk_pos.z - player_pos.z) < 12) {
+					global_pos = get_global_pos(chunk_pos, player_pos);
+					pvm = glm::translate(light_pv, global_pos);
+					if (is_chunk_visible(pvm) || (abs(chunk_pos.x - player_pos.x) < 4 || abs(chunk_pos.z - player_pos.z) < 4)) {
+						glUniformMatrix4fv(l_pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
+						chunk->m_blocks_mesh.draw();
+					}
+				}
+			}
+		}
 
-				glUniformMatrix4fv(pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
-				glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
 
-				glBindVertexArray(chunk->m_blocks_mesh.get_VAO());
-				glDrawArrays(GL_TRIANGLES, 0, chunk->m_blocks_mesh.get_final_points_count());
-				glBindVertexArray(0);
+	static float fog_density = pow(RENDER_DISTANCE, 1.f / 3.f) / pow(512.f, 1.f / 3.f) * 1e-8f;
+	{
+		m_shader_program.setUniform("light_dir", sf::Glsl::Vec3{ light.get_light_direction().x, abs(light.get_light_direction().y), light.get_light_direction().z });
+
+		m_shader_program.setUniform("light_color", light.get_gl_light_color());
+		m_shader_program.setUniform("fog_color", light.get_gl_sky_color());
+		m_shader_program.setUniform("fog_density", fog_density);
+
+		GLuint pvm_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "pvm");
+		GLuint light_pvm_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "light_pvm");
+
+		glViewport(0, 0, window.getSize().x, window.getSize().y);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		sf::Shader::bind(&m_shader_program);
+		sf::Texture::bind(&m_texture_atlas);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_texture_atlas.getNativeHandle());
+		glUniform1i(glGetUniformLocation(m_shader_program.getNativeHandle(), "atlas"), 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, m_depth_map);
+		glUniform1i(glGetUniformLocation(m_shader_program.getNativeHandle(), "shadow_map"), 1);
+
+		glm::vec3 global_pos(0.f);
+		glm::mat4 pvm(1.f);
+		glm::mat4 light_pvm(1.f);
+		for (auto &chunk : m_chunks4rendering) {
+			if (chunk->m_blocks_mesh.get_final_points_count() > 0) {
+
+				global_pos = get_global_pos(chunk->get_pos(), player_pos);
+				pvm = glm::translate(projection_view, global_pos);
+
+				if (is_chunk_visible(pvm)) {
+					light_pvm = glm::translate(light_pv, global_pos);
+
+					glUniformMatrix4fv(pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
+					glUniformMatrix4fv(light_pvm_location, 1, GL_FALSE, glm::value_ptr(light_pvm));
+					chunk->m_blocks_mesh.draw();
+				}
+				
 			}
 		}
 	}
-	glDisable(GL_CULL_FACE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//only water
-	for (auto &chunk : m_chunks4rendering) {
-		if (chunk->m_water_mesh.get_final_points_count() > 0) {
-			auto &pos = chunk->get_pos();
-			assert(pos.y >= 0);
+
+	{
+		sf::Shader::bind(&m_water_shader);
+		sf::Texture::bind(&m_texture_atlas);
+
+		m_water_shader.setUniform("sun_dir", sf::Glsl::Vec3{ light.get_light_direction().x, abs(light.get_light_direction().y), light.get_light_direction().z });
+		m_water_shader.setUniform("is_day", true);
+		GLuint pvm_location = glGetUniformLocation(m_water_shader.getNativeHandle(), "pvm");
 
 
-			auto delta = pos - player_pos;
-			glm::mat4 pvm = glm::translate(projection_view,
-				glm::fvec3(
-					pos.x * BLOCKS_IN_CHUNK - delta.x / 2000.f,
-					pos.y * BLOCKS_IN_CHUNK - delta.y / 2000.f,
-					pos.z * BLOCKS_IN_CHUNK - delta.z / 2000.f)
-			);
+		glDisable(GL_CULL_FACE);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		glm::vec3 global_pos(0.f);
+		glm::mat4 pvm(1.f);
+		for (auto &chunk : m_chunks4rendering) {
+			if (chunk->m_water_mesh.get_final_points_count() > 0) {
 
-			mat[12] = static_cast<float>((pos.x) * BLOCKS_IN_CHUNK);
-			mat[13] = static_cast<float>((pos.y) * BLOCKS_IN_CHUNK);
-			mat[14] = static_cast<float>((pos.z) * BLOCKS_IN_CHUNK);
+				global_pos = get_global_pos(chunk->get_pos(), player_pos);
+				pvm = glm::translate(projection_view, global_pos);
 
-			glUniformMatrix4fv(pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
-			glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
-
-			glBindVertexArray(chunk->m_water_mesh.get_VAO());
-			glDrawArrays(GL_TRIANGLES, 0, chunk->m_water_mesh.get_final_points_count());
-			glBindVertexArray(0);
+				glUniformMatrix4fv(pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
+				chunk->m_water_mesh.draw();
+			}
 		}
+
+		glBlendFunc(GL_ONE, GL_ZERO);
 	}
 	
-	glBlendFunc(GL_ONE, GL_ZERO);
+
 	mutex_chunks4rendering.unlock();
+
 
 	sf::Vector3i pos = player.get_block_look_at_pos();
 	if (pos.y > 0) {
-		draw_wrapper(pos, projection, view);
+		draw_wrapper(pos, projection_view);
 	}
 
+
+	draw_depth_map(m_depth_map);
 	//sfml render
 	window.pushGLStates();
 
@@ -249,22 +322,21 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, phmap::pa
 	window.display();
 }
 
-void Renderer::draw_wrapper(sf::Vector3i& pos, glm::mat4& projection, glm::mat4& view)
+void Renderer::draw_wrapper(sf::Vector3i& pos, glm::mat4& projection_view)
 {
-	float mat[] = {
-		1.f, 0, 0, 0,
-		0, 1.f, 0, 0,
-		0, 0, 1.f, 0,
-		0, 0, 0, 1.f,
-	};
 
-	glLineWidth(4);
+	glLineWidth(6);
 
 	sf::Shader::bind(&m_wrapper_shader);
-	m_wrapper_shader.setUniform("view", sf::Glsl::Mat4(glm::value_ptr(view)));
-	m_wrapper_shader.setUniform("projection", sf::Glsl::Mat4(glm::value_ptr(projection)));
 
-	GLint model_location = glGetUniformLocation(m_wrapper_shader.getNativeHandle(), "model");
+	auto pvm = glm::translate(projection_view, glm::vec3{
+		 Map::coord2chunk_coord(pos.x) * BLOCKS_IN_CHUNK,
+		 Map::coord2chunk_coord(pos.y) * BLOCKS_IN_CHUNK,
+		 Map::coord2chunk_coord(pos.z) * BLOCKS_IN_CHUNK,
+		});
+
+	m_wrapper_shader.setUniform("pvm", sf::Glsl::Mat4(glm::value_ptr(pvm)));
+
 
 	sf::Vector3i bpos = {
 		Map::coord2block_coord_in_chunk(pos.x),
@@ -272,7 +344,7 @@ void Renderer::draw_wrapper(sf::Vector3i& pos, glm::mat4& projection, glm::mat4&
 		Map::coord2block_coord_in_chunk(pos.z)
 	};
 
-	float m = 0.005f;
+	float m = 0.02f;
 	float p = 1 + m;
 	GLfloat wrapper_verticies[] = {
 		bpos.x - m, bpos.y + p, bpos.z - m,
@@ -315,16 +387,33 @@ void Renderer::draw_wrapper(sf::Vector3i& pos, glm::mat4& projection, glm::mat4&
 	glBindVertexArray(0); // Unbind VAO
 
 
-	mat[12] = static_cast<float>(Map::coord2chunk_coord(pos.x) * BLOCKS_IN_CHUNK);
-	mat[13] = static_cast<float>(Map::coord2chunk_coord(pos.y) * BLOCKS_IN_CHUNK);
-	mat[14] = static_cast<float>(Map::coord2chunk_coord(pos.z) * BLOCKS_IN_CHUNK);
-
-	glUniformMatrix4fv(model_location, 1, GL_FALSE, mat);
-
 	glBindVertexArray(m_wrapper_VAO);
 	glDrawArrays(GL_LINE_STRIP, 0, 20);
 	glBindVertexArray(0);
 
-
 	glLineWidth(1);
+}
+
+bool Renderer::is_chunk_visible(const glm::mat4& pvm)
+{
+	static const float CHUNK_CENTER = BLOCKS_IN_CHUNK / 2.f - 1.f;
+	static const float SPHERE_DIAMETER = sqrtf(3.f*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK);
+
+	glm::vec4 norm_coords = pvm * glm::vec4(CHUNK_CENTER, CHUNK_CENTER, CHUNK_CENTER, 1.F);
+	norm_coords.x /= norm_coords.w;
+	norm_coords.y /= norm_coords.w;
+
+	return norm_coords.z > -1 * SPHERE_DIAMETER
+		&& fabsf(norm_coords.x) < 1 + SPHERE_DIAMETER / fabsf(norm_coords.w)
+		&& fabsf(norm_coords.y) < 1 + SPHERE_DIAMETER / fabsf(norm_coords.w);
+}
+
+glm::fvec3 Renderer::get_global_pos(const sf::Vector3i& chunk_pos, const sf::Vector3i& player_pos)
+{
+	//fixes white lines between chunks
+	auto delta = chunk_pos - player_pos;
+
+	return 	{ chunk_pos.x * BLOCKS_IN_CHUNK - delta.x / 2000.f,
+		chunk_pos.y * BLOCKS_IN_CHUNK - delta.y / 2000.f,
+		chunk_pos.z * BLOCKS_IN_CHUNK - delta.z / 2000.f };
 }

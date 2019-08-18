@@ -4,7 +4,7 @@ layout (location = 1) in vec2 loc_tex_coord;
 
 
 out float normal_id;
-out vec4 postition_from_light;
+out vec4 light_position;
 out vec2 tex_coord;
 
 
@@ -17,7 +17,7 @@ void main()
 
     gl_Position = pvm * vec4(loc_position.xyz, 1.0f);
 
-	postition_from_light = light_pvm * vec4(loc_position.xyz, 1.0f);
+	light_position = light_pvm * vec4(loc_position.xyz, 1.0f);
 
     tex_coord = vec2(loc_tex_coord.x/16.0f, 1-loc_tex_coord.y/16.0f); // TODO should get this data: 16 blocks in x and 16 blocks in y
 } 

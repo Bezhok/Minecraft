@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -134,6 +134,7 @@
     <ClCompile Include="libs\fast_noise\FastNoise.cpp" />
     <ClCompile Include="Minecraft\ChunkMeshBasic.cpp" />
     <ClCompile Include="Minecraft\game_constants.cpp" />
+    <ClCompile Include="Minecraft\Light.cpp" />
     <ClCompile Include="Minecraft\MapMeshBuilder.cpp" />
     <ClCompile Include="Minecraft\Menu.cpp" />
     <ClCompile Include="Minecraft\App.cpp" />
@@ -153,6 +154,7 @@
     <ClInclude Include="Minecraft\block_types.h" />
     <ClInclude Include="Minecraft\Buffers.h" />
     <ClInclude Include="Minecraft\ChunkMeshBasic.h" />
+    <ClInclude Include="Minecraft\Light.h" />
     <ClInclude Include="Minecraft\MapMeshBuilder.h" />
     <ClInclude Include="Minecraft\Menu.h" />
     <ClInclude Include="Minecraft\App.h" />
@@ -178,6 +180,10 @@
     <None Include="shaders\block_wrapper.vert.glsl" />
     <None Include="shaders\shader.frag.glsl" />
     <None Include="shaders\shader.vert.glsl" />
+    <None Include="shaders\shadow.frag.glsl" />
+    <None Include="shaders\shadow.vert.glsl" />
+    <None Include="shaders\water.frag.glsl" />
+    <None Include="shaders\water.vert.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -43,7 +43,7 @@ namespace World {
 
 		MapMeshBuilder();
 
-		int get_chunks4verticies_generation_size() { return m_chunks4verticies_generation.size(); };
-		int get_chunks4rendering_size() { return m_chunks4rendering.size(); };
+		size_t get_chunks4verticies_generation_size() { return m_chunks4verticies_generation.size(); };
+		size_t get_chunks4rendering_size() { return m_chunks4rendering.size(); };
 	};
 }

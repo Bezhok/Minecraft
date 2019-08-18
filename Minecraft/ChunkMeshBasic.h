@@ -39,29 +39,27 @@ namespace World {
 
 		void add_byte4(VertexType x, VertexType y, VertexType z, VertexType w);
 		ChunkMeshBasic();
-
 		void add_normal(VertexType x, VertexType y, VertexType z);
+
 	public:
-		/* Min */
+		/* Main */
 		ChunkMeshBasic(Chunk* c) : chunk(c) {};
 		~ChunkMeshBasic();
-
 		void upate_vao();
 		void update_vertices();
 		void free_buffers(Map* map);
+		void draw();
 		int get_final_points_count() { return m_old_i / 6; };
+
+		/* debug */
 		int get_current_faces_count() { return m_i / 36; };
 
-		Buffers get_buffers() { return m_buffers; };
-		GLuint get_VBO() { return m_buffers.VBO; };
-		GLuint get_VAO() { return m_buffers.VAO; };
-
 		/* only for Chunk */
-		void generate_verticies4positive_x(VertexType x, VertexType y, VertexType z, block_id id, VertexType side);
-		void generate_verticies4negative_x(VertexType x, VertexType y, VertexType z, block_id id, VertexType side);
-		void generate_verticies4negative_y(VertexType x, VertexType y, VertexType z, block_id id, VertexType side);
-		void generate_verticies4positive_y(VertexType x, VertexType y, VertexType z, block_id id, VertexType side);
-		void generate_verticies4negative_z(VertexType x, VertexType y, VertexType z, block_id id, VertexType side);
-		void generate_verticies4positive_z(VertexType x, VertexType y, VertexType z, block_id id, VertexType side);
+		void generate_verticies4positive_x(VertexType x, VertexType y, VertexType z, block_id id);
+		void generate_verticies4negative_x(VertexType x, VertexType y, VertexType z, block_id id);
+		void generate_verticies4negative_y(VertexType x, VertexType y, VertexType z, block_id id);
+		void generate_verticies4positive_y(VertexType x, VertexType y, VertexType z, block_id id);
+		void generate_verticies4negative_z(VertexType x, VertexType y, VertexType z, block_id id);
+		void generate_verticies4positive_z(VertexType x, VertexType y, VertexType z, block_id id);
 	};
 }

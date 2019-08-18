@@ -217,27 +217,8 @@ void MapMeshBuilder::add_new_chunks2rendering()
 
 void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 {
-	//auto terrain_generation_range = range;
-	//terrain_generation_range.start_x -= 1;
-	//terrain_generation_range.start_z -= 1;
-	//terrain_generation_range.end_x += 1;
-	//terrain_generation_range.end_z += 1;
-
-	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)m_window->getSize().x / (GLfloat)m_window->getSize().y, 0.1f, RENDER_DISTANCE);
-	glm::mat4 view = glm::lookAt(
-		glm::vec3(
-			m_player->get_position().x,
-			m_player->get_position().y + 0.8f,//m_size.y
-			m_player->get_position().z
-		),
-		glm::vec3(
-			m_player->get_position().x - sin(m_player->m_camera_angle.x / 180 * PI),
-			m_player->get_position().y + 0.8f + tan(m_player->m_camera_angle.y / 180 * PI),
-			m_player->get_position().z - cos(m_player->m_camera_angle.x / 180 * PI)
-		),
-		glm::vec3(0.0f, 1.0f, 0.0f)
-	);
-	glm::mat4 pv = projection * view;
+	auto windows_size = m_window->getSize();
+	glm::mat4 pv = m_player->get_projection_view(windows_size);
 
 	static const float SPHERE_DIAMETER = sqrtf(3.f*BLOCKS_IN_CHUNK*BLOCKS_IN_CHUNK);
 	static const int VISIBLE_COLUMNS_PER_LOOP = 20;
@@ -262,7 +243,9 @@ void MapMeshBuilder::add_chunks2verticies_generation(RenderRange& range)
 					&& fabsf(norm_coords.y) < 1 + 1 * SPHERE_DIAMETER / fabsf(norm_coords.w);
 
 
-				if (is_chunk_visible) {
+				bool is_chunk_near = range.chunk_x - i <= 4 && range.chunk_z - k <= 4;
+
+				if (is_chunk_visible || is_chunk_near) {
 					//TODO invalid "rendering sphere"
 					auto& column = m_map->get_column_or_generate(i, k);
 

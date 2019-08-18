@@ -32,6 +32,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/hash.hpp>
 #include <glm/gtc/random.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 #include <parallel_hashmap/phmap.h>
 #include <fast_noise/FastNoise.h>

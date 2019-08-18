@@ -1,62 +1,83 @@
 #version 330 core
-in vec4 position;
+in vec4 postition_from_light;
 in vec2 tex_coord;
-in vec3 normal;
-in vec3 frag_pos;
+in float normal_id;
 
 out vec4 color;
 
-uniform sampler2D ourTexture;
-uniform vec3 sun_dir;
-uniform bool is_day;
+uniform sampler2D atlas;
+uniform sampler2D shadow_map;
+uniform vec3 light_dir;
+uniform vec3 light_color;
+uniform vec3 fog_color;
+uniform float fog_density;
 
-const vec4 fog_color_day = vec4(0.6, 0.8, 1.0, 1.0);
-const vec4 fog_color_night = vec4(0.109f, 0.156f, 0.313f, 1.0);
 
-const vec3 sun_color = vec3(1.0, 1.0, 1.0);
+float get_cube_scalar()
+{
+	float scalar = 0.f; //dot(norm, norm_light_dir);
 
-//TODO should be connected with render distance
-const float fogdensity = .000011*.000011;
+	if (normal_id < 1.f) {
+		scalar = -light_dir.x;
+	} else if (normal_id < 2.f) {
+		scalar = light_dir.x;
+	} else if (normal_id < 3.f) {
+		scalar = -light_dir.y;
+	} else if (normal_id < 4.f) {
+		scalar = light_dir.y;
+	} else if (normal_id < 5.f) {
+		scalar = -light_dir.z;
+	} else if (normal_id < 6.f) {
+		scalar = light_dir.z;
+	}
+
+	return scalar;
+}
 
 void main()
 {
-	vec3 norm = normalize(normal);
-//	vec3 light_dir = normalize(light_pos - frag_pos);
-	vec3 norm_sun_dir = normalize(sun_dir);
+	float scalar = get_cube_scalar();
+	float diff = clamp(scalar, 0.2, 1.f);
 
-	float diff;
+	vec4 texColor = texture(atlas, tex_coord);
 
-	if (is_day) {
-		diff = clamp(dot(norm, norm_sun_dir), 0.3, 0.9);
-	} else {
-		diff = max(dot(norm, norm_sun_dir)/8.f, 0.05);
-	}
 
-	vec4 texColor;// = texture(ourTexture, tex_coord);
-	if (position.w < 1) // positive y
-		texColor = texture(ourTexture, tex_coord)*vec4(0.8, 0.8, 0.8, 1);
-	else if (position.w < 2) // negative y
-		texColor = texture(ourTexture, tex_coord)*vec4(0.5, 0.5, 0.5, 1);
-	else 
-		texColor = texture(ourTexture, tex_coord)*vec4(0.7, 0.7, 0.7, 1);
+	if (normal_id < 2 || normal_id > 4)
+		texColor *= vec4(0.9, 0.9, 0.9, 1);
+	else if (normal_id < 4.f) // positive y
+		texColor *= vec4(0.95, 0.95, 0.95, 1);
+	else if (normal_id < 3.f) // negative y
+		texColor *= vec4(0.85, 0.85, 0.85, 1);
 
 	
-	texColor *= vec4(sun_color*diff, 1);
+	float z = gl_FragCoord.z / gl_FragCoord.w;
+	float currentDepth = postition_from_light.z*0.5+0.5;
+
+	float shadow = 0.0;
+	float bias = 0.0009;
+	vec2 c = postition_from_light.xy*0.5f+0.5f;
+	if (currentDepth > 1) {
+		shadow = 1;
+	} else {
+		vec2 texel_size = 1.0 / textureSize(shadow_map, 0);
+		for(int x = -2; x <= 2; ++x)
+		{
+			for(int y = -2; y <= 2; ++y)
+			{
+				float pcf_depth = texture(shadow_map, c + vec2(x, y) * texel_size).r;
+
+				shadow += currentDepth - bias > pcf_depth ? 0.2 : 1.0;
+			}
+		}
+		shadow /= 25;
+	}
 
 
+	texColor *= vec4(light_color*diff*shadow, 1);
 
 	if (texColor.a < 0.1)
 		discard;
 
-//	color = texColor;
-
-	
-	float z = gl_FragCoord.z / gl_FragCoord.w;
-	float fog = clamp(exp(-fogdensity * z * z * z*z), 0.2, 1);
-
-	if (is_day) {
-		color = mix(fog_color_day, texColor, fog);
-	} else {
-		color = mix(fog_color_night, texColor, fog);
-	}
+	float fog = clamp(exp(-fog_density * z * z * z), 0.2, 1);
+	color = mix(vec4(fog_color, 1.f), texColor, fog);
 }

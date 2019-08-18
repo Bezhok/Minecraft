@@ -45,63 +45,63 @@ void Chunk::generate_vertices()
 
 
 						if (id == block_id::Cactus) {
-							m_blocks_mesh.generate_verticies4negative_x(x + pixel, y, z, id, side);
-							m_blocks_mesh.generate_verticies4positive_x(x - pixel, y, z, id, side);
+							m_blocks_mesh.generate_verticies4negative_x(x + pixel, y, z, id);
+							m_blocks_mesh.generate_verticies4positive_x(x - pixel, y, z, id);
 
-							m_blocks_mesh.generate_verticies4negative_y(x, y, z, id, side);
-							m_blocks_mesh.generate_verticies4positive_y(x, y, z, id, side);
+							m_blocks_mesh.generate_verticies4negative_y(x, y, z, id);
+							m_blocks_mesh.generate_verticies4positive_y(x, y, z, id);
 
-							m_blocks_mesh.generate_verticies4negative_z(x, y, z + pixel, id, side);
-							m_blocks_mesh.generate_verticies4positive_z(x, y, z - pixel, id, side);
+							m_blocks_mesh.generate_verticies4negative_z(x, y, z + pixel, id);
+							m_blocks_mesh.generate_verticies4positive_z(x, y, z - pixel, id);
 						}
 						else if (id == block_id::Water) {
 							if (!is_water__in_chunk(i - 1, j, k) && !is_opaque__in_chunk(i - 1, j, k)) {
-								m_water_mesh.generate_verticies4negative_x(x, y, z, id, side);
+								m_water_mesh.generate_verticies4negative_x(x, y, z, id);
 							}
 
 							if (!is_water__in_chunk(i + 1, j, k) && !is_opaque__in_chunk(i + 1, j, k)) {
-								m_water_mesh.generate_verticies4positive_x(x, y, z, id, side);
+								m_water_mesh.generate_verticies4positive_x(x, y, z, id);
 							}
 
 							if (!is_water__in_chunk(i, j - 1, k) && !is_opaque__in_chunk(i, j - 1, k)) {
-								m_water_mesh.generate_verticies4negative_y(x, y, z, id, side);
+								m_water_mesh.generate_verticies4negative_y(x, y, z, id);
 							}
 
 							if (!is_water__in_chunk(i, j + 1, k) && !is_opaque__in_chunk(i, j + 1, k)) {
-								m_water_mesh.generate_verticies4positive_y(x, y, z, id, side);
+								m_water_mesh.generate_verticies4positive_y(x, y, z, id);
 							}
 
 							if (!is_water__in_chunk(i, j, k - 1) && !is_opaque__in_chunk(i, j, k - 1)) {
-								m_water_mesh.generate_verticies4negative_z(x, y, z, id, side);
+								m_water_mesh.generate_verticies4negative_z(x, y, z, id);
 							}
 
 							if (!is_water__in_chunk(i, j, k + 1) && !is_opaque__in_chunk(i, j, k + 1)) {
-								m_water_mesh.generate_verticies4positive_z(x, y, z, id, side);
+								m_water_mesh.generate_verticies4positive_z(x, y, z, id);
 							}
 						}
 						else {
 							if (!is_opaque__in_chunk(i - 1, j, k)) {
-								m_blocks_mesh.generate_verticies4negative_x(x, y, z, id, side);
+								m_blocks_mesh.generate_verticies4negative_x(x, y, z, id);
 							}
 
 							if (!is_opaque__in_chunk(i + 1, j, k)) {
-								m_blocks_mesh.generate_verticies4positive_x(x, y, z, id, side);
+								m_blocks_mesh.generate_verticies4positive_x(x, y, z, id);
 							}
 
 							if (!is_opaque__in_chunk(i, j - 1, k)) {
-								m_blocks_mesh.generate_verticies4negative_y(x, y, z, id, side);
+								m_blocks_mesh.generate_verticies4negative_y(x, y, z, id);
 							}
 
 							if (!is_opaque__in_chunk(i, j + 1, k)) {
-								m_blocks_mesh.generate_verticies4positive_y(x, y, z, id, side);
+								m_blocks_mesh.generate_verticies4positive_y(x, y, z, id);
 							}
 
 							if (!is_opaque__in_chunk(i, j, k - 1)) {
-								m_blocks_mesh.generate_verticies4negative_z(x, y, z, id, side);
+								m_blocks_mesh.generate_verticies4negative_z(x, y, z, id);
 							}
 
 							if (!is_opaque__in_chunk(i, j, k + 1)) {
-								m_blocks_mesh.generate_verticies4positive_z(x, y, z, id, side);
+								m_blocks_mesh.generate_verticies4positive_z(x, y, z, id);
 							}
 						}
 					}

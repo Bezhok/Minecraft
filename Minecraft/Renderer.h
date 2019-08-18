@@ -15,16 +15,24 @@ private:
 
 	sf::Shader m_shader_program;
 	sf::Shader m_wrapper_shader;
+	sf::Shader m_shadow_shader;
+	sf::Shader m_water_shader;
 
 	GLuint m_wrapper_VAO;
 	GLuint m_wrapper_VBO;
+
+	GLuint m_depth_map_FBO;
+	GLuint m_depth_map;
 
 	sf::Image m_image_atlas;
 	sf::Texture m_texture_atlas;
 
 private:
-	void draw_wrapper(sf::Vector3i& pos, glm::mat4& projection, glm::mat4& view);
+	void draw_wrapper(sf::Vector3i& pos, glm::mat4& projection_view);
 
+	bool is_chunk_visible(const glm::mat4& pvm);
+
+	glm::fvec3 get_global_pos(const sf::Vector3i& chunk_pos, const sf::Vector3i& player_pos);
 public:
 	/* init open gl settings */
 	Renderer();

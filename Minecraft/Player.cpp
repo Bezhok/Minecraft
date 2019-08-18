@@ -281,6 +281,26 @@ void Player::delete_block()
 
 }
 
+glm::mat4 Player::get_projection_view(sf::Vector2u& window_size)
+{
+	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)window_size.x / (GLfloat)window_size.y, 0.1f, RENDER_DISTANCE);
+	glm::mat4 view = glm::lookAt(
+		glm::vec3(
+			get_position().x,
+			get_position().y + 0.8f,//m_size.y
+			get_position().z
+		),
+		glm::vec3(
+			get_position().x - sin(m_camera_angle.x / 180.0f * PI),
+			get_position().y + 0.8f + tan(m_camera_angle.y / 180.0f * PI),
+			get_position().z - cos(m_camera_angle.x / 180.0f * PI)
+		),
+		glm::vec3(0.0f, 1.0f, 0.0f)
+	);
+
+	return projection * view;
+}
+
 void Player::collision(float dx, float dy, float dz)
 {
 	m_is_in_water = false;

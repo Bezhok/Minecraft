@@ -6,6 +6,8 @@ extern const int RENDER_DISTANCE_IN_CHUNKS;
 extern const float DEFAULT_PLAYER_SPEED;
 extern const int BLOCK_RESOLUTION;
 extern const char PATH2ATLAS[];
+extern const int SHADOW_SIZE;
+
 
 //TODO
 static const int BLOCKS_IN_CHUNK = 16;

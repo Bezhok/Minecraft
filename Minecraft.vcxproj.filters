@@ -93,6 +93,9 @@
     <ClCompile Include="Minecraft\Sounds.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="Minecraft\Light.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Minecraft\App.h">
@@ -152,6 +155,9 @@
     <ClInclude Include="Minecraft\Sounds.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="Minecraft\Light.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\atlas.png">
@@ -169,6 +175,18 @@
       <Filter>Файлы ресурсов\Shaders</Filter>
     </None>
     <None Include="shaders\block_wrapper.vert.glsl">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+    <None Include="shaders\shadow.frag.glsl">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+    <None Include="shaders\shadow.vert.glsl">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+    <None Include="shaders\water.vert.glsl">
+      <Filter>Файлы ресурсов\Shaders</Filter>
+    </None>
+    <None Include="shaders\water.frag.glsl">
       <Filter>Файлы ресурсов\Shaders</Filter>
     </None>
   </ItemGroup>
