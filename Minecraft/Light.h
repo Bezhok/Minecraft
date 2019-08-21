@@ -24,8 +24,8 @@ public:
 	const glm::vec3& get_light_direction();
 	const glm::mat4& get_light_projection_view();
 
-	sf::Glsl::Vec3 get_gl_sky_color();
-	sf::Glsl::Vec3 get_gl_light_color();
+	sf::Glsl::Vec3 calc_gl_sky_color();
+	sf::Glsl::Vec3 calc_gl_light_color();
 
 	void update(const sf::Vector3f& player_position);
 };

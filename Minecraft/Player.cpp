@@ -197,7 +197,7 @@ void Player::flight_off()
 	}
 }
 
-sf::Vector3i Player::get_block_look_at_pos(sf::Vector3i* prev_pos /*= nullptr*/)
+sf::Vector3i Player::determine_look_at_block(sf::Vector3i* prev_pos /*= nullptr*/)
 {
 	float x = m_pos.x,
 		y = m_pos.y + 0.8f,
@@ -242,7 +242,7 @@ sf::Vector3i Player::get_block_look_at_pos(sf::Vector3i* prev_pos /*= nullptr*/)
 void Player::put_block()
 {
 	sf::Vector3i prev_pos;
-	sf::Vector3i pos = get_block_look_at_pos(&prev_pos);
+	sf::Vector3i pos = determine_look_at_block(&prev_pos);
 
 	if (pos.y != -1) {
 		bool able_create = true;
@@ -274,14 +274,14 @@ void Player::put_block()
 
 void Player::delete_block()
 {
-	sf::Vector3i pos = get_block_look_at_pos();
+	sf::Vector3i pos = determine_look_at_block();
 	if (pos.y != -1) {
 		m_map->delete_block(pos.x, pos.y, pos.z);
 	}
 
 }
 
-glm::mat4 Player::get_projection_view(sf::Vector2u& window_size)
+glm::mat4 Player::calc_projection_view(sf::Vector2u& window_size)
 {
 	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)window_size.x / (GLfloat)window_size.y, 0.1f, RENDER_DISTANCE);
 	glm::mat4 view = glm::lookAt(

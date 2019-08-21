@@ -136,7 +136,7 @@ void World::ChunkMeshBasic::draw()
 void World::ChunkMeshBasic::generate_verticies4positive_x(VertexType x, VertexType y, VertexType z, block_id id)
 {
 	VertexType normal_id = 2.f;
-	normal_id -= 0.5f;
+	normal_id += 0.2f;
 	bind_texture2positive_x(id);
 	add_byte4(x + BS, y,      z, normal_id);
 	add_byte4(x + BS, y + BS, z, normal_id);
@@ -149,7 +149,7 @@ void World::ChunkMeshBasic::generate_verticies4positive_x(VertexType x, VertexTy
 void World::ChunkMeshBasic::generate_verticies4negative_x(VertexType x, VertexType y, VertexType z, block_id id)
 {
 	VertexType normal_id = 1.f;
-	normal_id -= 0.5f;
+	normal_id += 0.2f;
 
 	bind_texture2negative_x(id);
 	add_byte4(x, y,      z, normal_id);
@@ -163,7 +163,7 @@ void World::ChunkMeshBasic::generate_verticies4negative_x(VertexType x, VertexTy
 void World::ChunkMeshBasic::generate_verticies4negative_y(VertexType x, VertexType y, VertexType z, block_id id)
 {
 	VertexType normal_id = 3.f;
-	normal_id -= 0.5f;
+	normal_id += 0.2f;
 
 	bind_texture2negative_y(id);
 	add_byte4(x,      y, z, normal_id);
@@ -176,22 +176,33 @@ void World::ChunkMeshBasic::generate_verticies4negative_y(VertexType x, VertexTy
 
 void World::ChunkMeshBasic::generate_verticies4positive_y(VertexType x, VertexType y, VertexType z, block_id id)
 {
-	VertexType normal_id = 4.f;
-	normal_id -= 0.5f;
+	if (id != block_id::Water) {
+		VertexType normal_id = 4.f;
+		normal_id += 0.2f;
 
-	bind_texture2positive_y(id);
-	add_byte4(x,      y + BS, z, normal_id);
-	add_byte4(x,      y + BS, z + BS, normal_id);
-	add_byte4(x + BS, y + BS, z, normal_id);
-	add_byte4(x + BS, y + BS, z, normal_id);
-	add_byte4(x,      y + BS, z + BS, normal_id);
-	add_byte4(x + BS, y + BS, z + BS, normal_id);
+		bind_texture2positive_y(id);
+		add_byte4(x,      y + BS, z, normal_id);
+		add_byte4(x,      y + BS, z + BS, normal_id);
+		add_byte4(x + BS, y + BS, z, normal_id);
+		add_byte4(x + BS, y + BS, z, normal_id);
+		add_byte4(x,      y + BS, z + BS, normal_id);
+		add_byte4(x + BS, y + BS, z + BS, normal_id);
+	}
+	else {
+		bind_texture2positive_y(id);
+		add_byte4(x,      y + BS, z,      11.2f);
+		add_byte4(x,      y + BS, z + BS, 12.2f);
+		add_byte4(x + BS, y + BS, z,      13.2f);
+		add_byte4(x + BS, y + BS, z,      14.2f);
+		add_byte4(x,      y + BS, z + BS, 15.2f);
+		add_byte4(x + BS, y + BS, z + BS, 16.2f);
+	}
 }
 
 void World::ChunkMeshBasic::generate_verticies4negative_z(VertexType x, VertexType y, VertexType z, block_id id)
 {
 	VertexType normal_id = 5.f;
-	normal_id -= 0.5f;
+	normal_id += 0.2f;
 
 	bind_texture2negative_z(id);
 	add_byte4(x,      y,      z, normal_id);
@@ -205,7 +216,7 @@ void World::ChunkMeshBasic::generate_verticies4negative_z(VertexType x, VertexTy
  void World::ChunkMeshBasic::generate_verticies4positive_z(VertexType x, VertexType y, VertexType z, block_id id)
 {
 	VertexType normal_id = 6.f;
-	normal_id -= 0.5f;
+	normal_id += 0.2f;
 
 	bind_texture2positive_z(id);
 	add_byte4(x,      y,      z + BS, normal_id);

@@ -5,10 +5,7 @@
 Light::Light()
 {
 	m_light_angle_in_deg = 89.9f;
-
-
 }
-
 
 Light::~Light()
 {
@@ -29,12 +26,12 @@ const glm::mat4& Light::get_light_projection_view()
 	return m_projection_view;
 }
 
-sf::Glsl::Vec3 Light::get_gl_sky_color()
+sf::Glsl::Vec3 Light::calc_gl_sky_color()
 {
 	return { m_sky_color.r/255.f, m_sky_color.g/ 255.f, m_sky_color.b/ 255.f };
 }
 
-sf::Glsl::Vec3 Light::get_gl_light_color()
+sf::Glsl::Vec3 Light::calc_gl_light_color()
 {
 	return {m_light_color.r/255.f, m_light_color.g/255.f, m_light_color.b/255.f};
 }
@@ -66,9 +63,11 @@ void Light::update(const sf::Vector3f& player_position)
 
 	if (m_is_day) {
 		m_sky_color = DAY;
+		m_light_color = { 255,255,255 };
 	}
 	else {
 		m_sky_color = NIGHT;
+		m_light_color = { 25,25,25 };
 	}
 
 

@@ -13,47 +13,66 @@ uniform vec3 fog_color;
 uniform float fog_density;
 
 
-float get_cube_scalar()
+float calc_scalar();
+float calc_shadow_value();
+float calc_fog_saturation();
+float calc_diffuse();
+
+void main()
+{
+
+	color = texture(atlas, tex_coord);
+	float alpha = color.a;
+	vec3 texColor = color.xyz;
+
+	float shadow = calc_shadow_value();
+	texColor *= light_color*calc_diffuse()*shadow;
+
+	if (alpha < 0.1)
+		discard;
+
+	texColor = mix(texColor, fog_color, calc_fog_saturation());
+	color = vec4(texColor, alpha);
+}
+
+float calc_fog_saturation()
+{
+	float z = gl_FragCoord.z / gl_FragCoord.w;
+	return clamp(1-exp(-fog_density * z * z * z), 0, 0.8);
+}
+
+float calc_diffuse()
+{
+	return clamp(calc_scalar(), 0.1, 1.f);
+}
+
+float calc_scalar()
 {
 	float scalar = 0.f; //dot(norm, norm_light_dir);
 
-	if (normal_id < 1.f) {
+	int normal_id_int = int(normal_id);
+	if (normal_id_int == 1) {
 		scalar = -light_dir.x;
-	} else if (normal_id < 2.f) {
+	} else if (normal_id_int == 2) {
 		scalar = light_dir.x;
-	} else if (normal_id < 3.f) {
+	} else if (normal_id_int == 3) {
 		scalar = -light_dir.y;
-	} else if (normal_id < 4.f) {
+	} else if (normal_id_int == 4) {
 		scalar = light_dir.y;
-	} else if (normal_id < 5.f) {
+	} else if (normal_id_int == 5) {
 		scalar = -light_dir.z;
-	} else if (normal_id < 6.f) {
+	} else if (normal_id_int == 6) {
 		scalar = light_dir.z;
 	}
 
 	return scalar;
 }
 
-void main()
+float calc_shadow_value()
 {
-	float scalar = get_cube_scalar();
-	float diff = clamp(scalar, 0.2, 1.f);
-
-	vec4 texColor = texture(atlas, tex_coord);
-
-
-	if (normal_id < 2 || normal_id > 4)
-		texColor *= vec4(0.9, 0.9, 0.9, 1);
-	else if (normal_id < 4.f) // positive y
-		texColor *= vec4(0.95, 0.95, 0.95, 1);
-	else if (normal_id < 3.f) // negative y
-		texColor *= vec4(0.85, 0.85, 0.85, 1);
-
-	
-	float z = gl_FragCoord.z / gl_FragCoord.w;
-	float currentDepth = postition_from_light.z*0.5+0.5;
-
 	float shadow = 0.0;
+
+	float currentDepth = postition_from_light.z*0.5+0.5;
 	float bias = 0.0009;
 	vec2 c = postition_from_light.xy*0.5f+0.5f;
 	if (currentDepth > 1) {
@@ -66,18 +85,10 @@ void main()
 			{
 				float pcf_depth = texture(shadow_map, c + vec2(x, y) * texel_size).r;
 
-				shadow += currentDepth - bias > pcf_depth ? 0.2 : 1.0;
+				shadow += currentDepth - bias > pcf_depth ? 0.4 : 1.0;
 			}
 		}
 		shadow /= 25;
 	}
-
-
-	texColor *= vec4(light_color*diff*shadow, 1);
-
-	if (texColor.a < 0.1)
-		discard;
-
-	float fog = clamp(exp(-fog_density * z * z * z), 0.2, 1);
-	color = mix(vec4(fog_color, 1.f), texColor, fog);
+	return shadow;
 }

@@ -50,9 +50,8 @@ public:
 	/* getters */
 	const auto& get_inventory() { return m_inventory; };
 
-	sf::Vector3i get_block_look_at_pos(sf::Vector3i* prev_pos = nullptr);
-
-	glm::mat4 get_projection_view(sf::Vector2u& window_size);
+	sf::Vector3i determine_look_at_block(sf::Vector3i* prev_pos = nullptr);
+	glm::mat4 calc_projection_view(sf::Vector2u& window_size);
 private:
 	void collision(float dx, float dy, float dz);
 	void put_block();

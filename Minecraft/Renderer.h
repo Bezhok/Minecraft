@@ -2,6 +2,7 @@
 #include "pch.h"
 
 class Player;
+class Light;
 namespace World {
 	class Chunk;
 	class Map;
@@ -10,6 +11,7 @@ namespace World {
 
 class Renderer
 {
+	using set_of_chunks = phmap::parallel_node_hash_set<World::Chunk*>;
 private:
 	std::queue<const sf::Drawable*> m_SFML;
 
@@ -31,20 +33,20 @@ private:
 	void draw_wrapper(sf::Vector3i& pos, glm::mat4& projection_view);
 
 	bool is_chunk_visible(const glm::mat4& pvm);
+	void generate_depth_map(set_of_chunks& chunks4rendering, glm::mat4& light_pv, sf::Vector3i& player_pos);
+	void draw_block_mesh(set_of_chunks& chunks4rendering, Light& light, glm::mat4& projection_view, sf::Vector3i& player_pos);
+	void draw_water_mesh(set_of_chunks& chunks4rendering, Light& light, glm::mat4& projection_view, sf::Vector3i& player_pos, Player& player);
 
-	glm::fvec3 get_global_pos(const sf::Vector3i& chunk_pos, const sf::Vector3i& player_pos);
+	glm::fvec3 calc_global_pos(const sf::Vector3i& chunk_pos, const sf::Vector3i& player_pos);
 public:
 	/* init open gl settings */
 	Renderer();
 	~Renderer();
 
-	/* reset GL_PROJECTION after resizing */
-	void reset_view(sf::Vector2f size);
-
 	/* add to queue */
 	void draw_SFML(const sf::Drawable& drawable);
 
 	/* real "drawing" */
-	void finish_render(sf::RenderWindow& window, Player& player, phmap::parallel_node_hash_set<World::Chunk*> &m_chunks4rendering, sf::Mutex& mutex_chunks4rendering);
+	void finish_render(sf::RenderWindow& window, Player& player, set_of_chunks &chunks4rendering, sf::Mutex& mutex_chunks4rendering);
 };
 

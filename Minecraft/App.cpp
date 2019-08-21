@@ -188,7 +188,6 @@ void App::input()
 			sf::FloatRect visibleArea(0.f, 0.f, static_cast<float>(event.size.width), static_cast<float>(event.size.height));
 			m_window.setView(sf::View(visibleArea));
 			m_window.setSize({ event.size.width, event.size.height });
-			m_renderer.reset_view({ static_cast<float>(event.size.width), static_cast<float>(event.size.height) });
 			m_menu->update();
 			break;
 		}
