@@ -283,7 +283,7 @@ void Player::delete_block()
 
 glm::mat4 Player::calc_projection_view(sf::Vector2u& window_size)
 {
-	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)window_size.x / (GLfloat)window_size.y, 0.1f, RENDER_DISTANCE);
+	glm::mat4 projection = glm::perspective( glm::radians(60.0f), (GLfloat)window_size.x / (GLfloat)window_size.y, 0.1f, RENDER_DISTANCE);
 	glm::mat4 view = glm::lookAt(
 		glm::vec3(
 			get_position().x,

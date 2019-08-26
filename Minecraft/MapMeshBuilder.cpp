@@ -147,15 +147,16 @@ void MapMeshBuilder::regenerate_edited_chunk_verticies()
 
 		priority4_rendering.push_back(&chunk);
 
-		//TODO critical error
-		//for (sf::Vector3i& pos : m_map->m_should_be_updated_neighbours) {
-		//	Chunk& chunk = m_map->get_chunk_or_generate(pos.x, pos.y, pos.z);
+		m_mutex__chunks4rendering.lock();
+		for (sf::Vector3i& pos : m_map->m_should_be_updated_neighbours) {
+			Chunk& chunk = m_map->get_chunk_or_generate(pos.x, pos.y, pos.z);
 
-		//	if (chunk.is_rendering()) {
-		//		chunk.update_vertices();
-		//		priority4_rendering.push_back(&chunk);
-		//	}
-		//}
+			if (chunk.is_rendering()) {
+				chunk.update_vertices();
+				priority4_rendering.push_back(&chunk);
+			}
+		}
+		m_mutex__chunks4rendering.unlock();
 
 		should_update_priority_chunks = true;
 
@@ -176,21 +177,22 @@ void MapMeshBuilder::regenerate_edited_chunk_verticies()
 
 	if (should_update_priority_chunks) {
 		//TODO set_block here not in map
-		for (Chunk* chunk : priority4_rendering) {
-			chunk->upate_vao();
 
+		m_mutex__chunks4rendering.lock();
+		for (Chunk* chunk : priority4_rendering) {
+
+			chunk->upate_vao();
 			if (is_new_chunk) {
-				m_mutex__chunks4rendering.lock();
 				m_chunks4rendering.insert(chunk);
-				m_mutex__chunks4rendering.unlock();
 
 				is_new_chunk = false;
 			}
 		}
 		priority4_rendering.clear();
-
 		m_map->apply_chunk_changes();
 		should_update_priority_chunks = false;
+
+		m_mutex__chunks4rendering.unlock();
 	}
 }
 

@@ -88,14 +88,14 @@ void App::run()
 	m_player.god_on();
 	m_player.flight_on();
 
-	
 
 	Menu menu(m_window);
 	menu.update_players_blocks(m_player);
 	m_menu = &menu;
 
-	
+	Sleep(1000.f);
 	m_map_mesh_builder.launch(m_map.get(), &m_player, &m_window);
+	
 	while (m_window.isOpen())
 	{
 		m_debug_data.start();

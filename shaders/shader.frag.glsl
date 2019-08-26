@@ -14,7 +14,7 @@ uniform float fog_density;
 
 
 float calc_scalar();
-float calc_shadow_value();
+float calc_shadow_saturation();
 float calc_fog_saturation();
 float calc_diffuse();
 
@@ -25,8 +25,9 @@ void main()
 	float alpha = color.a;
 	vec3 texColor = color.xyz;
 
-	float shadow = calc_shadow_value();
-	texColor *= light_color*calc_diffuse()*shadow;
+	float shadow = calc_shadow_saturation();
+	float diffuse = calc_diffuse();
+	texColor *= light_color*diffuse*(1-shadow);
 
 	if (alpha < 0.1)
 		discard;
@@ -43,7 +44,7 @@ float calc_fog_saturation()
 
 float calc_diffuse()
 {
-	return clamp(calc_scalar(), 0.1, 1.f);
+	return clamp(calc_scalar(), 0.3, 0.9f);
 }
 
 float calc_scalar()
@@ -68,7 +69,7 @@ float calc_scalar()
 	return scalar;
 }
 
-float calc_shadow_value()
+float calc_shadow_saturation()
 {
 	float shadow = 0.0;
 
@@ -85,10 +86,11 @@ float calc_shadow_value()
 			{
 				float pcf_depth = texture(shadow_map, c + vec2(x, y) * texel_size).r;
 
-				shadow += currentDepth - bias > pcf_depth ? 0.4 : 1.0;
+				shadow += currentDepth - bias > pcf_depth ? 0.7 : 0;
 			}
 		}
 		shadow /= 25;
 	}
+
 	return shadow;
 }

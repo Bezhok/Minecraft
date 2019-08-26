@@ -52,15 +52,14 @@ Renderer::Renderer()
 	glGenVertexArrays(1, &m_wrapper_VAO);
 	glGenBuffers(1, &m_wrapper_VBO);
 
-
 	//shadows
 	glGenFramebuffers(1, &m_depth_map_FBO);
 	glGenTextures(1, &m_depth_map);
 	glBindTexture(GL_TEXTURE_2D, m_depth_map);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
 		SHADOW_SIZE, SHADOW_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	float border_ñolor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -95,7 +94,7 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, set_of_ch
 
 	static int counter = 0;
 	counter++;
-	static const int shadow_update_per_frames = 10;
+	static const int shadow_update_per_frames = 30;
 	if (counter == shadow_update_per_frames) {
 		light.update(player.get_position());
 	}
@@ -146,8 +145,8 @@ void Renderer::finish_render(sf::RenderWindow& window, Player& player, set_of_ch
 		draw_wrapper(pos, projection_view);
 	}
 
-	glViewport(0, 0, 200, 200);
-	draw_depth_map(m_depth_map);
+	//glViewport(0, 0, 200, 200);
+	//draw_depth_map(m_depth_map);
 
 	//sfml render
 	window.pushGLStates();
@@ -278,11 +277,11 @@ void Renderer::draw_water_mesh(set_of_chunks & chunks4rendering, Light & light, 
 glm::fvec3 Renderer::calc_global_pos(const sf::Vector3i& chunk_pos, const sf::Vector3i& player_pos)
 {
 	//fixes white lines between chunks
-	auto delta = chunk_pos - player_pos;
+	auto delta = chunk_pos - player_pos /*+ sf::Vector3i{2, 2, 2}*/;
 
-	return 	{ chunk_pos.x * BLOCKS_IN_CHUNK - delta.x / 2000.f,
-		chunk_pos.y * BLOCKS_IN_CHUNK - delta.y / 2000.f,
-		chunk_pos.z * BLOCKS_IN_CHUNK - delta.z / 2000.f };
+	return 	{ chunk_pos.x * BLOCKS_IN_CHUNK - delta.x / 1000.f,
+		chunk_pos.y * BLOCKS_IN_CHUNK - delta.y / 1000.f,
+		chunk_pos.z * BLOCKS_IN_CHUNK - delta.z / 1000.f };
 }
 
 void Renderer::draw_wrapper(sf::Vector3i& pos, glm::mat4& projection_view)

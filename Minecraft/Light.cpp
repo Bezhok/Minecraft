@@ -5,6 +5,7 @@
 Light::Light()
 {
 	m_light_angle_in_deg = 89.9f;
+	m_light_angle_in_deg -= 2.6*15;
 }
 
 Light::~Light()
@@ -39,22 +40,31 @@ sf::Glsl::Vec3 Light::calc_gl_light_color()
 void Light::update(const sf::Vector3f& player_position)
 {
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
-		m_light_angle_in_deg += 0.6f;
+		m_light_angle_in_deg += 2.6f;
 	}
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {
-		m_light_angle_in_deg -= 0.6f;
+		m_light_angle_in_deg -= 2.6f;
 	}
 
-	if (m_light_angle_in_deg > 360) {
-		m_light_angle_in_deg = 0;
+	// always day
+	if (m_light_angle_in_deg > 178) {
+		m_light_angle_in_deg = 2;
 	}
 
-	if (m_light_angle_in_deg < 0) {
-		m_light_angle_in_deg = 360;
+	if (m_light_angle_in_deg < 2) {
+		m_light_angle_in_deg = 178;
 	}
 
-	if (m_light_angle_in_deg > 180) {
+	//if (m_light_angle_in_deg > 360) {
+	//	m_light_angle_in_deg = 0;
+	//}
+
+	//if (m_light_angle_in_deg < 0) {
+	//	m_light_angle_in_deg = 360;
+	//}
+
+	if (m_light_angle_in_deg > 178) {
 		m_is_day = false;
 	}
 	else {

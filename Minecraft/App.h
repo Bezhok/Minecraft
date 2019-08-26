@@ -18,6 +18,7 @@ private:
 	sf::RenderWindow& m_window;
 	Player m_player;
 	Renderer m_renderer;
+	//std::shared_ptr<World::Map> m_map;
 	std::shared_ptr<World::Map> m_map;
 
 	bool m_should_display_debug_info = true;
