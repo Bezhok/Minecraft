@@ -1,14 +1,16 @@
-# Minecraft clone using
-c++, openGL 3+, sfml, glm, parallel_hash_map, FastNoise
+# Minecraft clone
+Using: c++, openGL 3+, sfml, glm, parallel_hash_map, FastNoise
+
+[Download x64 version](https://github.com/Chekistchek/Minecraft/releases/download/v0.1-alpha/x64.zip)
 
 # Controls
 | Key | Description |
 | ------ | ------ |
-| w,a,s,d | movement |
-| right shift | flight on/off |
-| left shift | down when flight on |
-| space | jump/up |
-| f3 | hide/disply debug info |
+| W, A, S, D | movement |
+| right SHIFT | flight on/off |
+| left SHIFT | to move downwards when flight on |
+| SPACE | jump/ to move upwards |
+| F3 | hide/disply debug info |
 
 # Features
 - infinite world (from zero to billions)
