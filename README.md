@@ -9,13 +9,15 @@ Using: c++, openGL 3+, sfml, glm, parallel_hash_map, FastNoise
 | W, A, S, D | movement |
 | right SHIFT | flight on/off |
 | left SHIFT | to move downwards when flight on |
-| SPACE | jump/ to move upwards |
-| F3 | hide/disply debug info |
+| SPACE | jump/to move upwards when flight on |
+| F3 | hide/display debug info |
+| LEFT, RIGHT | change sun position |
 
 # Features
 - infinite world (from zero to billions)
 - "alive" water
 - shadows
+- ability to change sun position
 
 # Screenshots
 ![1 png](https://user-images.githubusercontent.com/30340548/63799842-930b5380-c915-11e9-8e3a-41c3d26ef291.jpg)
