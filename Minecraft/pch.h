@@ -20,7 +20,7 @@
 #include <stack>
 
 //libs
-#include <glew.h>
+#include <GLEW/GL/glew.h>
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 #include <SFML/System.hpp>

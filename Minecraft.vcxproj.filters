@@ -81,9 +81,6 @@
     <ClCompile Include="Minecraft\TerrainGenerator.cpp">
       <Filter>Исходные файлы\World</Filter>
     </ClCompile>
-    <ClCompile Include="libs\fast_noise\FastNoise.cpp">
-      <Filter>Исходные файлы\Base</Filter>
-    </ClCompile>
     <ClCompile Include="Minecraft\MapMeshBuilder.cpp">
       <Filter>Исходные файлы\World</Filter>
     </ClCompile>
@@ -95,6 +92,9 @@
     </ClCompile>
     <ClCompile Include="Minecraft\Light.cpp">
       <Filter>Исходные файлы</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependicies\includeFull\fast_noise\FastNoise.cpp">
+      <Filter>Исходные файлы\Base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
