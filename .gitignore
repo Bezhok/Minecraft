@@ -13,13 +13,21 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
-!openal32.dll
+
 # Build results
-[Dd]ebug(Obj)?/
-[Dd]ebugPublic(Obj)?/
-[Rr]elease(Obj)?/
-[Rr]eleases(Obj)?/
-x64/
+output/**/*.exe
+#[Dd]ebug/
+[Dd]ebugPublic/
+#[Rr]elease/
+[Rr]eleases/
+
+
+DebugObj/
+ReleaseObj/
+
+!*.dll
+
+
 x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
