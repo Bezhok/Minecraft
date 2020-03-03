@@ -49,10 +49,10 @@
     <ClCompile Include="src\Chunk.cpp">
       <Filter>World</Filter>
     </ClCompile>
-    <ClCompile Include="src\TerrainGenerator.cpp">
+    <ClCompile Include="src\block_db.cpp">
       <Filter>World</Filter>
     </ClCompile>
-    <ClCompile Include="src\block_db.cpp">
+    <ClCompile Include="src\TerrainGenerator.cpp">
       <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>
