@@ -14,4 +14,4 @@ static const int BLOCKS_IN_CHUNK = 16;
 static const int CHUNKS_IN_WORLD_HEIGHT = 16;
 
 
-extern int verticies_wasnt_free;
+extern int vertices_wasnt_free;

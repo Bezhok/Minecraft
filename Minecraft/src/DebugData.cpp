@@ -2,21 +2,19 @@
 #include "DebugData.h"
 
 
-void DebugData::start()
-{
-	start_time = end_time;
+void DebugData::start() {
+    start_time = end_time;
 
-	end_time = timer.getElapsedTime().asMilliseconds();
-	update_frequency_time = update_frequency_timer.getElapsedTime().asMilliseconds();
+    end_time = timer.getElapsedTime().asMilliseconds();
+    update_frequency_time = update_frequency_timer.getElapsedTime().asMilliseconds();
 }
 
-void DebugData::count()
-{
-	if (update_frequency_time >= 200) {
-		update_frequency_timer.restart();
-		timer.restart();
+void DebugData::count() {
+    if (update_frequency_time >= 200) {
+        update_frequency_timer.restart();
+        timer.restart();
 
-		frame_time = static_cast<float>(end_time - start_time);
-		fps = 1000.f / frame_time;
-	}
+        frame_time = static_cast<float>(end_time - start_time);
+        fps = 1000.f / frame_time;
+    }
 }

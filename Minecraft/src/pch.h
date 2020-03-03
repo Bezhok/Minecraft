@@ -1,13 +1,13 @@
 #pragma once
 #define _ENABLE_EXTENDED_ALIGNED_STORAGE
 
-// standart
+// std
 #include <cmath>
 #include <string>
 #include <functional>
 #include <array>
-#include <iterator> 
-#include <algorithm> 
+#include <iterator>
+#include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
 #include <fstream>
@@ -27,6 +27,7 @@
 #include <SFML/Audio.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

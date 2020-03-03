@@ -1,24 +1,25 @@
 #pragma once
+
 #include "pch.h"
 
-class DebugData
-{
+class DebugData {
 private:
-	float fps = 0;
-	float frame_time = 0;
-	int start_time = 0;
-	int end_time = 0;
-	int update_frequency_time;
-	sf::Clock update_frequency_timer;
-	sf::Clock timer;
+    float fps = 0;
+    float frame_time = 0;
+    int start_time = 0;
+    int end_time = 0;
+    int update_frequency_time = 0;
+    sf::Clock update_frequency_timer;
+    sf::Clock timer;
 
 public:
-	float get_fps() { return fps; };
-	float get_frame_time() { return frame_time; };
+    float get_fps() { return fps; };
 
-	/* counting delta time */
-	void start();
+    float get_frame_time() { return frame_time; };
 
-	/* update data if need */
-	void count();
+    /* counting delta time */
+    void start();
+
+    /* update data if need */
+    void count();
 };

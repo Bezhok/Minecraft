@@ -1,9 +1,9 @@
 #pragma once
+
 #include "Entity.h"
 
 namespace Base {
-	class Box :
-		public Entity
-	{
-	};
+    class Box :
+            public Entity {
+    };
 }

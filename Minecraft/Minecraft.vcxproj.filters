@@ -49,10 +49,10 @@
     <ClCompile Include="src\Chunk.cpp">
       <Filter>World</Filter>
     </ClCompile>
-    <ClCompile Include="src\block_db.cpp">
+    <ClCompile Include="src\TerrainGenerator.cpp">
       <Filter>World</Filter>
     </ClCompile>
-    <ClCompile Include="src\TerrainGenerator.cpp">
+    <ClCompile Include="src\block_db.cpp">
       <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>
@@ -96,13 +96,13 @@
     <ClInclude Include="src\Chunk.h">
       <Filter>World</Filter>
     </ClInclude>
-    <ClInclude Include="src\block_db.h">
-      <Filter>World</Filter>
-    </ClInclude>
     <ClInclude Include="src\TerrainGenerator.h">
       <Filter>World</Filter>
     </ClInclude>
     <ClInclude Include="src\block_types.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="src\block_db.h">
       <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
