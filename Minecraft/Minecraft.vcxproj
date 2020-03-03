@@ -154,59 +154,46 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Dependicies\includeFull\fast_noise\FastNoise.cpp" />
-    <ClCompile Include="Minecraft\ChunkMeshBasic.cpp" />
-    <ClCompile Include="Minecraft\game_constants.cpp" />
-    <ClCompile Include="Minecraft\Light.cpp" />
-    <ClCompile Include="Minecraft\MapMeshBuilder.cpp" />
-    <ClCompile Include="Minecraft\Menu.cpp" />
-    <ClCompile Include="Minecraft\App.cpp" />
-    <ClCompile Include="Minecraft\block_db.cpp" />
-    <ClCompile Include="Minecraft\Box.cpp" />
-    <ClCompile Include="Minecraft\Chunk.cpp" />
-    <ClCompile Include="Minecraft\DebugData.cpp" />
-    <ClCompile Include="Minecraft\Entity.cpp" />
-    <ClCompile Include="Minecraft\main.cpp" />
-    <ClCompile Include="Minecraft\Player.cpp" />
-    <ClCompile Include="Minecraft\Renderer.cpp" />
-    <ClCompile Include="Minecraft\Map.cpp" />
-    <ClCompile Include="Minecraft\Sounds.cpp" />
-    <ClCompile Include="Minecraft\TerrainGenerator.cpp" />
+    <ClCompile Include="..\Dependicies\includeFull\fast_noise\FastNoise.cpp" />
+    <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\block_db.cpp" />
+    <ClCompile Include="src\Box.cpp" />
+    <ClCompile Include="src\Chunk.cpp" />
+    <ClCompile Include="src\ChunkMeshBasic.cpp" />
+    <ClCompile Include="src\DebugData.cpp" />
+    <ClCompile Include="src\Entity.cpp" />
+    <ClCompile Include="src\game_constants.cpp" />
+    <ClCompile Include="src\Light.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Map.cpp" />
+    <ClCompile Include="src\MapMeshBuilder.cpp" />
+    <ClCompile Include="src\Menu.cpp" />
+    <ClCompile Include="src\Player.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
+    <ClCompile Include="src\Sounds.cpp" />
+    <ClCompile Include="src\TerrainGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Minecraft\block_types.h" />
-    <ClInclude Include="Minecraft\Buffers.h" />
-    <ClInclude Include="Minecraft\ChunkMeshBasic.h" />
-    <ClInclude Include="Minecraft\Light.h" />
-    <ClInclude Include="Minecraft\MapMeshBuilder.h" />
-    <ClInclude Include="Minecraft\Menu.h" />
-    <ClInclude Include="Minecraft\App.h" />
-    <ClInclude Include="Minecraft\block_db.h" />
-    <ClInclude Include="Minecraft\Box.h" />
-    <ClInclude Include="Minecraft\Chunk.h" />
-    <ClInclude Include="Minecraft\DebugData.h" />
-    <ClInclude Include="Minecraft\Entity.h" />
-    <ClInclude Include="Minecraft\game_constants.h" />
-    <ClInclude Include="Minecraft\Maths.h" />
-    <ClInclude Include="Minecraft\pch.h" />
-    <ClInclude Include="Minecraft\Player.h" />
-    <ClInclude Include="Minecraft\Renderer.h" />
-    <ClInclude Include="Minecraft\Map.h" />
-    <ClInclude Include="Minecraft\Sounds.h" />
-    <ClInclude Include="Minecraft\TerrainGenerator.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="resources\atlas.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shaders\block_wrapper.frag.glsl" />
-    <None Include="shaders\block_wrapper.vert.glsl" />
-    <None Include="shaders\shader.frag.glsl" />
-    <None Include="shaders\shader.vert.glsl" />
-    <None Include="shaders\shadow.frag.glsl" />
-    <None Include="shaders\shadow.vert.glsl" />
-    <None Include="shaders\water.frag.glsl" />
-    <None Include="shaders\water.vert.glsl" />
+    <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\block_db.h" />
+    <ClInclude Include="src\block_types.h" />
+    <ClInclude Include="src\Box.h" />
+    <ClInclude Include="src\Buffers.h" />
+    <ClInclude Include="src\Chunk.h" />
+    <ClInclude Include="src\ChunkMeshBasic.h" />
+    <ClInclude Include="src\DebugData.h" />
+    <ClInclude Include="src\Entity.h" />
+    <ClInclude Include="src\game_constants.h" />
+    <ClInclude Include="src\Light.h" />
+    <ClInclude Include="src\Map.h" />
+    <ClInclude Include="src\MapMeshBuilder.h" />
+    <ClInclude Include="src\Maths.h" />
+    <ClInclude Include="src\Menu.h" />
+    <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\Player.h" />
+    <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\Sounds.h" />
+    <ClInclude Include="src\TerrainGenerator.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
