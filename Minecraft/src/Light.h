@@ -9,7 +9,7 @@ private:
     const sf::Color NIGHT{28, 40, 80};
     const float light_movement_radius = RENDER_DISTANCE / 1;
     const float y_rotation_in_deg = 0;
-    
+
     float m_light_angle_in_deg;
     sf::Color m_sky_color = DAY;
     sf::Color m_light_color{255, 255, 255};

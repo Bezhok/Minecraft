@@ -156,8 +156,8 @@
   <ItemGroup>
     <ClCompile Include="..\Dependicies\includeFull\fast_noise\FastNoise.cpp" />
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\BlockWrapper.cpp" />
     <ClCompile Include="src\block_db.cpp" />
-    <ClCompile Include="src\Box.cpp" />
     <ClCompile Include="src\Chunk.cpp" />
     <ClCompile Include="src\ChunkMeshBasic.cpp" />
     <ClCompile Include="src\DebugData.cpp" />
@@ -175,9 +175,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\BlockWrapper.h" />
     <ClInclude Include="src\block_db.h" />
     <ClInclude Include="src\block_types.h" />
-    <ClInclude Include="src\Box.h" />
     <ClInclude Include="src\Buffers.h" />
     <ClInclude Include="src\Chunk.h" />
     <ClInclude Include="src\ChunkMeshBasic.h" />

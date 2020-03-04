@@ -22,9 +22,6 @@
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Sounds.cpp" />
-    <ClCompile Include="src\Box.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="src\Entity.cpp">
       <Filter>Base</Filter>
     </ClCompile>
@@ -55,6 +52,7 @@
     <ClCompile Include="src\TerrainGenerator.cpp">
       <Filter>World</Filter>
     </ClCompile>
+    <ClCompile Include="src\BlockWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -63,9 +61,6 @@
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Sounds.h" />
-    <ClInclude Include="src\Box.h">
-      <Filter>Base</Filter>
-    </ClInclude>
     <ClInclude Include="src\Entity.h">
       <Filter>Base</Filter>
     </ClInclude>
@@ -105,5 +100,6 @@
     <ClInclude Include="src\block_db.h">
       <Filter>World</Filter>
     </ClInclude>
+    <ClInclude Include="src\BlockWrapper.h" />
   </ItemGroup>
 </Project>

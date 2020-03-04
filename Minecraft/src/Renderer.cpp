@@ -2,14 +2,13 @@
 #include "Renderer.h"
 #include "Player.h"
 #include "block_db.h"
-#include "Chunk.h"
 #include "Map.h"
 #include "Light.h"
+#include "BlockWrapper.h"
 
 using namespace World;
 
-
-Renderer::Renderer() {
+void Renderer::init_openGL() {
     glewExperimental = GL_TRUE;
     glewInit();
 
@@ -21,15 +20,26 @@ Renderer::Renderer() {
     glDepthFunc(GL_LESS);
     glDepthMask(GL_TRUE);
     glClearDepth(1.f);
+}
 
+void Renderer::load_shaders() {
     m_wrapper_shader.loadFromFile("shaders\\block_wrapper.vert.glsl", "shaders\\block_wrapper.frag.glsl");
     m_shader_program.loadFromFile("shaders\\shader.vert.glsl", "shaders\\shader.frag.glsl");
     m_shadow_shader.loadFromFile("shaders\\shadow.vert.glsl", "shaders\\shadow.frag.glsl");
     m_water_shader.loadFromFile("shaders\\water.vert.glsl", "shaders\\water.frag.glsl");
 
+    m_pvm_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "pvm");
+    m_light_pvm_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "light_pvm");
+
+    m_shadow_pvm_location = glGetUniformLocation(m_shadow_shader.getNativeHandle(), "pvm");
+
+    m_water_pvm_location = glGetUniformLocation(m_water_shader.getNativeHandle(), "pvm");
+    m_water_model_location = glGetUniformLocation(m_water_shader.getNativeHandle(), "model");
+}
+
+void Renderer::load_atlas() {
     m_image_atlas.loadFromFile(PATH2ATLAS);
     m_image_atlas.flipVertically();
-
 
     glEnable(GL_TEXTURE_2D);
     m_texture_atlas.loadFromImage(m_image_atlas);
@@ -44,14 +54,10 @@ Renderer::Renderer() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-
     m_image_atlas.flipVertically();
+}
 
-
-    glGenVertexArrays(1, &m_wrapper_VAO);
-    glGenBuffers(1, &m_wrapper_VBO);
-
-    //shadows
+void Renderer::configure_depth_map() {
     glGenFramebuffers(1, &m_depth_map_FBO);
     glGenTextures(1, &m_depth_map);
     glBindTexture(GL_TEXTURE_2D, m_depth_map);
@@ -71,10 +77,21 @@ Renderer::Renderer() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-Renderer::~Renderer() {
-    glDeleteVertexArrays(1, &m_wrapper_VAO);
-    glDeleteBuffers(1, &m_wrapper_VBO);
+Renderer::Renderer() {
+    init_openGL();
 
+    load_shaders();
+
+    load_atlas();
+
+    configure_depth_map();
+
+    m_fog_density = pow(RENDER_DISTANCE, 1.f / 3.f) / pow(512.f, 1.f / 3.f) * 1e-8f;
+    m_block_wrapper = std::make_unique<BlockWrapper>();
+    m_light = std::make_unique<Light>();
+}
+
+Renderer::~Renderer() {
     glDeleteFramebuffers(1, &m_depth_map_FBO);
     glDeleteTextures(1, &m_depth_map);
 }
@@ -83,66 +100,7 @@ void Renderer::draw_SFML(const sf::Drawable &drawable) {
     m_SFML.push(&drawable);
 }
 
-void Renderer::finish_render(sf::RenderWindow &window, Player &player, set_of_chunks &chunks4rendering,
-                             sf::Mutex &mutex_chunks4rendering) {
-    static Light light;
-
-    static int counter = 0;
-    counter++;
-    static const int shadow_update_per_frames = 30;
-    if (counter == shadow_update_per_frames) {
-        light.update(player.get_position());
-    }
-
-    auto color = light.calc_gl_sky_color();
-    glClearColor(color.x, color.y, color.z, 1.0f);
-
-    auto window_size = window.getSize();
-    glm::mat4 projection_view = player.calc_projection_view(window_size);
-    glm::mat4 light_pv = light.get_light_projection_view();
-
-
-    sf::Vector3i player_pos = {
-            Map::coord2chunk_coord(player.get_position().x),
-            Map::coord2chunk_coord(player.get_position().y),
-            Map::coord2chunk_coord(player.get_position().z)
-    };
-
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
-
-
-    //if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up)) {
-    //	counter = 1000;
-    //}
-
-
-    mutex_chunks4rendering.lock();
-    if (counter == shadow_update_per_frames) {
-        counter = 0;
-
-        glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
-        generate_depth_map(chunks4rendering, light_pv, player_pos);
-    }
-
-    glViewport(0, 0, window.getSize().x, window.getSize().y);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    draw_block_mesh(chunks4rendering, light, projection_view, player_pos);
-    draw_water_mesh(chunks4rendering, light, projection_view, player_pos, player);
-
-
-    mutex_chunks4rendering.unlock();
-
-
-    sf::Vector3i pos = player.determine_look_at_block();
-    if (pos.y > 0) {
-        draw_wrapper(pos, projection_view);
-    }
-
-    //glViewport(0, 0, 200, 200);
-    //draw_depth_map(m_depth_map);
-
+void Renderer::finish_renderSFML(sf::RenderWindow &window) {
     //sfml render
     window.pushGLStates();
     while (!m_SFML.empty()) {
@@ -150,26 +108,80 @@ void Renderer::finish_render(sf::RenderWindow &window, Player &player, set_of_ch
         m_SFML.pop();
     }
     window.popGLStates();
+}
 
+bool Renderer::should_update_shadows() {
+    static int counter = 0;
+    counter++;
+    static const int shadow_update_per_frames = 30;
+
+    bool res = counter == shadow_update_per_frames;
+    if (res) counter = 0;
+    return res;
+}
+
+void Renderer::draw_meshes(const sf::Vector2u &window_size, Player &player, set_of_chunks &chunks4rendering,
+                           bool should_update_shadow) {
+    sf::Vector3i player_pos__chunk = {
+            Map::coord2chunk_coord(player.get_position().x),
+            Map::coord2chunk_coord(player.get_position().y),
+            Map::coord2chunk_coord(player.get_position().z)
+    };
+    if (should_update_shadow) {
+        glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
+        generate_depth_map(chunks4rendering, player_pos__chunk);
+    }
+
+    glViewport(0, 0, window_size.x, window_size.y);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    draw_block_mesh(chunks4rendering, player_pos__chunk);
+    draw_water_mesh(chunks4rendering, player_pos__chunk, player);
+}
+
+void Renderer::finish_render(sf::RenderWindow &window, Player &player, set_of_chunks &chunks4rendering,
+                             sf::Mutex &mutex_chunks4rendering) {
+    bool should_update = should_update_shadows();
+    if (should_update) {
+        m_light->update(player.get_position());
+    }
+    auto color = m_light->calc_gl_sky_color();
+    glClearColor(color.x, color.y, color.z, 1.0f);
+
+    auto window_size = window.getSize();
+    m_projection_view = player.calc_projection_view(window_size);
+    m_light_pv = m_light->get_light_projection_view();
+
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    mutex_chunks4rendering.lock();
+    draw_meshes(window_size, player, chunks4rendering, should_update);
+    mutex_chunks4rendering.unlock();
+
+    sf::Vector3i pos = player.determine_look_at_block();
+    if (pos.y > 0) {
+        draw_wrapper(pos);
+    }
+
+    finish_renderSFML(window);
     window.display();
 }
 
-void Renderer::generate_depth_map(set_of_chunks &chunks4rendering, glm::mat4 &light_pv, sf::Vector3i &player_pos) {
+void Renderer::generate_depth_map(set_of_chunks &chunks4rendering, sf::Vector3i &player_pos__chunk) {
     sf::Shader::bind(&m_shadow_shader);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_depth_map_FBO);
     glClear(GL_DEPTH_BUFFER_BIT);
 
     sf::Texture::bind(&m_texture_atlas);
-    GLuint l_pvm_location = glGetUniformLocation(m_shadow_shader.getNativeHandle(), "pvm");
 
     glm::vec3 global_pos(0.f);
     glm::mat4 pvm(1.f);
     for (auto &chunk : chunks4rendering) {
         if (chunk->m_blocks_mesh.get_final_points_count() > 0) {
-            global_pos = calc_global_pos(chunk->get_pos(), player_pos);
-            pvm = glm::translate(light_pv, global_pos);
-            glUniformMatrix4fv(l_pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
+            global_pos = calc_global_pos(chunk->get_pos(), player_pos__chunk);
+            pvm = glm::translate(m_light_pv, global_pos);
+            glUniformMatrix4fv(m_shadow_pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
             chunk->m_blocks_mesh.draw();
         }
     }
@@ -177,118 +189,95 @@ void Renderer::generate_depth_map(set_of_chunks &chunks4rendering, glm::mat4 &li
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void Renderer::draw_block_mesh(set_of_chunks &chunks4rendering, Light &light, glm::mat4 &projection_view,
-                               sf::Vector3i &player_pos) {
-    static float fog_density = pow(RENDER_DISTANCE, 1.f / 3.f) / pow(512.f, 1.f / 3.f) * 1e-8f;
+void Renderer::bind_shadow_map(sf::Shader &shader, int idx) {
+    glActiveTexture(GL_TEXTURE0 + idx);
+    glBindTexture(GL_TEXTURE_2D, m_depth_map);
+    glUniform1i(glGetUniformLocation(shader.getNativeHandle(), "shadow_map"), idx);
+}
 
-    m_shader_program.setUniform("light_dir",
-                                sf::Glsl::Vec3{light.get_light_direction().x, abs(light.get_light_direction().y),
-                                               light.get_light_direction().z});
+void Renderer::draw_block_mesh(set_of_chunks &chunks4rendering,
+                               sf::Vector3i &player_pos__chunk) {
 
-    m_shader_program.setUniform("light_color", light.calc_gl_light_color());
-    m_shader_program.setUniform("fog_color", light.calc_gl_sky_color());
-    m_shader_program.setUniform("fog_density", fog_density);
-
-    GLuint pvm_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "pvm");
-    GLuint light_pvm_location = glGetUniformLocation(m_shader_program.getNativeHandle(), "light_pvm");
+    set_basic_uniforms(m_shader_program);
 
     sf::Shader::bind(&m_shader_program);
     sf::Texture::bind(&m_texture_atlas);
+    bind_shadow_map(m_shader_program, 1);
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_texture_atlas.getNativeHandle());
-    glUniform1i(glGetUniformLocation(m_shader_program.getNativeHandle(), "atlas"), 0);
-
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, m_depth_map);
-    glUniform1i(glGetUniformLocation(m_shader_program.getNativeHandle(), "shadow_map"), 1);
-
-    glm::vec3 global_pos(0.f);
     glm::mat4 pvm(1.f);
     glm::mat4 light_pvm(1.f);
     for (auto &chunk : chunks4rendering) {
         if (chunk->m_blocks_mesh.get_final_points_count() > 0) {
 
-            global_pos = calc_global_pos(chunk->get_pos(), player_pos);
-            pvm = glm::translate(projection_view, global_pos);
+            glm::vec3 global_pos = calc_global_pos(chunk->get_pos(), player_pos__chunk);
+            pvm = glm::translate(m_projection_view, global_pos);
 
             if (is_chunk_visible(pvm)) {
-                light_pvm = glm::translate(light.get_light_projection_view(), global_pos);
+                light_pvm = glm::translate(m_light->get_light_projection_view(), global_pos);
 
-                glUniformMatrix4fv(pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
-                glUniformMatrix4fv(light_pvm_location, 1, GL_FALSE, glm::value_ptr(light_pvm));
+                glUniformMatrix4fv(m_pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
+                glUniformMatrix4fv(m_light_pvm_location, 1, GL_FALSE, glm::value_ptr(light_pvm));
                 chunk->m_blocks_mesh.draw();
             }
 
         }
     }
-
 }
 
-void Renderer::draw_water_mesh(set_of_chunks &chunks4rendering, Light &light, glm::mat4 &projection_view,
-                               sf::Vector3i &player_pos, Player &player) {
-    static float fog_density = pow(RENDER_DISTANCE, 1.f / 3.f) / pow(512.f, 1.f / 3.f) * 1e-8f;
-    static sf::Clock timer;
+void Renderer::set_basic_uniforms(sf::Shader &shader) {
+    shader.setUniform("light_dir",
+                      sf::Glsl::Vec3{m_light->get_light_direction().x, abs(m_light->get_light_direction().y),
+                                     m_light->get_light_direction().z});
+    shader.setUniform("light_color", m_light->calc_gl_light_color());
+    shader.setUniform("fog_color", m_light->calc_gl_sky_color());
+    shader.setUniform("fog_density", m_fog_density);
+}
+
+void Renderer::draw_water_mesh(set_of_chunks &chunks4rendering,
+                               sf::Vector3i &player_pos__chunk, Player &player) {
 
     sf::Shader::bind(&m_water_shader);
     sf::Texture::bind(&m_texture_atlas);
 
-    m_water_shader.setUniform("light_dir",
-                              sf::Glsl::Vec3{light.get_light_direction().x, abs(light.get_light_direction().y),
-                                             light.get_light_direction().z});
-    m_water_shader.setUniform("light_color", light.calc_gl_light_color());
-    m_water_shader.setUniform("fog_color", light.calc_gl_sky_color());
-    m_water_shader.setUniform("fog_density", fog_density);
-
+    set_basic_uniforms(m_water_shader);
+    static sf::Clock timer;
     m_water_shader.setUniform("dtime", timer.getElapsedTime().asSeconds());
-
     m_water_shader.setUniform("view_pos", sf::Glsl::Vec3{player.get_position().x, player.get_position().y + 0.8f,
                                                          player.get_position().z});
-
-
-    GLuint pvm_location = glGetUniformLocation(m_water_shader.getNativeHandle(), "pvm");
-    GLuint model_location = glGetUniformLocation(m_water_shader.getNativeHandle(), "model");
-
-
     glDisable(GL_CULL_FACE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     glm::vec3 global_pos(0.f);
     glm::mat4 pvm(1.f);
     glm::mat4 model(1.f);
     for (auto &chunk : chunks4rendering) {
         if (chunk->m_water_mesh.get_final_points_count() > 0) {
 
-            global_pos = calc_global_pos(chunk->get_pos(), player_pos);
-            pvm = glm::translate(projection_view, global_pos);
+            global_pos = calc_global_pos(chunk->get_pos(), player_pos__chunk);
+            pvm = glm::translate(m_projection_view, global_pos);
             model = glm::translate(glm::mat4(1.f), global_pos);
 
-            glUniformMatrix4fv(pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
-            glUniformMatrix4fv(model_location, 1, GL_FALSE, glm::value_ptr(model));
+            glUniformMatrix4fv(m_water_pvm_location, 1, GL_FALSE, glm::value_ptr(pvm));
+            glUniformMatrix4fv(m_water_model_location, 1, GL_FALSE, glm::value_ptr(model));
 
             chunk->m_water_mesh.draw();
         }
     }
-
     glBlendFunc(GL_ONE, GL_ZERO);
 }
 
-glm::fvec3 Renderer::calc_global_pos(const sf::Vector3i &chunk_pos, const sf::Vector3i &player_pos) {
+glm::fvec3 Renderer::calc_global_pos(const sf::Vector3i &chunk_pos, const sf::Vector3i &player_pos__chunk) {
     //fixes white lines between chunks
-    auto delta = chunk_pos - player_pos /*+ sf::Vector3i{2, 2, 2}*/;
+    auto delta = chunk_pos - player_pos__chunk /*+ sf::Vector3i{2, 2, 2}*/;
 
     return {chunk_pos.x * BLOCKS_IN_CHUNK - delta.x / 1000.f,
             chunk_pos.y * BLOCKS_IN_CHUNK - delta.y / 1000.f,
             chunk_pos.z * BLOCKS_IN_CHUNK - delta.z / 1000.f};
 }
 
-void Renderer::draw_wrapper(sf::Vector3i &pos, glm::mat4 &projection_view) {
-
-    glLineWidth(6);
-
+void Renderer::draw_wrapper(const sf::Vector3i &pos) {
     sf::Shader::bind(&m_wrapper_shader);
 
-    auto pvm = glm::translate(projection_view, glm::vec3{
+    auto pvm = glm::translate(m_projection_view, glm::vec3{
             Map::coord2chunk_coord(pos.x) * BLOCKS_IN_CHUNK,
             Map::coord2chunk_coord(pos.y) * BLOCKS_IN_CHUNK,
             Map::coord2chunk_coord(pos.z) * BLOCKS_IN_CHUNK,
@@ -296,62 +285,8 @@ void Renderer::draw_wrapper(sf::Vector3i &pos, glm::mat4 &projection_view) {
 
     m_wrapper_shader.setUniform("pvm", sf::Glsl::Mat4(glm::value_ptr(pvm)));
 
-
-    sf::Vector3i bpos = {
-            Map::coord2block_coord_in_chunk(pos.x),
-            Map::coord2block_coord_in_chunk(pos.y),
-            Map::coord2block_coord_in_chunk(pos.z)
-    };
-
-    float m = 0.02f;
-    float p = 1 + m;
-    GLfloat wrapper_vertices[] = {
-            bpos.x - m, bpos.y + p, bpos.z - m,
-            bpos.x + p, bpos.y + p, bpos.z - m,
-            bpos.x + p, bpos.y + p, bpos.z + p,
-            bpos.x - m, bpos.y + p, bpos.z + p,
-            bpos.x - m, bpos.y + p, bpos.z - m,
-
-            bpos.x - m, bpos.y - m, bpos.z - m,
-            bpos.x + p, bpos.y - m, bpos.z - m,
-            bpos.x + p, bpos.y - m, bpos.z + p,
-            bpos.x - m, bpos.y - m, bpos.z + p,
-            bpos.x - m, bpos.y - m, bpos.z - m,
-
-            bpos.x + p, bpos.y - m, bpos.z - m,
-            bpos.x + p, bpos.y + p, bpos.z - m,
-            bpos.x + p, bpos.y + p, bpos.z + p,
-            bpos.x + p, bpos.y - m, bpos.z + p,
-            bpos.x + p, bpos.y - m, bpos.z - m,
-
-            bpos.x - m, bpos.y - m, bpos.z - m,
-            bpos.x - m, bpos.y + p, bpos.z - m,
-            bpos.x - m, bpos.y + p, bpos.z + p,
-            bpos.x - m, bpos.y - m, bpos.z + p,
-            bpos.x - m, bpos.y - m, bpos.z - m
-    };
-
-
-    glBindVertexArray(m_wrapper_VAO);
-    /**/
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_wrapper_VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(wrapper_vertices), wrapper_vertices,
-                 GL_STATIC_DRAW); //GL_DYNAMIC_DRAW GL_STATIC_DRAW GL_STREAM_DRAW
-
-    // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0 * sizeof(GL_FLOAT), (GLvoid *) 0);
-    glEnableVertexAttribArray(0);
-
-    /**/
-    glBindVertexArray(0); // Unbind VAO
-
-
-    glBindVertexArray(m_wrapper_VAO);
-    glDrawArrays(GL_LINE_STRIP, 0, 20);
-    glBindVertexArray(0);
-
-    glLineWidth(1);
+    m_block_wrapper->set_pos(pos);
+    m_block_wrapper->draw();
 }
 
 bool Renderer::is_chunk_visible(const glm::mat4 &pvm) {
