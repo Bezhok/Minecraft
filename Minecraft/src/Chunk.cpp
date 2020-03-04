@@ -23,82 +23,96 @@ block_id Chunk::get_block_type(int x, int y, int z) {
     return m_blocks.at(x + y * BLOCKS_IN_CHUNK + z * BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK);
 }
 
+void Chunk::generate_block_vertices(int i, int j, int k, VertexType x, VertexType y, VertexType z, block_id id) {
+    if (!is_opaque__in_chunk(i - 1, j, k)) {
+        m_blocks_mesh.generate_vertices4negative_x(x, y, z, id);
+    }
+
+    if (!is_opaque__in_chunk(i + 1, j, k)) {
+        m_blocks_mesh.generate_vertices4positive_x(x, y, z, id);
+    }
+
+    if (!is_opaque__in_chunk(i, j - 1, k)) {
+        m_blocks_mesh.generate_vertices4negative_y(x, y, z, id);
+    }
+
+    if (!is_opaque__in_chunk(i, j + 1, k)) {
+        m_blocks_mesh.generate_vertices4positive_y(x, y, z, id);
+    }
+
+    if (!is_opaque__in_chunk(i, j, k - 1)) {
+        m_blocks_mesh.generate_vertices4negative_z(x, y, z, id);
+    }
+
+    if (!is_opaque__in_chunk(i, j, k + 1)) {
+        m_blocks_mesh.generate_vertices4positive_z(x, y, z, id);
+    }
+}
+
+void Chunk::generate_water_vertices(int i, int j, int k, VertexType x, VertexType y, VertexType z, block_id id) {
+    if (!is_water__in_chunk(i - 1, j, k) && !is_opaque__in_chunk(i - 1, j, k)) {
+        m_water_mesh.generate_vertices4negative_x(x, y, z, id);
+    }
+
+    if (!is_water__in_chunk(i + 1, j, k) && !is_opaque__in_chunk(i + 1, j, k)) {
+        m_water_mesh.generate_vertices4positive_x(x, y, z, id);
+    }
+
+    if (!is_water__in_chunk(i, j - 1, k) && !is_opaque__in_chunk(i, j - 1, k)) {
+        m_water_mesh.generate_vertices4negative_y(x, y, z, id);
+    }
+
+    if (!is_water__in_chunk(i, j + 1, k) && !is_opaque__in_chunk(i, j + 1, k)) {
+        m_water_mesh.generate_vertices4positive_y(x, y, z, id);
+    }
+
+    if (!is_water__in_chunk(i, j, k - 1) && !is_opaque__in_chunk(i, j, k - 1)) {
+        m_water_mesh.generate_vertices4negative_z(x, y, z, id);
+    }
+
+    if (!is_water__in_chunk(i, j, k + 1) && !is_opaque__in_chunk(i, j, k + 1)) {
+        m_water_mesh.generate_vertices4positive_z(x, y, z, id);
+    }
+}
+
+void Chunk::generate_cactus_vertices(VertexType x, VertexType y, VertexType z, block_id id) {
+    static VertexType pixel = 1.005 / BLOCK_RESOLUTION;
+
+    m_blocks_mesh.generate_vertices4negative_x(x + pixel, y, z, id);
+    m_blocks_mesh.generate_vertices4positive_x(x - pixel, y, z, id);
+
+    m_blocks_mesh.generate_vertices4negative_y(x, y, z, id);
+    m_blocks_mesh.generate_vertices4positive_y(x, y, z, id);
+
+    m_blocks_mesh.generate_vertices4negative_z(x, y, z + pixel, id);
+    m_blocks_mesh.generate_vertices4positive_z(x, y, z - pixel, id);
+}
+
 void Chunk::generate_vertices() {
     for (int j = 0; j < BLOCKS_IN_CHUNK; ++j) {
-        if (should_make_layer(j))
-            for (int i = 0; i < BLOCKS_IN_CHUNK; ++i)
-                for (int k = 0; k < BLOCKS_IN_CHUNK; ++k)
+    if (should_make_layer(j))
+    for (int i = 0; i < BLOCKS_IN_CHUNK; ++i)
+    for (int k = 0; k < BLOCKS_IN_CHUNK; ++k)
 
-                    if (!is_air__in_chunk(i, j, k)) {
-                        // local(in chunk) pos
+        if (!is_air__in_chunk(i, j, k)) {
+            // local(in chunk) pos
 
-                        auto x = static_cast<VertexType>(i);
-                        auto y = static_cast<VertexType>(j);
-                        auto z = static_cast<VertexType>(k);
+            auto x = static_cast<VertexType>(i);
+            auto y = static_cast<VertexType>(j);
+            auto z = static_cast<VertexType>(k);
 
-                        static VertexType pixel = 1.005 / BLOCK_RESOLUTION;
-                        block_id id = get_block_type(i, j, k);
+            static VertexType pixel = 1.005 / BLOCK_RESOLUTION;
+            block_id id = get_block_type(i, j, k);
 
 
-                        if (id == block_id::Cactus) {
-                            m_blocks_mesh.generate_vertices4negative_x(x + pixel, y, z, id);
-                            m_blocks_mesh.generate_vertices4positive_x(x - pixel, y, z, id);
-
-                            m_blocks_mesh.generate_vertices4negative_y(x, y, z, id);
-                            m_blocks_mesh.generate_vertices4positive_y(x, y, z, id);
-
-                            m_blocks_mesh.generate_vertices4negative_z(x, y, z + pixel, id);
-                            m_blocks_mesh.generate_vertices4positive_z(x, y, z - pixel, id);
-                        } else if (id == block_id::Water) {
-                            if (!is_water__in_chunk(i - 1, j, k) && !is_opaque__in_chunk(i - 1, j, k)) {
-                                m_water_mesh.generate_vertices4negative_x(x, y, z, id);
-                            }
-
-                            if (!is_water__in_chunk(i + 1, j, k) && !is_opaque__in_chunk(i + 1, j, k)) {
-                                m_water_mesh.generate_vertices4positive_x(x, y, z, id);
-                            }
-
-                            if (!is_water__in_chunk(i, j - 1, k) && !is_opaque__in_chunk(i, j - 1, k)) {
-                                m_water_mesh.generate_vertices4negative_y(x, y, z, id);
-                            }
-
-                            if (!is_water__in_chunk(i, j + 1, k) && !is_opaque__in_chunk(i, j + 1, k)) {
-                                m_water_mesh.generate_vertices4positive_y(x, y, z, id);
-                            }
-
-                            if (!is_water__in_chunk(i, j, k - 1) && !is_opaque__in_chunk(i, j, k - 1)) {
-                                m_water_mesh.generate_vertices4negative_z(x, y, z, id);
-                            }
-
-                            if (!is_water__in_chunk(i, j, k + 1) && !is_opaque__in_chunk(i, j, k + 1)) {
-                                m_water_mesh.generate_vertices4positive_z(x, y, z, id);
-                            }
-                        } else {
-                            if (!is_opaque__in_chunk(i - 1, j, k)) {
-                                m_blocks_mesh.generate_vertices4negative_x(x, y, z, id);
-                            }
-
-                            if (!is_opaque__in_chunk(i + 1, j, k)) {
-                                m_blocks_mesh.generate_vertices4positive_x(x, y, z, id);
-                            }
-
-                            if (!is_opaque__in_chunk(i, j - 1, k)) {
-                                m_blocks_mesh.generate_vertices4negative_y(x, y, z, id);
-                            }
-
-                            if (!is_opaque__in_chunk(i, j + 1, k)) {
-                                m_blocks_mesh.generate_vertices4positive_y(x, y, z, id);
-                            }
-
-                            if (!is_opaque__in_chunk(i, j, k - 1)) {
-                                m_blocks_mesh.generate_vertices4negative_z(x, y, z, id);
-                            }
-
-                            if (!is_opaque__in_chunk(i, j, k + 1)) {
-                                m_blocks_mesh.generate_vertices4positive_z(x, y, z, id);
-                            }
-                        }
-                    }
+            if (id == block_id::Cactus) {
+                generate_cactus_vertices(x,y,z,id);
+            } else if (id == block_id::Water) {
+                generate_water_vertices(i,j,k,x,y,z,id);
+            } else {
+                generate_block_vertices(i,j,k,x,y,z,id);
+            }
+        }
     }
 }
 
@@ -118,7 +132,6 @@ void World::Chunk::update_vertices() {
     }
 }
 
-
 void World::Chunk::free_buffers() {
     m_blocks_mesh.free_buffers(m_map);
     m_water_mesh.free_buffers(m_map);
@@ -129,7 +142,6 @@ void Chunk::set_block_type(int x, int y, int z, block_id type) {
     m_layers[y].update(type);
 }
 
-
 bool Chunk::is_empty() {
     for (block_id id : m_blocks) {
         if (id != block_id::Air) {
@@ -139,7 +151,6 @@ bool Chunk::is_empty() {
 
     return true;
 };
-
 
 bool Chunk::is_air__in_chunk(int x, int y, int z) {
     if (y < 0 || x < 0 || z < 0 || y >= BLOCKS_IN_CHUNK || x >= BLOCKS_IN_CHUNK || z >= BLOCKS_IN_CHUNK) {
@@ -230,8 +241,8 @@ void Chunk::ChunkLayer::update(block_id type) {
 }
 
 bool World::Chunk::is_block_type_transperent(block_id type) {
-    return type == block_id::Air || type == block_id::Cactus || type ==
-                                                                block_id::Water /*|| type == block_id::Oak_leafage*/;// || type == block_id::Glass; //... || type == block_id::Oak_leafage
+    return type == block_id::Air || type == block_id::Cactus || type == block_id::Water;
+    /*|| type == block_id::Oak_leafage*/// || type == block_id::Glass; //... || type == block_id::Oak_leafage
 }
 
 bool World::Chunk::is_block_type_solid(block_id type) {

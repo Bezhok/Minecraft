@@ -2,7 +2,6 @@
 
 #include "pch.h"
 #include "game_constants.h"
-#include "TerrainGenerator.h"
 #include "Buffers.h"
 #include "Sounds.h"
 
@@ -19,7 +18,7 @@ namespace World {
     private:
         phmap::parallel_node_hash_map<size_t, Column> m_map;
         bool m_should_redraw_chunk = false;
-        TerrainGenerator m_terrain_generator;
+        std::unique_ptr<TerrainGenerator> m_terrain_generator;
         block_id m_edited_block_type;
         sf::Vector3i m_edited_block_pos;
         Chunk *m_edited_chunk = nullptr;
@@ -30,7 +29,7 @@ namespace World {
         void
         find_neighbours(const sf::Vector3i &chunk_pos, const sf::Vector3i &block_in_chunk_pos, int x, int y, int z);
 
-        void calculate_pos(sf::Vector3i &pos_rel2chunk, sf::Vector3i &chunk_pos);
+        void recalculate_pos(sf::Vector3i &pos_rel2chunk, sf::Vector3i &chunk_pos);
 
     public:
         size_t get_size() { return m_map.size(); };

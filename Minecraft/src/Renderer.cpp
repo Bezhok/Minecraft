@@ -6,6 +6,7 @@
 #include "Map.h"
 #include "Light.h"
 #include "BlockWrapper.h"
+#include "Chunk.h"
 
 using namespace World;
 

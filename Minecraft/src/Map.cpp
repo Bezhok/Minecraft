@@ -8,7 +8,9 @@
 using namespace World;
 
 
-Map::Map() : m_terrain_generator(this), m_should_be_updated_neighbours(6) {
+Map::Map() : m_should_be_updated_neighbours(6) {
+    m_terrain_generator = std::make_unique<TerrainGenerator>(this);
+
     int columns_count = RENDER_DISTANCE_IN_CHUNKS * RENDER_DISTANCE_IN_CHUNKS * 2;
     m_map.reserve(columns_count);
 }
@@ -16,10 +18,10 @@ Map::Map() : m_terrain_generator(this), m_should_be_updated_neighbours(6) {
 World::Map::~Map() = default;
 
 inline void World::Map::generate_chunk_terrain(Column &column, int chunk_x, int chunk_y, int chunk_z) {
-    m_terrain_generator.generate_chunk_terrain(column, chunk_x, chunk_y, chunk_z);
+    m_terrain_generator->generate_chunk_terrain(column, chunk_x, chunk_y, chunk_z);
 }
 
-void Map::calculate_pos(sf::Vector3i &pos_rel2chunk, sf::Vector3i &chunk_pos) {
+void Map::recalculate_pos(sf::Vector3i &pos_rel2chunk, sf::Vector3i &chunk_pos) {
     if (pos_rel2chunk.y < 0) {
         pos_rel2chunk.y = BLOCKS_IN_CHUNK + pos_rel2chunk.y;
         chunk_pos.y -= 1;
@@ -50,7 +52,7 @@ void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y,
     if (pos_in_chunk.x >= 0 && pos_in_chunk.z >= 0 && pos_in_chunk.x < BLOCKS_IN_CHUNK &&
         pos_in_chunk.z < BLOCKS_IN_CHUNK) {
 
-        calculate_pos(pos_in_chunk, chunk_pos);
+        recalculate_pos(pos_in_chunk, chunk_pos);
 
         if (chunk_pos.y < 0 || chunk_pos.y >= CHUNKS_IN_WORLD_HEIGHT)
             return;
@@ -59,7 +61,7 @@ void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y,
                                        type);
     }
     else {
-        calculate_pos(pos_in_chunk, chunk_pos);
+        recalculate_pos(pos_in_chunk, chunk_pos);
 
         if (chunk_pos.x < 0 || chunk_pos.z < 0 || chunk_pos.y < 0 || chunk_pos.y >= CHUNKS_IN_WORLD_HEIGHT)
             return;
@@ -91,7 +93,7 @@ bool Map::is_solid(int x, int y, int z) {
 }
 
 bool Map::is_opaque(int x, int y, int z) {
-    return !Chunk::is_block_type_transperent(get_type(x,y,z));
+    return !Chunk::is_block_type_transperent(get_type(x, y, z));
 }
 
 bool Map::is_air(int x, int y, int z) {
