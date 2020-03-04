@@ -23,7 +23,7 @@ block_id Chunk::get_block_type(int x, int y, int z) {
     return m_blocks.at(x + y * BLOCKS_IN_CHUNK + z * BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK);
 }
 
-void Chunk::generate_block_vertices(int i, int j, int k, VertexType x, VertexType y, VertexType z, block_id id) {
+void Chunk::generate_block_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, block_id id) {
     if (!is_opaque__in_chunk(i - 1, j, k)) {
         m_blocks_mesh.generate_vertices4negative_x(x, y, z, id);
     }
@@ -49,7 +49,7 @@ void Chunk::generate_block_vertices(int i, int j, int k, VertexType x, VertexTyp
     }
 }
 
-void Chunk::generate_water_vertices(int i, int j, int k, VertexType x, VertexType y, VertexType z, block_id id) {
+void Chunk::generate_water_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, block_id id) {
     if (!is_water__in_chunk(i - 1, j, k) && !is_opaque__in_chunk(i - 1, j, k)) {
         m_water_mesh.generate_vertices4negative_x(x, y, z, id);
     }
@@ -75,8 +75,8 @@ void Chunk::generate_water_vertices(int i, int j, int k, VertexType x, VertexTyp
     }
 }
 
-void Chunk::generate_cactus_vertices(VertexType x, VertexType y, VertexType z, block_id id) {
-    static VertexType pixel = 1.005 / BLOCK_RESOLUTION;
+void Chunk::generate_cactus_vertices(GLfloat x, GLfloat y, GLfloat z, block_id id) {
+    static GLfloat pixel = 1.005 / BLOCK_RESOLUTION;
 
     m_blocks_mesh.generate_vertices4negative_x(x + pixel, y, z, id);
     m_blocks_mesh.generate_vertices4positive_x(x - pixel, y, z, id);
@@ -97,11 +97,11 @@ void Chunk::generate_vertices() {
         if (!is_air__in_chunk(i, j, k)) {
             // local(in chunk) pos
 
-            auto x = static_cast<VertexType>(i);
-            auto y = static_cast<VertexType>(j);
-            auto z = static_cast<VertexType>(k);
+            auto x = static_cast<GLfloat>(i);
+            auto y = static_cast<GLfloat>(j);
+            auto z = static_cast<GLfloat>(k);
 
-            static VertexType pixel = 1.005 / BLOCK_RESOLUTION;
+            static GLfloat pixel = 1.005 / BLOCK_RESOLUTION;
             block_id id = get_block_type(i, j, k);
 
 
@@ -173,7 +173,7 @@ bool Chunk::is_opaque__in_chunk(int x, int y, int z) {
         );
     }
 
-    return !is_block_type_transperent(get_block_type(x, y, z));
+    return !is_block_type_transparent(get_block_type(x, y, z));
 }
 
 
@@ -231,16 +231,15 @@ bool Chunk::is_layer_solid(sf::Vector3i pos, int y) {
     }
 }
 
-
 void Chunk::ChunkLayer::update(block_id type) {
-    if (is_block_type_transperent(type)) {
+    if (is_block_type_transparent(type)) {
         --solid_block_count;
     } else {
         ++solid_block_count;
     }
 }
 
-bool World::Chunk::is_block_type_transperent(block_id type) {
+bool World::Chunk::is_block_type_transparent(block_id type) {
     return type == block_id::Air || type == block_id::Cactus || type == block_id::Water;
     /*|| type == block_id::Oak_leafage*/// || type == block_id::Glass; //... || type == block_id::Oak_leafage
 }

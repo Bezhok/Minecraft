@@ -93,7 +93,7 @@ bool Map::is_solid(int x, int y, int z) {
 }
 
 bool Map::is_opaque(int x, int y, int z) {
-    return !Chunk::is_block_type_transperent(get_type(x, y, z));
+    return !Chunk::is_block_type_transparent(get_type(x, y, z));
 }
 
 bool Map::is_air(int x, int y, int z) {

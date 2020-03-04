@@ -1,14 +1,11 @@
 #include "pch.h"
 #include "block_db.h"
 
-
 using std::vector;
 using namespace World;
 
-
 DB::AtlasDb DB::s_atlas_db;
 std::vector<block_id> DB::s_loaded_blocks;
-
 
 void World::DB::init_xyz(block_id id, const sf::Vector2i &pos) {
     for (int i = 0; i < static_cast<int>(sides::SIDES_COUNT); ++i) {
@@ -81,5 +78,4 @@ void DB::load_blocks() {
     id = block_id::Oak_wood;
     load_block(id);
     init_xyz(id, {4, 0});
-
 }

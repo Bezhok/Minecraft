@@ -42,11 +42,11 @@ namespace World {
 
         bool is_empty();
 
-        void generate_cactus_vertices(VertexType x, VertexType y, VertexType z, block_id id);
+        void generate_cactus_vertices(GLfloat x, GLfloat y, GLfloat z, block_id id);
 
-        void generate_water_vertices(int i, int j, int k, VertexType x, VertexType y, VertexType z, block_id id);
+        void generate_water_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, block_id id);
 
-        void generate_block_vertices(int i, int j, int k, VertexType x, VertexType y, VertexType z, block_id id);
+        void generate_block_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, block_id id);
     public:
         /* for Block mesh basic */
         bool should_make_layer(int y);
@@ -71,7 +71,7 @@ namespace World {
         void free_buffers();
 
         /* Main */
-        static bool is_block_type_transperent(block_id type);
+        static bool is_block_type_transparent(block_id type);
 
         static bool is_block_type_solid(block_id type);
 

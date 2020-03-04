@@ -15,7 +15,6 @@ namespace World {
         SIDES_COUNT
     };
 
-
     struct DB {
         struct AtlasDb {
             std::array<sf::Vector2i,

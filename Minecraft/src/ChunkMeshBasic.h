@@ -3,8 +3,6 @@
 #include "pch.h"
 #include "Buffers.h"
 
-using VertexType = GLfloat;
-
 
 namespace World {
     enum class block_id : uint8_t;
@@ -15,10 +13,10 @@ namespace World {
 
     class ChunkMeshBasic {
     private:
-        const VertexType BS = 1;
+        const GLfloat BS = 1;
 
         bool m_is_vertices_created = false;
-        VertexType *m_vertices = nullptr;
+        GLfloat *m_vertices = nullptr;
 
 
         //vertices count in current time
@@ -47,7 +45,7 @@ namespace World {
 
         void bind_texture2positive_z(block_id id);
 
-        void add_byte4(VertexType x, VertexType y, VertexType z, VertexType w);
+        void add_byte4(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 
     public:
         /* Main */
@@ -69,16 +67,16 @@ namespace World {
         int get_current_faces_count() { return m_i / 36; };
 
         /* only for Chunk */
-        void generate_vertices4positive_x(VertexType x, VertexType y, VertexType z, block_id id);
+        void generate_vertices4positive_x(GLfloat x, GLfloat y, GLfloat z, block_id id);
 
-        void generate_vertices4negative_x(VertexType x, VertexType y, VertexType z, block_id id);
+        void generate_vertices4negative_x(GLfloat x, GLfloat y, GLfloat z, block_id id);
 
-        void generate_vertices4negative_y(VertexType x, VertexType y, VertexType z, block_id id);
+        void generate_vertices4negative_y(GLfloat x, GLfloat y, GLfloat z, block_id id);
 
-        void generate_vertices4positive_y(VertexType x, VertexType y, VertexType z, block_id id);
+        void generate_vertices4positive_y(GLfloat x, GLfloat y, GLfloat z, block_id id);
 
-        void generate_vertices4negative_z(VertexType x, VertexType y, VertexType z, block_id id);
+        void generate_vertices4negative_z(GLfloat x, GLfloat y, GLfloat z, block_id id);
 
-        void generate_vertices4positive_z(VertexType x, VertexType y, VertexType z, block_id id);
+        void generate_vertices4positive_z(GLfloat x, GLfloat y, GLfloat z, block_id id);
     };
 }
