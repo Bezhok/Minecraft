@@ -1,6 +1,7 @@
 #include "MapMeshBuilder.h"
 #include "pch.h"
 #include "Chunk.h"
+#include "Converter.h"
 #include "Map.h"
 #include "Player.h"
 
@@ -20,8 +21,8 @@ void World::MapMeshBuilder::launch(Map *map, Player *player, sf::Window *window)
     m_window = window;
 
     /////////////////////////////////////
-    int chunk_x = Map::coord2chunk_coord(m_player->get_position().x);
-    int chunk_z = Map::coord2chunk_coord(m_player->get_position().z);
+    int chunk_x = Converter::coord2chunk_coord(m_player->get_position().x);
+    int chunk_z = Converter::coord2chunk_coord(m_player->get_position().z);
 
     int start_x = std::max(0, chunk_x - 3);
     int start_z = std::max(0, chunk_z - 3);
@@ -63,8 +64,8 @@ void MapMeshBuilder::generate_vertices() {
     while (m_window->isOpen()) {
         loop_timer.restart();
 
-        range.chunk_x = Map::coord2chunk_coord(m_player->get_position().x);
-        range.chunk_z = Map::coord2chunk_coord(m_player->get_position().z);
+        range.chunk_x = Converter::coord2chunk_coord(m_player->get_position().x);
+        range.chunk_z = Converter::coord2chunk_coord(m_player->get_position().z);
 
         range.start_x = range.chunk_x - RENDER_DISTANCE_IN_CHUNKS / 2;
         range.start_z = range.chunk_z - RENDER_DISTANCE_IN_CHUNKS / 2;

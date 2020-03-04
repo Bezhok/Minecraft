@@ -3,7 +3,7 @@
 #include "Map.h"
 #include "Chunk.h"
 #include "ChunkMeshBasic.h"
-
+#include "Converter.h"
 using namespace World;
 
 
@@ -144,9 +144,9 @@ bool Chunk::is_empty() {
 bool Chunk::is_air__in_chunk(int x, int y, int z) {
     if (y < 0 || x < 0 || z < 0 || y >= BLOCKS_IN_CHUNK || x >= BLOCKS_IN_CHUNK || z >= BLOCKS_IN_CHUNK) {
         return m_map->is_air(
-                x + Map::chunk_coord2block_coord(m_pos.x),
-                y + Map::chunk_coord2block_coord(m_pos.y),
-                z + Map::chunk_coord2block_coord(m_pos.z)
+                x + Converter::chunk_coord2block_coord(m_pos.x),
+                y + Converter::chunk_coord2block_coord(m_pos.y),
+                z + Converter::chunk_coord2block_coord(m_pos.z)
         );
     }
 
@@ -156,9 +156,9 @@ bool Chunk::is_air__in_chunk(int x, int y, int z) {
 bool Chunk::is_opaque__in_chunk(int x, int y, int z) {
     if (y < 0 || x < 0 || z < 0 || y >= BLOCKS_IN_CHUNK || x >= BLOCKS_IN_CHUNK || z >= BLOCKS_IN_CHUNK) {
         return m_map->is_opaque(
-                x + Map::chunk_coord2block_coord(m_pos.x),
-                y + Map::chunk_coord2block_coord(m_pos.y),
-                z + Map::chunk_coord2block_coord(m_pos.z)
+                x + Converter::chunk_coord2block_coord(m_pos.x),
+                y + Converter::chunk_coord2block_coord(m_pos.y),
+                z + Converter::chunk_coord2block_coord(m_pos.z)
         );
     }
 
@@ -169,9 +169,9 @@ bool Chunk::is_opaque__in_chunk(int x, int y, int z) {
 bool Chunk::is_water__in_chunk(int x, int y, int z) {
     if (y < 0 || x < 0 || z < 0 || y >= BLOCKS_IN_CHUNK || x >= BLOCKS_IN_CHUNK || z >= BLOCKS_IN_CHUNK) {
         return m_map->is_water(
-                x + Map::chunk_coord2block_coord(m_pos.x),
-                y + Map::chunk_coord2block_coord(m_pos.y),
-                z + Map::chunk_coord2block_coord(m_pos.z)
+                x + Converter::chunk_coord2block_coord(m_pos.x),
+                y + Converter::chunk_coord2block_coord(m_pos.y),
+                z + Converter::chunk_coord2block_coord(m_pos.z)
         );
     }
 

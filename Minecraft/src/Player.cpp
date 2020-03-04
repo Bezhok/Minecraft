@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Player.h"
 #include "game_constants.h"
+#include "Converter.h"
 #include "Map.h"
 #include "block_db.h"
 
@@ -197,22 +198,22 @@ sf::Vector3i Player::determine_look_at_block(sf::Vector3i *prev_pos /*= nullptr*
         y += tanf(m_camera_angle.y / 180 * PI) / 80.F;
         z += -cosf(m_camera_angle.x / 180 * PI) / 80.F;
 
-        if (!m_map->is_air(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z)) &&
-            !m_map->is_water(Map::coord2block_coord(x), Map::coord2block_coord(y), Map::coord2block_coord(z)) &&
-            Map::coord2block_coord(y) >= 0 && Map::coord2block_coord(y) < BLOCKS_IN_CHUNK * CHUNKS_IN_WORLD_HEIGHT
+        if (!m_map->is_air(Converter::coord2block_coord(x), Converter::coord2block_coord(y), Converter::coord2block_coord(z)) &&
+            !m_map->is_water(Converter::coord2block_coord(x), Converter::coord2block_coord(y), Converter::coord2block_coord(z)) &&
+            Converter::coord2block_coord(y) >= 0 && Converter::coord2block_coord(y) < BLOCKS_IN_CHUNK * CHUNKS_IN_WORLD_HEIGHT
                 ) {
             if (prev_pos != nullptr) {
                 *prev_pos = {
-                        Map::coord2block_coord(prev_x),
-                        Map::coord2block_coord(prev_y),
-                        Map::coord2block_coord(prev_z)
+                        Converter::coord2block_coord(prev_x),
+                        Converter::coord2block_coord(prev_y),
+                        Converter::coord2block_coord(prev_z)
                 };
             }
 
             return {
-                    Map::coord2block_coord(x),
-                    Map::coord2block_coord(y),
-                    Map::coord2block_coord(z)
+                    Converter::coord2block_coord(x),
+                    Converter::coord2block_coord(y),
+                    Converter::coord2block_coord(z)
             };
         }
 
@@ -231,9 +232,9 @@ void Player::put_block() {
     if (pos.y != -1) {
         bool able_create = true;
         // is we in this block
-        for (int matrix_x = Map::coord2block_coord(m_pos.x - m_size.x); matrix_x < m_pos.x + m_size.x; matrix_x++) {
-            for (int matrix_y = Map::coord2block_coord(m_pos.y - m_size.y); matrix_y < m_pos.y + m_size.y; matrix_y++) {
-                for (int matrix_z = Map::coord2block_coord(m_pos.z - m_size.z);
+        for (int matrix_x = Converter::coord2block_coord(m_pos.x - m_size.x); matrix_x < m_pos.x + m_size.x; matrix_x++) {
+            for (int matrix_y = Converter::coord2block_coord(m_pos.y - m_size.y); matrix_y < m_pos.y + m_size.y; matrix_y++) {
+                for (int matrix_z = Converter::coord2block_coord(m_pos.z - m_size.z);
                      matrix_z < m_pos.z + m_size.z; matrix_z++) {
 
                     if (matrix_x == prev_pos.x && matrix_y == prev_pos.y && matrix_z == prev_pos.z) {
@@ -289,10 +290,10 @@ void Player::collision(float dx, float dy, float dz) {
     m_is_in_water = false;
 
     //for  blocks in player's area
-    for (int y = Map::coord2block_coord(m_pos.y - m_size.y); y < m_pos.y + m_size.y; y++) {
+    for (int y = Converter::coord2block_coord(m_pos.y - m_size.y); y < m_pos.y + m_size.y; y++) {
 
-        for (int x = Map::coord2block_coord(m_pos.x - m_size.x); x < m_pos.x + m_size.x; x++) {
-            for (int z = Map::coord2block_coord(m_pos.z - m_size.z); z < m_pos.z + m_size.z; z++) {
+        for (int x = Converter::coord2block_coord(m_pos.x - m_size.x); x < m_pos.x + m_size.x; x++) {
+            for (int z = Converter::coord2block_coord(m_pos.z - m_size.z); z < m_pos.z + m_size.z; z++) {
                 if (m_map->is_solid(x, y, z)) { //if collided with block
                     if (dx > 0) m_pos.x = x - m_size.x;
                     if (dx < 0) m_pos.x = x + 1 + m_size.x;

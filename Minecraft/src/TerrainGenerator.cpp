@@ -1,12 +1,13 @@
 #include "TerrainGenerator.h"
 #include "Map.h"
+#include "Converter.h"
 #include "block_db.h"
 
 using namespace World;
 
 
 TerrainGenerator::TerrainGenerator(Map *map) : m_map(map) {
-    
+
     srand(m_noise.GetSeed());
 
     m_noise.SetNoiseType(FastNoise::PerlinFractal);
@@ -41,8 +42,8 @@ void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN
     std::vector<sf::Vector3i> tree_pos;
     for (int block_x = 0; block_x < BLOCKS_IN_CHUNK; ++block_x)
         for (int block_z = 0; block_z < BLOCKS_IN_CHUNK; ++block_z) {
-            int x = Map::chunk_coord2block_coord(chunk_x) + block_x;
-            int z = Map::chunk_coord2block_coord(chunk_z) + block_z;
+            int x = Converter::chunk_coord2block_coord(chunk_x) + block_x;
+            int z = Converter::chunk_coord2block_coord(chunk_z) + block_z;
 
             int h = 0;
             float b = m_biome_noise.GetNoise(static_cast<float>(x) + 1, static_cast<float>(z) + 1);
@@ -70,7 +71,7 @@ void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN
 
 
             for (int block_y = 0; block_y < BLOCKS_IN_CHUNK; ++block_y) {
-                int y = Map::chunk_coord2block_coord(chunk_y) + block_y;
+                int y = Converter::chunk_coord2block_coord(chunk_y) + block_y;
 
                 block_id id;
                 if (h < WATER_LEVEL && y >= h && y < WATER_LEVEL) {
@@ -97,63 +98,70 @@ void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN
             }
 
             if (biome_type == 0 || biome_type == 2) {
-
                 for (auto &pos : tree_pos) {
-                    int tree_height = glm::linearRand(5, 7);
-                    for (int y = 0; y < tree_height; ++y) {
-                        auto full_pos = pos + sf::Vector3i{0, y, 0};
-                        m_map->set_block(full_pos, column, chunk_y, block_id::Oak);
-                    }
-
-                    auto full_pos = pos + sf::Vector3i{0, tree_height, 0};
-                    m_map->set_block(full_pos, column, chunk_y, block_id::Oak_leafage);
-
-                    full_pos = pos + sf::Vector3i{-1, tree_height, 0};
-                    m_map->set_block(full_pos, column, chunk_y, block_id::Oak_leafage);
-
-                    full_pos = pos + sf::Vector3i{1, tree_height, 0};
-                    m_map->set_block(full_pos, column, chunk_y, block_id::Oak_leafage);
-
-                    full_pos = pos + sf::Vector3i{0, tree_height, 1};
-                    m_map->set_block(full_pos, column, chunk_y, block_id::Oak_leafage);
-
-                    full_pos = pos + sf::Vector3i{0, tree_height, -1};
-                    m_map->set_block(full_pos, column, chunk_y, block_id::Oak_leafage);
-
-                    for (int x = -1; x <= 1; ++x)
-                        for (int z = -1; z <= 1; ++z) {
-                            if (x != 0 || z != 0) {
-                                full_pos = pos + sf::Vector3i{x, tree_height - 1, z};
-                                m_map->set_block(full_pos, column, chunk_y, block_id::Oak_leafage);
-                            }
-                        }
-
-                    for (int x = -2; x <= 2; ++x)
-                        for (int z = -2; z <= 2; ++z) {
-                            if (x != 0 || z != 0) {
-                                full_pos = pos + sf::Vector3i{x, tree_height - 2, z};
-                                m_map->set_block(full_pos, column, chunk_y, block_id::Oak_leafage);
-                            }
-                        }
-
-                    for (int x = -2; x <= 2; ++x)
-                        for (int z = -2; z <= 2; ++z) {
-                            if (x != 0 || z != 0) {
-                                full_pos = pos + sf::Vector3i{x, tree_height - 3, z};
-                                m_map->set_block(full_pos, column, chunk_y, block_id::Oak_leafage);
-                            }
-                        }
+                    generate_tree(pos, column, chunk_y);
                 }
             } else {
                 for (auto &pos : tree_pos) {
-                    int tree_height = glm::linearRand(3, 6);
-                    for (int y = 0; y < tree_height; ++y) {
-                        auto full_pos = pos + sf::Vector3i{0, y, 0};
-                        m_map->set_block(full_pos, column, chunk_y, block_id::Cactus);
-                    }
+                    generate_cactus(pos, column, chunk_y);
                 }
             }
 
             tree_pos.clear();
+        }
+}
+
+void TerrainGenerator::generate_cactus(sf::Vector3i &pos, std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT> &column, int chunk_y) {
+    int tree_height = glm::linearRand(3, 6);
+    for (int y = 0; y < tree_height; ++y) {
+        auto full_pos = pos + sf::Vector3i{0, y, 0};
+        m_map->set_block_type(full_pos, column, chunk_y, block_id::Cactus);
+    }
+}
+
+void TerrainGenerator::generate_tree(sf::Vector3i &pos, std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT> &column, int chunk_y) {
+    int tree_height = glm::linearRand(5, 7);
+    for (int y = 0; y < tree_height; ++y) {
+        auto full_pos = pos + sf::Vector3i{0, y, 0};
+        m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak);
+    }
+
+    auto full_pos = pos + sf::Vector3i{0, tree_height, 0};
+    m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
+
+    full_pos = pos + sf::Vector3i{-1, tree_height, 0};
+    m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
+
+    full_pos = pos + sf::Vector3i{1, tree_height, 0};
+    m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
+
+    full_pos = pos + sf::Vector3i{0, tree_height, 1};
+    m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
+
+    full_pos = pos + sf::Vector3i{0, tree_height, -1};
+    m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
+
+    for (int x = -1; x <= 1; ++x)
+        for (int z = -1; z <= 1; ++z) {
+            if (x != 0 || z != 0) {
+                full_pos = pos + sf::Vector3i{x, tree_height - 1, z};
+                m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
+            }
+        }
+
+    for (int x = -2; x <= 2; ++x)
+        for (int z = -2; z <= 2; ++z) {
+            if (x != 0 || z != 0) {
+                full_pos = pos + sf::Vector3i{x, tree_height - 2, z};
+                m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
+            }
+        }
+
+    for (int x = -2; x <= 2; ++x)
+        for (int z = -2; z <= 2; ++z) {
+            if (x != 0 || z != 0) {
+                full_pos = pos + sf::Vector3i{x, tree_height - 3, z};
+                m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
+            }
         }
 }

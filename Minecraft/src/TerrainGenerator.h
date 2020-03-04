@@ -33,6 +33,10 @@ namespace World {
         TerrainGenerator(Map *map);
 
         ~TerrainGenerator();
+
+        void generate_tree(sf::Vector3i &pos, std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT> &column, int chunk_y);
+
+        void generate_cactus(sf::Vector3i &pos, std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT> &column, int chunk_y);
     };
 }
    

@@ -101,5 +101,6 @@
       <Filter>World</Filter>
     </ClInclude>
     <ClInclude Include="src\BlockWrapper.h" />
+    <ClInclude Include="src\Converter.h" />
   </ItemGroup>
 </Project>

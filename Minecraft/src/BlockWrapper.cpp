@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "BlockWrapper.h"
-#include "game_constants.h"
-#include "Map.h"
+#include "Converter.h"
 
 using namespace World;
 
@@ -9,9 +8,9 @@ void BlockWrapper::draw() {
     glLineWidth(6);
 
     sf::Vector3i bpos = {
-            Map::coord2block_coord_in_chunk(m_pos.x),
-            Map::coord2block_coord_in_chunk(m_pos.y),
-            Map::coord2block_coord_in_chunk(m_pos.z)
+            Converter::coord2block_coord_in_chunk(m_pos.x),
+            Converter::coord2block_coord_in_chunk(m_pos.y),
+            Converter::coord2block_coord_in_chunk(m_pos.z)
     };
 
     update_vertices(bpos);
