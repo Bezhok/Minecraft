@@ -2,13 +2,14 @@
 
 #include "pch.h"
 #include "game_constants.h"
-#include "Chunk.h"
 #include "TerrainGenerator.h"
 #include "Buffers.h"
 #include "Sounds.h"
 
 namespace World {
     class TerrainGenerator;
+
+    class Chunk;
 
     enum class block_id : uint8_t;
 
@@ -17,15 +18,20 @@ namespace World {
         using Column = std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT>;
     private:
         phmap::parallel_node_hash_map<size_t, Column> m_map;
-
         bool m_should_redraw_chunk = false;
         TerrainGenerator m_terrain_generator;
-
         block_id m_edited_block_type;
         sf::Vector3i m_edited_block_pos;
         Chunk *m_edited_chunk = nullptr;
-
         Sounds m_sounds;
+    private:
+        void play_sound(Sounds::SoundsNames name);
+
+        void
+        find_neighbours(const sf::Vector3i &chunk_pos, const sf::Vector3i &block_in_chunk_pos, int x, int y, int z);
+
+        void calculate_pos(sf::Vector3i &pos_rel2chunk, sf::Vector3i &chunk_pos);
+
     public:
         size_t get_size() { return m_map.size(); };
 
@@ -84,41 +90,11 @@ namespace World {
 
         Column &get_column_or_generate(int i, int k);
 
-
         std::vector<Buffers> m_should_be_freed_buffers;
 
-        void set_block(sf::Vector3i pos_in_chunk, Map::Column &column, int y, block_id type);
+        void set_block_type(sf::Vector3i pos_in_chunk, Map::Column &column, int chunk_y, block_id type);
 
-        template<typename T>
-        static int coord2chunk_coord(T c);
-
-        template<typename T>
-        static int coord2block_coord(T c);
-
-        template<typename T>
-        static int coord2block_coord_in_chunk(T c);//block in chunk coord
-
-        template<typename T>
-        static int chunk_coord2block_coord(T c);
+        inline block_id get_type(int x, int y, int z);
     };
 }
 
-template<typename T>
-int World::Map::coord2chunk_coord(T c) {
-    return static_cast<int>(c / BLOCKS_IN_CHUNK);
-}
-
-template<typename T>
-int World::Map::coord2block_coord(T c) {
-    return static_cast<int>(c);
-}
-
-template<typename T>
-int World::Map::coord2block_coord_in_chunk(T c) {
-    return static_cast<int>(c % BLOCKS_IN_CHUNK);
-}
-
-template<typename T>
-inline int World::Map::chunk_coord2block_coord(T c) {
-    return static_cast<int>(c * static_cast<T>(BLOCKS_IN_CHUNK));
-}
