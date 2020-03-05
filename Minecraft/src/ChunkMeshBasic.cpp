@@ -104,27 +104,27 @@ void ChunkMeshBasic::bind_texture_second_order(const sf::Vector2i &t_p) {
 }
 
 inline void ChunkMeshBasic::bind_texture2negative_x(block_id id) {
-    bind_texture_first_order(DB::s_atlas_db(id, sides::negative_x));
+    bind_texture_first_order(DB::s_atlas_db(id, Side::negative_x));
 }
 
 inline void ChunkMeshBasic::bind_texture2positive_x(block_id id) {
-    bind_texture_second_order(DB::s_atlas_db(id, sides::positive_x));
+    bind_texture_second_order(DB::s_atlas_db(id, Side::positive_x));
 }
 
 inline void ChunkMeshBasic::bind_texture2negative_y(block_id id) {
-    bind_texture_second_order(DB::s_atlas_db(id, sides::negative_y));
+    bind_texture_second_order(DB::s_atlas_db(id, Side::negative_y));
 }
 
 inline void ChunkMeshBasic::bind_texture2positive_y(block_id id) {
-    bind_texture_first_order(DB::s_atlas_db(id, sides::positive_y));
+    bind_texture_first_order(DB::s_atlas_db(id, Side::positive_y));
 }
 
 inline void ChunkMeshBasic::bind_texture2negative_z(block_id id) {
-    bind_texture_second_order(DB::s_atlas_db(id, sides::negative_z));
+    bind_texture_second_order(DB::s_atlas_db(id, Side::negative_z));
 }
 
 inline void ChunkMeshBasic::bind_texture2positive_z(block_id id) {
-    bind_texture_first_order(DB::s_atlas_db(id, sides::positive_z));
+    bind_texture_first_order(DB::s_atlas_db(id, Side::positive_z));
 }
 
 void World::ChunkMeshBasic::draw() {

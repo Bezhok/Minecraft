@@ -10,17 +10,15 @@ namespace World {
 
     enum class block_id : uint8_t;
 
+    class ChunkLayer {
+    public:
+        bool is_all_solid() { return solid_block_count == BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK; };
+        void update(block_id type);
+    private:
+        int solid_block_count = 0;
+    };
+
     class Chunk {
-        class ChunkLayer {
-        public:
-            bool is_all_solid() { return solid_block_count == BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK; };
-
-            void update(block_id type);
-
-        private:
-            int solid_block_count = 0;
-        };
-
     private:
         sf::Vector3i m_pos = {-1, -1, -1};
         std::array<block_id, BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK> m_blocks;

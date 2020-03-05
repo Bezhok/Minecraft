@@ -8,29 +8,29 @@ DB::AtlasDb DB::s_atlas_db;
 std::vector<block_id> DB::s_loaded_blocks;
 
 void World::DB::init_xyz(block_id id, const sf::Vector2i &pos) {
-    for (int i = 0; i < static_cast<int>(sides::SIDES_COUNT); ++i) {
-        s_atlas_db(id, static_cast<sides>(i)) = pos;
+    for (int i = 0; i < static_cast<int>(Side::SIDES_COUNT); ++i) {
+        s_atlas_db(id, static_cast<Side>(i)) = pos;
     }
 }
 
 void DB::init_xz(block_id id, const sf::Vector2i &pos) {
-    s_atlas_db(id, sides::negative_x) =
-    s_atlas_db(id, sides::positive_x) =
-    s_atlas_db(id, sides::negative_z) =
-    s_atlas_db(id, sides::positive_z) = pos;
+    s_atlas_db(id, Side::negative_x) =
+    s_atlas_db(id, Side::positive_x) =
+    s_atlas_db(id, Side::negative_z) =
+    s_atlas_db(id, Side::positive_z) = pos;
 }
 
 void DB::init_y(block_id id, const sf::Vector2i &pos) {
-    s_atlas_db(id, sides::positive_y) =
-    s_atlas_db(id, sides::negative_y) = pos;
+    s_atlas_db(id, Side::positive_y) =
+    s_atlas_db(id, Side::negative_y) = pos;
 }
 
 void DB::init_n_y(block_id id, const sf::Vector2i &pos) {
-    s_atlas_db(id, sides::negative_y) = pos;
+    s_atlas_db(id, Side::negative_y) = pos;
 }
 
 void DB::init_p_y(block_id id, const sf::Vector2i &pos) {
-    s_atlas_db(id, sides::positive_y) = pos;
+    s_atlas_db(id, Side::positive_y) = pos;
 }
 
 void DB::load_block(block_id id) {

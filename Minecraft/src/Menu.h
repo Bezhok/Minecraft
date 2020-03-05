@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pch.h"
+#include "MenuElement.h"
 
 class Player;
 namespace World {
@@ -8,18 +9,11 @@ namespace World {
 }
 
 class Menu {
-    enum MenuElement {
-        tool_bar,
-        curr_tool,
-        cross,
-        atlas
-    };
-
 private:
     sf::RenderWindow &m_window;
-    std::unordered_map<enum MenuElement, sf::Sprite> m_sprites;
-    std::unordered_map<enum World::block_id, sf::Sprite> m_side_sprites; // tool bar items
-    std::unordered_map<enum MenuElement, sf::Texture> m_textures;
+    std::unordered_map<MenuElement, sf::Sprite> m_sprites;
+    std::unordered_map<World::block_id, sf::Sprite> m_side_sprites; // tool bar items
+    std::unordered_map<MenuElement, sf::Texture> m_textures;
 
 public:
     /* init MenuElements */

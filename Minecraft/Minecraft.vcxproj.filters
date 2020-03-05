@@ -108,5 +108,8 @@
     <ClInclude Include="src\Biome.h" />
     <ClInclude Include="src\PlainsBiome.h" />
     <ClInclude Include="src\DesertBiome.h" />
+    <ClInclude Include="src\Side.h" />
+    <ClInclude Include="src\MenuElement.h" />
+    <ClInclude Include="src\RenderRange.h" />
   </ItemGroup>
 </Project>

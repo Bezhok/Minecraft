@@ -4,6 +4,7 @@
 #include "Converter.h"
 #include "Map.h"
 #include "Player.h"
+#include "RenderRange.h"
 
 using namespace World;
 using std::copy;

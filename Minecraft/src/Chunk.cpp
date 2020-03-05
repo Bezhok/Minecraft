@@ -231,8 +231,8 @@ bool Chunk::is_layer_solid(sf::Vector3i pos, int y) {
     }
 }
 
-void Chunk::ChunkLayer::update(block_id type) {
-    if (is_block_type_transparent(type)) {
+void ChunkLayer::update(block_id type) {
+    if (Chunk::is_block_type_transparent(type)) {
         --solid_block_count;
     } else {
         ++solid_block_count;

@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "game_constants.h"
 
+struct RenderRange;
 class Player;
 namespace World {
     class Map;
@@ -10,14 +11,6 @@ namespace World {
     class Chunk;
 
     class MapMeshBuilder {
-        struct RenderRange {
-            int start_x = 0,
-                    end_x = 0,
-                    start_z = 0,
-                    end_z = 0,
-                    chunk_x = 0,
-                    chunk_z = 0;
-        };
     private:
         Map *m_map = nullptr;
         Player *m_player = nullptr;

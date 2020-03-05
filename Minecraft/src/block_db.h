@@ -2,27 +2,17 @@
 
 #include "pch.h"
 #include "block_types.h"
+#include "Side.h"
 
 namespace World {
-    enum class sides : int {
-        negative_x = 0,
-        positive_x,
-        negative_y,
-        positive_y,
-        negative_z,
-        positive_z,
-
-        SIDES_COUNT
-    };
-
     struct DB {
         struct AtlasDb {
             std::array<sf::Vector2i,
-                    static_cast<int>(block_id::BLOCK_ID_COUNT) * static_cast<int>(sides::SIDES_COUNT)> m_atlas_db;
+                    static_cast<int>(block_id::BLOCK_ID_COUNT) * static_cast<int>(Side::SIDES_COUNT)> m_atlas_db;
 
-            sf::Vector2i &operator()(block_id type, sides side) {
+            sf::Vector2i &operator()(block_id type, Side side) {
                 return m_atlas_db.at(
-                        static_cast<int>(type) * static_cast<int>(sides::SIDES_COUNT) + static_cast<int>(side));
+                        static_cast<int>(type) * static_cast<int>(Side::SIDES_COUNT) + static_cast<int>(side));
             }
         };
 

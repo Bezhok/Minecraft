@@ -177,6 +177,9 @@
     <ClCompile Include="src\TerrainGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\MenuElement.h" />
+    <ClInclude Include="src\RenderRange.h" />
+    <ClInclude Include="src\Side.h" />
     <ClInclude Include="src\Biome.h" />
     <ClInclude Include="src\Converter.h" />
     <ClInclude Include="src\App.h" />
