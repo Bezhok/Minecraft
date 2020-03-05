@@ -39,6 +39,8 @@ App::App(sf::RenderWindow &window)
 
     m_menu = std::make_unique<Menu>(m_window);
     m_menu->update_players_blocks(m_player);
+
+    m_should_display_debug_info = false;
 }
 
 std::string App::debug_text() {

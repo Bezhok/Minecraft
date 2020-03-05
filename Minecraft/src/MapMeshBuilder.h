@@ -38,11 +38,11 @@ namespace World {
         phmap::parallel_node_hash_set<World::Chunk *> m_chunks4rendering;
 
     private:
-        void add_chunks2vertices_generation(RenderRange &range);
+        void add_chunks_range2vertices_generation(RenderRange &range);
 
         void unload_columns(RenderRange &range);
 
-        void add2vertices_generation(int i, int k, glm::mat4 &pv, RenderRange &range);
+        void add_visible_chunks_in_range2vertices_generation(int i, int k, glm::mat4 &pv, RenderRange &range);
 
         void update_edited_chunk();
 

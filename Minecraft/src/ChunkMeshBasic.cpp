@@ -38,7 +38,7 @@ void ChunkMeshBasic::update_vao() {
                          GL_STATIC_DRAW); //GL_DYNAMIC_DRAW GL_STATIC_DRAW
 
             // Position attribute
-            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *) 0);
+            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid *) nullptr);
             glEnableVertexAttribArray(0);
 
             // TexCoord attribute
@@ -73,58 +73,58 @@ void World::ChunkMeshBasic::free_buffers(Map *map) {
     }
 }
 
-void ChunkMeshBasic::bind_texture_first_order(block_id id, const sf::Vector2i &p) {
-    m_vertices[m_i + 4] = p.x;
-    m_vertices[m_i + 5] = (p.y + 1);
-    m_vertices[m_i + 10] = (p.x + 1);
-    m_vertices[m_i + 11] = (p.y + 1);
-    m_vertices[m_i + 16] = p.x;
-    m_vertices[m_i + 17] = p.y;
-    m_vertices[m_i + 22] = p.x;
-    m_vertices[m_i + 23] = p.y;
-    m_vertices[m_i + 28] = (p.x + 1);
-    m_vertices[m_i + 29] = (p.y + 1);
-    m_vertices[m_i + 34] = (p.x + 1);
-    m_vertices[m_i + 35] = p.y;
+void ChunkMeshBasic::bind_texture_first_order(const sf::Vector2i &t_p) {
+    m_vertices[m_i + 4] = t_p.x;
+    m_vertices[m_i + 5] = (t_p.y + 1);
+    m_vertices[m_i + 10] = (t_p.x + 1);
+    m_vertices[m_i + 11] = (t_p.y + 1);
+    m_vertices[m_i + 16] = t_p.x;
+    m_vertices[m_i + 17] = t_p.y;
+    m_vertices[m_i + 22] = t_p.x;
+    m_vertices[m_i + 23] = t_p.y;
+    m_vertices[m_i + 28] = (t_p.x + 1);
+    m_vertices[m_i + 29] = (t_p.y + 1);
+    m_vertices[m_i + 34] = (t_p.x + 1);
+    m_vertices[m_i + 35] = t_p.y;
 }
 
-void ChunkMeshBasic::bind_texture_second_order(block_id id, const sf::Vector2i &p) {
-    m_vertices[m_i + 4] = p.x;
-    m_vertices[m_i + 5] = (p.y + 1);
-    m_vertices[m_i + 10] = p.x;
-    m_vertices[m_i + 11] = p.y;
-    m_vertices[m_i + 16] = (p.x + 1);
-    m_vertices[m_i + 17] = (p.y + 1);
-    m_vertices[m_i + 22] = p.x;
-    m_vertices[m_i + 23] = p.y;
-    m_vertices[m_i + 28] = (p.x + 1);
-    m_vertices[m_i + 29] = p.y;
-    m_vertices[m_i + 34] = (p.x + 1);
-    m_vertices[m_i + 35] = (p.y + 1);
+void ChunkMeshBasic::bind_texture_second_order(const sf::Vector2i &t_p) {
+    m_vertices[m_i + 4] = t_p.x;
+    m_vertices[m_i + 5] = (t_p.y + 1);
+    m_vertices[m_i + 10] = t_p.x;
+    m_vertices[m_i + 11] = t_p.y;
+    m_vertices[m_i + 16] = (t_p.x + 1);
+    m_vertices[m_i + 17] = (t_p.y + 1);
+    m_vertices[m_i + 22] = t_p.x;
+    m_vertices[m_i + 23] = t_p.y;
+    m_vertices[m_i + 28] = (t_p.x + 1);
+    m_vertices[m_i + 29] = t_p.y;
+    m_vertices[m_i + 34] = (t_p.x + 1);
+    m_vertices[m_i + 35] = (t_p.y + 1);
 }
 
 inline void ChunkMeshBasic::bind_texture2negative_x(block_id id) {
-    bind_texture_first_order(id, DB::s_atlas_db(id, sides::negative_x));
+    bind_texture_first_order(DB::s_atlas_db(id, sides::negative_x));
 }
 
 inline void ChunkMeshBasic::bind_texture2positive_x(block_id id) {
-    bind_texture_second_order(id, DB::s_atlas_db(id, sides::positive_x));
+    bind_texture_second_order(DB::s_atlas_db(id, sides::positive_x));
 }
 
 inline void ChunkMeshBasic::bind_texture2negative_y(block_id id) {
-    bind_texture_second_order(id, DB::s_atlas_db(id, sides::negative_y));
+    bind_texture_second_order(DB::s_atlas_db(id, sides::negative_y));
 }
 
 inline void ChunkMeshBasic::bind_texture2positive_y(block_id id) {
-    bind_texture_first_order(id, DB::s_atlas_db(id, sides::positive_y));
+    bind_texture_first_order(DB::s_atlas_db(id, sides::positive_y));
 }
 
 inline void ChunkMeshBasic::bind_texture2negative_z(block_id id) {
-    bind_texture_second_order(id, DB::s_atlas_db(id, sides::negative_z));
+    bind_texture_second_order(DB::s_atlas_db(id, sides::negative_z));
 }
 
 inline void ChunkMeshBasic::bind_texture2positive_z(block_id id) {
-    bind_texture_first_order(id, DB::s_atlas_db(id, sides::positive_z));
+    bind_texture_first_order(DB::s_atlas_db(id, sides::positive_z));
 }
 
 void World::ChunkMeshBasic::draw() {

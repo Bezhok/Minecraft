@@ -66,7 +66,7 @@ void MapMeshBuilder::generate_vertices() {
         range.end_z = range.chunk_z + RENDER_DISTANCE_IN_CHUNKS / 2;
 
         unload_columns(range);
-        add_chunks2vertices_generation(range);
+        add_chunks_range2vertices_generation(range);
         for (auto it = m_chunks4vertices_generation.begin(); it != m_chunks4vertices_generation.end(); ++it) {
             (*it)->update_vertices();
 
@@ -99,15 +99,16 @@ void MapMeshBuilder::unload_columns(RenderRange &range) {
 }
 
 void MapMeshBuilder::update_edited_chunk() {
-    Chunk &chunk = *m_map->get_edited_chunk();
+    Chunk *edited_chunk = m_map->get_edited_chunk();
 
-    if (!chunk.is_rendering()) {
-        chunk.set_is_rendering(true);
-        m_is_new_chunk = true;
+    if (edited_chunk != nullptr) {
+        if (!edited_chunk->is_rendering()) {
+            edited_chunk->set_is_rendering(true);
+            m_is_new_chunk = true;
+        }
+        edited_chunk->update_vertices();
+        m_priority4_rendering.push_back(edited_chunk);
     }
-    chunk.update_vertices();
-
-    m_priority4_rendering.push_back(&chunk);
 
     m_mutex__chunks4rendering.lock();
     for (sf::Vector3i &pos : m_map->m_should_be_updated_neighbours) {
@@ -187,7 +188,7 @@ bool MapMeshBuilder::add_column2vertices_generation(Map::Column &column) {
     return has_new;
 }
 
-void MapMeshBuilder::add2vertices_generation(int i, int k, glm::mat4 &pv, RenderRange &range) {
+void MapMeshBuilder::add_visible_chunks_in_range2vertices_generation(int i, int k, glm::mat4 &pv, RenderRange &range) {
     if (i >= 0 && k >= 0) {
         for (int j = 0; j < CHUNKS_IN_WORLD_HEIGHT; ++j) {
             float chunk_center = BLOCKS_IN_CHUNK / 2.f - 1.f;
@@ -219,7 +220,7 @@ void MapMeshBuilder::add2vertices_generation(int i, int k, glm::mat4 &pv, Render
     }
 }
 
-void MapMeshBuilder::add_chunks2vertices_generation(RenderRange &range) {
+void MapMeshBuilder::add_chunks_range2vertices_generation(RenderRange &range) {
     auto windows_size = m_window->getSize();
     glm::mat4 pv = m_player->calc_projection_view(windows_size);
 
@@ -236,20 +237,20 @@ void MapMeshBuilder::add_chunks2vertices_generation(RenderRange &range) {
         int k = loc_start_z;
         for (; k <= loc_end_z; ++k) {
             if (m_visible_columns_count >= VISIBLE_COLUMNS_PER_LOOP) break;
-            add2vertices_generation(i, k, pv, range);
+            add_visible_chunks_in_range2vertices_generation(i, k, pv, range);
         }
         for (; i <= loc_end_x; ++i) {
             if (m_visible_columns_count >= VISIBLE_COLUMNS_PER_LOOP)
                 break;
-            add2vertices_generation(i, k, pv, range);
+            add_visible_chunks_in_range2vertices_generation(i, k, pv, range);
         }
         for (; k >= loc_start_z; --k) {
             if (m_visible_columns_count >= VISIBLE_COLUMNS_PER_LOOP) break;
-            add2vertices_generation(i, k, pv, range);
+            add_visible_chunks_in_range2vertices_generation(i, k, pv, range);
         }
         for (; i >= loc_start_x; --i) {
             if (m_visible_columns_count >= VISIBLE_COLUMNS_PER_LOOP) break;
-            add2vertices_generation(i, k, pv, range);
+            add_visible_chunks_in_range2vertices_generation(i, k, pv, range);
         }
         if (m_visible_columns_count >= VISIBLE_COLUMNS_PER_LOOP) break;
 

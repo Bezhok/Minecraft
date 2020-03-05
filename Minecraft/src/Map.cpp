@@ -74,6 +74,10 @@ void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y,
                 Converter::coord2block_coord_in_chunk(pos_in_chunk.z),
                 type
         );
+
+        if (temp_chunk.is_rendering()) {
+            // TODO should update vertices or it cause "holes"
+        }
     }
 }
 

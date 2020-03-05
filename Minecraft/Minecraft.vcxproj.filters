@@ -53,6 +53,9 @@
       <Filter>World</Filter>
     </ClCompile>
     <ClCompile Include="src\BlockWrapper.cpp" />
+    <ClCompile Include="src\Biome.cpp" />
+    <ClCompile Include="src\PlainsBiome.cpp" />
+    <ClCompile Include="src\DesertBiome.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -102,5 +105,8 @@
     </ClInclude>
     <ClInclude Include="src\BlockWrapper.h" />
     <ClInclude Include="src\Converter.h" />
+    <ClInclude Include="src\Biome.h" />
+    <ClInclude Include="src\PlainsBiome.h" />
+    <ClInclude Include="src\DesertBiome.h" />
   </ItemGroup>
 </Project>

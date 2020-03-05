@@ -155,12 +155,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Dependicies\includeFull\fast_noise\FastNoise.cpp" />
+    <ClCompile Include="src\Biome.cpp" />
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\BlockWrapper.cpp" />
     <ClCompile Include="src\block_db.cpp" />
     <ClCompile Include="src\Chunk.cpp" />
     <ClCompile Include="src\ChunkMeshBasic.cpp" />
     <ClCompile Include="src\DebugData.cpp" />
+    <ClCompile Include="src\DesertBiome.cpp" />
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\game_constants.cpp" />
     <ClCompile Include="src\Light.cpp" />
@@ -168,12 +170,14 @@
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\MapMeshBuilder.cpp" />
     <ClCompile Include="src\Menu.cpp" />
+    <ClCompile Include="src\PlainsBiome.cpp" />
     <ClCompile Include="src\Player.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Sounds.cpp" />
     <ClCompile Include="src\TerrainGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Biome.h" />
     <ClInclude Include="src\Converter.h" />
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\BlockWrapper.h" />
@@ -183,6 +187,7 @@
     <ClInclude Include="src\Chunk.h" />
     <ClInclude Include="src\ChunkMeshBasic.h" />
     <ClInclude Include="src\DebugData.h" />
+    <ClInclude Include="src\DesertBiome.h" />
     <ClInclude Include="src\Entity.h" />
     <ClInclude Include="src\game_constants.h" />
     <ClInclude Include="src\Light.h" />
@@ -191,6 +196,7 @@
     <ClInclude Include="src\Maths.h" />
     <ClInclude Include="src\Menu.h" />
     <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\PlainsBiome.h" />
     <ClInclude Include="src\Player.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Sounds.h" />

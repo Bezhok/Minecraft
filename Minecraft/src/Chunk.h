@@ -42,11 +42,11 @@ namespace World {
 
         bool is_empty();
 
-        void generate_cactus_vertices(GLfloat x, GLfloat y, GLfloat z, block_id id);
+        inline void generate_cactus_vertices(GLfloat x, GLfloat y, GLfloat z, block_id id);
 
-        void generate_water_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, block_id id);
+        inline void generate_water_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, block_id id);
 
-        void generate_block_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, block_id id);
+        inline void generate_block_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, block_id id);
     public:
         /* for Block mesh basic */
         bool should_make_layer(int y);

@@ -2,6 +2,9 @@
 #include "Map.h"
 #include "Converter.h"
 #include "block_db.h"
+#include "Biome.h"
+#include "DesertBiome.h"
+#include "PlainsBiome.h"
 
 using namespace World;
 
@@ -16,11 +19,15 @@ TerrainGenerator::TerrainGenerator(Map *map) : m_map(map) {
     m_noise.SetInterp(FastNoise::Hermite);
 
     m_biome_noise.SetNoiseType(FastNoise::ValueFractal);
-    m_biome_noise.SetFrequency(0.002f); //0.0009
+    m_biome_noise.SetFrequency(0.002f);
     m_biome_noise.SetFractalOctaves(5);
+
+    m_offset = 0;//30
+    m_water_level = m_offset + 30;
 }
 
 TerrainGenerator::~TerrainGenerator() {
+
 }
 
 inline void TerrainGenerator::generate_chunk_terrain(int chunk_x, int chunk_y, int chunk_z) {
@@ -28,140 +35,61 @@ inline void TerrainGenerator::generate_chunk_terrain(int chunk_x, int chunk_y, i
     generate_chunk_terrain(column, chunk_x, chunk_y, chunk_z);
 }
 
-void World::TerrainGenerator::generate_chunk_terrain(std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT> &column, int chunk_x,
+void World::TerrainGenerator::generate_chunk_terrain(Column &column, int chunk_x,
                                                      int chunk_y, int chunk_z) {
-
     Chunk &chunk = column[chunk_y];
     chunk.init({chunk_x, chunk_y, chunk_z}, m_map);
 
     srand(chunk_x + chunk_z * chunk_z);
 
-    int offset = 0;//30
-    static const int WATER_LEVEL = offset + 30;
+    PlainsBiome plain(m_water_level);
+    DesertBiome desert(m_water_level);
+    PlainsBiome groove(m_water_level);
+    groove.set_tree_frequency(30);
 
-    std::vector<sf::Vector3i> tree_pos;
+    Biome *biome;
     for (int block_x = 0; block_x < BLOCKS_IN_CHUNK; ++block_x)
         for (int block_z = 0; block_z < BLOCKS_IN_CHUNK; ++block_z) {
+            // noise calculating
             int x = Converter::chunk_coord2block_coord(chunk_x) + block_x;
             int z = Converter::chunk_coord2block_coord(chunk_z) + block_z;
+            int ground_h = 0;
+            float biome_noise = m_biome_noise.GetNoise(static_cast<float>(x) + 1, static_cast<float>(z) + 1);
+            float shifted_noise = get_noise(x + 1, z + 1) + 1;
 
-            int h = 0;
-            float b = m_biome_noise.GetNoise(static_cast<float>(x) + 1, static_cast<float>(z) + 1);
-
-            int biome_type = 0;
-            static int tree_freeq[] = {200, 1000, 50};
-            block_id top_block_type;
-            block_id below_block_type;
-
-            if (b >= 0) {
-                biome_type = 2;
-                if (b > 0.2) {
-                    biome_type = 0;
+            // biome determining
+            if (biome_noise >= 0) {
+                if (biome_noise > 0.2) {
+                    biome = &plain;
+                } else {
+                    biome = &groove;
                 }
-
-                top_block_type = block_id::Grass;
-                below_block_type = block_id::Dirt;
-                h = static_cast<int>((get_noise(x + 1, z + 1) + 1) * 40) + offset;
+                ground_h = static_cast<int>(shifted_noise * 40) + m_offset;
             } else {
-                biome_type = 1;
-                top_block_type = below_block_type = block_id::Sand;
-
-                h = static_cast<int>((get_noise(x + 1, z + 1) + 1) * 15) + offset + 19;
+                biome = &desert;
+                ground_h = static_cast<int>(shifted_noise * 15) + m_offset + 19;
             }
 
-
+            // blocks generation
             for (int block_y = 0; block_y < BLOCKS_IN_CHUNK; ++block_y) {
-                int y = Converter::chunk_coord2block_coord(chunk_y) + block_y;
+                int block_global_y = Converter::chunk_coord2block_coord(chunk_y) + block_y;
 
-                block_id id;
-                if (h < WATER_LEVEL && y >= h && y < WATER_LEVEL) {
-                    id = block_id::Water;
-                } else if (y > h) {
-                    break;
-                } else if (h - 4 < WATER_LEVEL && y > h - 4) {
-                    id = block_id::Sand;
-                } else {
-                    if (y == h) {
-                        if (glm::linearRand(0, tree_freeq[biome_type]) == 1) {
-                            tree_pos.emplace_back(block_x, block_y + 1, block_z);
-                            id = below_block_type;
-                        } else {
-                            id = top_block_type;
-                        }
-                    } else if (y > h - 5) {
-                        id = below_block_type;
-                    } else {
-                        id = block_id::Stone;
-                    }
-                }
+                block_id id = biome->generate_block({block_x, block_y, block_z}, ground_h, block_global_y);
+                if (id == block_id::Air) break;
                 chunk.set_block_type(block_x, block_y, block_z, id);
             }
 
-            if (biome_type == 0 || biome_type == 2) {
-                for (auto &pos : tree_pos) {
-                    generate_tree(pos, column, chunk_y);
-                }
-            } else {
-                for (auto &pos : tree_pos) {
-                    generate_cactus(pos, column, chunk_y);
-                }
-            }
-
-            tree_pos.clear();
+            generate_structures(column, chunk_y, biome);
         }
 }
 
-void TerrainGenerator::generate_cactus(sf::Vector3i &pos, std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT> &column, int chunk_y) {
-    int tree_height = glm::linearRand(3, 6);
-    for (int y = 0; y < tree_height; ++y) {
-        auto full_pos = pos + sf::Vector3i{0, y, 0};
-        m_map->set_block_type(full_pos, column, chunk_y, block_id::Cactus);
+void TerrainGenerator::generate_structures(Column &column, int chunk_y, Biome *biome) {
+    // tree generation
+    for (auto &pos : biome->get_tree_positions()) {
+        biome->generate_tree([&] (sf::Vector3i loc_pos, block_id type) {
+            sf::Vector3i full_pos = pos + loc_pos;
+            m_map->set_block_type(full_pos, column, chunk_y, type);
+        });
     }
-}
-
-void TerrainGenerator::generate_tree(sf::Vector3i &pos, std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT> &column, int chunk_y) {
-    int tree_height = glm::linearRand(5, 7);
-    for (int y = 0; y < tree_height; ++y) {
-        auto full_pos = pos + sf::Vector3i{0, y, 0};
-        m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak);
-    }
-
-    auto full_pos = pos + sf::Vector3i{0, tree_height, 0};
-    m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
-
-    full_pos = pos + sf::Vector3i{-1, tree_height, 0};
-    m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
-
-    full_pos = pos + sf::Vector3i{1, tree_height, 0};
-    m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
-
-    full_pos = pos + sf::Vector3i{0, tree_height, 1};
-    m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
-
-    full_pos = pos + sf::Vector3i{0, tree_height, -1};
-    m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
-
-    for (int x = -1; x <= 1; ++x)
-        for (int z = -1; z <= 1; ++z) {
-            if (x != 0 || z != 0) {
-                full_pos = pos + sf::Vector3i{x, tree_height - 1, z};
-                m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
-            }
-        }
-
-    for (int x = -2; x <= 2; ++x)
-        for (int z = -2; z <= 2; ++z) {
-            if (x != 0 || z != 0) {
-                full_pos = pos + sf::Vector3i{x, tree_height - 2, z};
-                m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
-            }
-        }
-
-    for (int x = -2; x <= 2; ++x)
-        for (int z = -2; z <= 2; ++z) {
-            if (x != 0 || z != 0) {
-                full_pos = pos + sf::Vector3i{x, tree_height - 3, z};
-                m_map->set_block_type(full_pos, column, chunk_y, block_id::Oak_leafage);
-            }
-        }
+    biome->clear();
 }
