@@ -6,6 +6,7 @@
 #include "block_db.h"
 #include "Menu.h"
 #include "MapMeshBuilder.h"
+#include "InputManager.h"
 
 using std::to_string;
 using std::advance;
@@ -19,7 +20,7 @@ using namespace World;
 
 
 App::App(sf::RenderWindow &window)
-        : m_window{window} {
+    : m_window{window} {
     m_font.loadFromFile("resources/arial.ttf");
     m_text.setFont(m_font);
     m_text.setCharacterSize(20);
@@ -28,8 +29,13 @@ App::App(sf::RenderWindow &window)
     m_map = std::make_shared<World::Map>();
     m_renderer = std::make_unique<Renderer>();
     m_map_mesh_builder = std::make_unique<MapMeshBuilder>();
+    m_input_manager = std::make_unique<InputManager>(m_window);
 
+    m_should_display_debug_info = false;
     m_window.setMouseCursorVisible(false);
+    int x = m_window.getSize().x / 2;
+    int y = m_window.getSize().y / 2;
+    sf::Mouse::setPosition(sf::Vector2i(x, y), m_window);
 
     DB::load_blocks();
     // after !!!
@@ -40,24 +46,27 @@ App::App(sf::RenderWindow &window)
     m_menu = std::make_unique<Menu>(m_window);
     m_menu->update_players_blocks(m_player);
 
-    m_should_display_debug_info = false;
+    m_input_manager->add(&m_player);
+    m_input_manager->add(m_menu.get());
+    m_input_manager->set_should_fix_cursor(m_should_fix_cursor);
+
 }
 
 std::string App::debug_text() {
     std::string str =
-            "fps: " +
-          to_string(int(m_debug_data.get_fps())) + "\n" +
-          "ft: " +
-          to_string(int(m_debug_data.get_frame_time())) + "\n" +
-          "x, y, z: " +
-          to_string(m_player.get_position().x) + " " +
-          to_string(m_player.get_position().y) + " " +
-          to_string(m_player.get_position().z) + "\n" +
-          to_string(m_map_mesh_builder->get_chunks4rendering_size()) + " " +
-          to_string(m_map->get_size()) + " " +
-          to_string(m_map_mesh_builder->get_chunks4vertices_generation_size()) + " " +
-          "- chunks rendering, map size, updates, global buffer\n" +
-          to_string(vertices_wasnt_free) + " - chunks which veticies memory is not freed";
+        "fps: " +
+            to_string(int(m_debug_data.get_fps())) + "\n" +
+            "ft: " +
+            to_string(int(m_debug_data.get_frame_time())) + "\n" +
+            "x, y, z: " +
+            to_string(m_player.get_position().x) + " " +
+            to_string(m_player.get_position().y) + " " +
+            to_string(m_player.get_position().z) + "\n" +
+            to_string(m_map_mesh_builder->get_chunks4rendering_size()) + " " +
+            to_string(m_map->get_size()) + " " +
+            to_string(m_map_mesh_builder->get_chunks4vertices_generation_size()) + " " +
+            "- chunks rendering, map size, updates, global buffer\n" +
+            to_string(vertices_wasnt_free) + " - chunks which veticies memory is not freed";
 
     return str;
 }
@@ -71,7 +80,6 @@ void App::draw_under_water_filter() {
 }
 
 void App::draw_SFML() {
-
     if (m_player.m_is_under_water) {
         draw_under_water_filter();
     }
@@ -97,11 +105,9 @@ void App::draw_openGL() {
 }
 
 void App::run() {
+    handle_events();
 
-
-//	Sleep(1000.f);
     m_map_mesh_builder->launch(m_map.get(), &m_player, &m_window);
-
     while (m_window.isOpen()) {
         m_debug_data.start();
         //
@@ -119,7 +125,7 @@ void App::run() {
         draw_SFML();
 
         m_renderer->finish_render(m_window, m_player, m_map_mesh_builder->m_chunks4rendering,
-                                 m_map_mesh_builder->m_mutex__chunks4rendering);
+                                  m_map_mesh_builder->m_mutex__chunks4rendering);
 
         if (m_should_display_debug_info) {
             m_debug_data.count();
@@ -131,32 +137,6 @@ void App::run() {
 
 void App::handle_events() {
     input();
-
-    //camera
-    sf::Vector2i mouse_xy;
-    if (m_should_fix_cursor) {
-        mouse_xy = sf::Mouse::getPosition(m_window);
-
-        // center coordinates
-        int x = m_window.getSize().x / 2;
-        int y = m_window.getSize().y / 2;
-
-        m_player.m_camera_angle.x += float(x - mouse_xy.x) / 12;
-        m_player.m_camera_angle.y += float(y - mouse_xy.y) / 12;
-
-        if (m_player.m_camera_angle.y < -89) { m_player.m_camera_angle.y = -89; }
-        if (m_player.m_camera_angle.y > 89) { m_player.m_camera_angle.y = 89; }
-
-        if (m_player.m_camera_angle.x > 361) {
-            m_player.m_camera_angle.x -= 360;
-        }
-
-        if (m_player.m_camera_angle.x < -361) {
-            m_player.m_camera_angle.x += 360;
-        }
-
-        sf::Mouse::setPosition(sf::Vector2i(x, y), m_window);
-    }
 }
 
 void App::input() {
@@ -166,20 +146,14 @@ void App::input() {
     sf::Event event;
     while (m_window.pollEvent(event)) {
         switch (event.type) {
-            case sf::Event::Closed:
-                m_window.close();
+            case sf::Event::Closed:m_window.close();
                 break;
-            case sf::Event::KeyPressed:
-                process_key(event.key.code);
+            case sf::Event::KeyPressed:process_key4window(event.key.code);
                 break;
-            case sf::Event::Resized:
-                resize(event.size.width, event.size.height);
+            case sf::Event::Resized:resize(event.size.width, event.size.height);
                 break;
         }
-
-
-        m_player.input(event);
-        m_menu->input(event);
+        m_input_manager->handle_input(event);
     }
 }
 
@@ -191,17 +165,13 @@ void App::resize(uint32_t x, uint32_t y) {
     m_menu->update();
 }
 
-void App::process_key(sf::Keyboard::Key code) {
+void App::process_key4window(sf::Keyboard::Key code) {
     switch (code) {
-        case sf::Keyboard::Escape:
-            m_window.setMouseCursorVisible(m_should_fix_cursor);
+        case sf::Keyboard::Escape:m_window.setMouseCursorVisible(m_should_fix_cursor);
             m_should_fix_cursor = !m_should_fix_cursor;
-
+            m_input_manager->set_should_fix_cursor(m_should_fix_cursor);
             break;
-        case sf::Keyboard::F3:
-            m_should_display_debug_info = !m_should_display_debug_info;
-            break;
-        default:
+        case sf::Keyboard::F3:m_should_display_debug_info = !m_should_display_debug_info;
             break;
     }
 }

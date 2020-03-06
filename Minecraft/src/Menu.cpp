@@ -4,6 +4,7 @@
 #include "block_db.h"
 #include "Player.h"
 #include "MenuElement.h"
+#include "InputEvent.h"
 
 using namespace World;
 
@@ -66,11 +67,6 @@ void Menu::update() {
     );
 }
 
-void Menu::input(sf::Event &e) {
-    keyboard_input(e);
-    mouse_input(e);
-}
-
 void Menu::update_players_blocks(Player &player) {
     m_side_sprites.clear();
 
@@ -102,29 +98,30 @@ void Menu::update_players_blocks(Player &player) {
     }
 }
 
-void Menu::keyboard_input(sf::Event &e) {
+void Menu::on_notify(const InputEvent *event) {
+  if (event->type == EventType::CHANGE_INV_ITEM) {
+    change_inventory_item(event->delta.x);
+  }
 }
 
-void Menu::mouse_input(sf::Event &e) {
-    if (e.type == sf::Event::MouseWheelMoved) {
-        // toolbar
-        sf::Vector2f pos = m_sprites[MenuElement::curr_tool].getPosition();
+void Menu::change_inventory_item(int deltaX) {
+  // toolbar
+  sf::Vector2f pos = m_sprites[MenuElement::curr_tool].getPosition();
 
-        float dx = e.mouseWheel.delta * float(m_textures[MenuElement::tool_bar].getSize().x - 2) / 9.F;
-        float tool_bar_block_size_x = float(m_textures[MenuElement::tool_bar].getSize().x - 2) / 9.F;
-        float curr_tool_x = m_sprites[MenuElement::curr_tool].getPosition().x;
-        float tool_bar_x = m_sprites[MenuElement::tool_bar].getPosition().x;
-        int tool_bar_size_x = m_textures[MenuElement::tool_bar].getSize().x;
+  float dx = deltaX * float(m_textures[MenuElement::tool_bar].getSize().x - 2) / 9.F;
+  float tool_bar_block_size_x = float(m_textures[MenuElement::tool_bar].getSize().x - 2) / 9.F;
+  float curr_tool_x = m_sprites[MenuElement::curr_tool].getPosition().x;
+  float tool_bar_x = m_sprites[MenuElement::tool_bar].getPosition().x;
+  int tool_bar_size_x = m_textures[MenuElement::tool_bar].getSize().x;
 
-        // ring closure
-        if (curr_tool_x + dx >= tool_bar_x + tool_bar_size_x - tool_bar_block_size_x / 2.F) {
-            pos.x = tool_bar_x - 2;
-        } else if (curr_tool_x + dx <= tool_bar_x - tool_bar_block_size_x / 2.F) {
-            pos.x = tool_bar_x + tool_bar_size_x - tool_bar_block_size_x - 4;
-        } else {
-            pos.x += dx;
-        }
+  // ring closure
+  if (curr_tool_x + dx >= tool_bar_x + tool_bar_size_x - tool_bar_block_size_x / 2.F) {
+    pos.x = tool_bar_x - 2;
+  } else if (curr_tool_x + dx <= tool_bar_x - tool_bar_block_size_x / 2.F) {
+    pos.x = tool_bar_x + tool_bar_size_x - tool_bar_block_size_x - 4;
+  } else {
+    pos.x += dx;
+  }
 
-        m_sprites[MenuElement::curr_tool].setPosition(pos);
-    }
+  m_sprites[MenuElement::curr_tool].setPosition(pos);
 }

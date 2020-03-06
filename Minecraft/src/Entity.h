@@ -8,7 +8,7 @@ namespace World {
 
 namespace Base {
     class Entity {
-    protected:
+     public:
         sf::Vector3f m_pos;
         sf::Vector3f m_rotation;
         sf::Vector3f m_size;

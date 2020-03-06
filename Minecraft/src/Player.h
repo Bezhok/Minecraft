@@ -3,6 +3,8 @@
 #include "pch.h"
 #include "Entity.h"
 #include "game_constants.h"
+#include "Directions.h"
+#include "Observer.h"
 
 namespace World {
     class Map;
@@ -11,15 +13,15 @@ namespace World {
 }
 
 class Player :
-        public Base::Entity {
+        public Base::Entity, public Observer {
     enum Key {
         W = 0, A, S, D, Space, LShift
     };
 public:
     sf::Vector2f m_camera_angle;
 private:
-    bool m_is_keys_pressed[6] = {false};
-    double m_direction_speed[6] = {0};
+//    bool m_is_moving[6] = {false};
+//    double m_direction_speed[6] = {0};
 
     std::vector<std::pair<World::block_id, int>> m_inventory;
     World::block_id m_curr_block;
@@ -29,15 +31,14 @@ private:
     bool m_on_ground = false;
     bool m_flying = false;
     bool m_god = false;
-
+    std::unordered_map<Directions, double > m_direction_speed;
+    std::unordered_map<Directions, bool> m_is_moving;
 public:
     /* set default value */
     void init(World::Map *map);
 
     /* calculate movement */
     void update(double time);
-
-    void input(sf::Event &e);
 
     /* eponymous */
     void god_on() { m_god = true; }
@@ -58,15 +59,12 @@ public:
 
     glm::mat4 calc_projection_view(sf::Vector2u &window_size);
 
+    void on_notify(const InputEvent *event) override;
 private:
     void collision(float dx, float dy, float dz);
 
     void put_block();
 
     void delete_block();
-
-    void keyboard_input(sf::Event &e);
-
-    void mouse_input(sf::Event &e);
 };
 

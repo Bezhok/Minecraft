@@ -56,6 +56,11 @@
     <ClCompile Include="src\Biome.cpp" />
     <ClCompile Include="src\PlainsBiome.cpp" />
     <ClCompile Include="src\DesertBiome.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\InputEvent.cpp" />
+    <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\Observer.cpp" />
+    <ClCompile Include="src\Subject.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -111,5 +116,12 @@
     <ClInclude Include="src\Side.h" />
     <ClInclude Include="src\MenuElement.h" />
     <ClInclude Include="src\RenderRange.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Directions.h" />
+    <ClInclude Include="src\EventType.h" />
+    <ClInclude Include="src\InputEvent.h" />
+    <ClInclude Include="src\InputManager.h" />
+    <ClInclude Include="src\Observer.h" />
+    <ClInclude Include="src\Subject.h" />
   </ItemGroup>
 </Project>

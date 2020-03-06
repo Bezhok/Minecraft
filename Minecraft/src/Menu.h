@@ -2,27 +2,25 @@
 
 #include "pch.h"
 #include "MenuElement.h"
+#include "Observer.h"
 
 class Player;
 namespace World {
-    enum class block_id : uint8_t;
+enum class block_id : uint8_t;
 }
 
-class Menu {
-private:
+class Menu : public Observer {
+ private:
     sf::RenderWindow &m_window;
     std::unordered_map<MenuElement, sf::Sprite> m_sprites;
     std::unordered_map<World::block_id, sf::Sprite> m_side_sprites; // tool bar items
     std::unordered_map<MenuElement, sf::Texture> m_textures;
 
-public:
+ public:
     /* init MenuElements */
     Menu(sf::RenderWindow &window);
 
     ~Menu();
-
-    /* eponymous */
-    void input(sf::Event &e);
 
     /* should be called when resized */
     void update();
@@ -34,9 +32,7 @@ public:
     const auto &get_spites() { return m_sprites; };
 
     const auto &get_top_spites() { return m_side_sprites; };
-private:
-    /* eponymous */
-    void keyboard_input(sf::Event &e);
-
-    void mouse_input(sf::Event &e);
+ private:
+    void on_notify(const InputEvent *event) override;
+    void change_inventory_item(int deltaX);
 };

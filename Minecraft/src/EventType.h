@@ -1,0 +1,5 @@
+#pragma once
+
+enum class EventType {
+    MOVEMENT, CREATE, REMOVE, CHANGE_INV_ITEM, CAMERA_ROTATION, RSHIFT_RELEASED
+};

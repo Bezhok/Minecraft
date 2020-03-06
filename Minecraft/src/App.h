@@ -3,6 +3,7 @@
 #include "pch.h"
 #include "DebugData.h"
 #include "Player.h"
+#include "InputManager.h"
 
 class Menu;
 class Renderer;
@@ -23,6 +24,7 @@ private:
     std::unique_ptr<Renderer> m_renderer;
     std::shared_ptr<World::Map> m_map;
     std::unique_ptr<World::MapMeshBuilder> m_map_mesh_builder;
+    std::unique_ptr<InputManager> m_input_manager;
 
     bool m_should_display_debug_info = true;
     bool m_should_fix_cursor = true;
@@ -51,7 +53,7 @@ private:
 
     std::string debug_text();
 
-    void process_key(sf::Keyboard::Key code);
+    void process_key4window(sf::Keyboard::Key code);
 
     void resize(uint32_t x, uint32_t y);
 
