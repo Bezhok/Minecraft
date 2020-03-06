@@ -10,20 +10,20 @@ namespace World {
 
     class Chunk;
 
-    enum class block_id : uint8_t;
+    enum class BlockType : uint8_t;
 
     class Map {
-    public:
+     public:
         using Column = std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT>;
-    private:
+     private:
         phmap::parallel_node_hash_map<size_t, Column> m_map;
         bool m_should_redraw_chunk = false;
         std::unique_ptr<TerrainGenerator> m_terrain_generator;
-        block_id m_edited_block_type;
+        BlockType m_edited_block_type;
         sf::Vector3i m_edited_block_pos;
         Chunk *m_edited_chunk = nullptr;
         Sounds m_sounds;
-    private:
+     private:
         void play_sound(Sounds::SoundsNames name);
 
         void
@@ -31,7 +31,7 @@ namespace World {
 
         void recalculate_pos(sf::Vector3i &pos_rel2chunk, sf::Vector3i &chunk_pos);
 
-    public:
+     public:
         size_t get_size() { return m_map.size(); };
 
         void generate_chunk_terrain(Column &, int, int, int);
@@ -50,7 +50,7 @@ namespace World {
 
         bool is_water(int x, int y, int z);
 
-        bool create_block(int x, int y, int z, block_id type);
+        bool create_block(int x, int y, int z, BlockType type);
 
         bool delete_block(int x, int y, int z);
 
@@ -91,9 +91,9 @@ namespace World {
 
         std::vector<Buffers> m_should_be_freed_buffers;
 
-        void set_block_type(sf::Vector3i pos_in_chunk, Map::Column &column, int chunk_y, block_id type);
+        void set_block_type(sf::Vector3i pos_in_chunk, Map::Column &column, int chunk_y, BlockType type);
 
-        inline block_id get_type(int x, int y, int z);
+        inline BlockType get_type(int x, int y, int z);
     };
 }
 

@@ -13,7 +13,7 @@ namespace World {
 }
 
 class App {
-private:
+ private:
     sf::Text m_text;
     sf::Font m_font;
     DebugData m_debug_data;
@@ -28,7 +28,7 @@ private:
 
     bool m_should_display_debug_info = true;
     bool m_should_fix_cursor = true;
-public:
+ public:
     /* init some objects */
     explicit App(sf::RenderWindow &window);
 
@@ -36,7 +36,7 @@ public:
     void run();
 
     ~App();
-private:
+ private:
     /* input and camera */
     void handle_events();
 

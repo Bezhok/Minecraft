@@ -2,16 +2,15 @@
 
 #include "Buffers.h"
 
-class BlockWrapper
-{
-private:
+class BlockWrapper {
+ private:
     sf::Vector3f m_pos;
     Buffers m_buffers;
     std::vector<GLfloat> m_vertices;
 
-private:
+ private:
     void update_vertices(sf::Vector3i &bpos);
-public:
+ public:
     void draw();
     BlockWrapper();
     ~BlockWrapper();

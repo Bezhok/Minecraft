@@ -8,7 +8,6 @@
 
 using namespace World;
 
-
 TerrainGenerator::TerrainGenerator(Map *map) : m_map(map) {
 
     srand(m_noise.GetSeed());
@@ -74,8 +73,8 @@ void World::TerrainGenerator::generate_chunk_terrain(Column &column, int chunk_x
             for (int block_y = 0; block_y < BLOCKS_IN_CHUNK; ++block_y) {
                 int block_global_y = Converter::chunk_coord2block_coord(chunk_y) + block_y;
 
-                block_id id = biome->generate_block({block_x, block_y, block_z}, ground_h, block_global_y);
-                if (id == block_id::Air) break;
+                BlockType id = biome->generate_block({block_x, block_y, block_z}, ground_h, block_global_y);
+                if (id == BlockType::Air) break;
                 chunk.set_block_type(block_x, block_y, block_z, id);
             }
 
@@ -86,9 +85,9 @@ void World::TerrainGenerator::generate_chunk_terrain(Column &column, int chunk_x
 void TerrainGenerator::generate_structures(Column &column, int chunk_y, Biome *biome) {
     // tree generation
     for (auto &pos : biome->get_tree_positions()) {
-        biome->generate_tree([&] (sf::Vector3i loc_pos, block_id type) {
-            sf::Vector3i full_pos = pos + loc_pos;
-            m_map->set_block_type(full_pos, column, chunk_y, type);
+        biome->generate_tree([&](sf::Vector3i loc_pos, BlockType type) {
+          sf::Vector3i full_pos = pos + loc_pos;
+          m_map->set_block_type(full_pos, column, chunk_y, type);
         });
     }
     biome->clear();

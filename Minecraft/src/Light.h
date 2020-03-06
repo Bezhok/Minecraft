@@ -4,7 +4,7 @@
 #include "game_constants.h"
 
 class Light {
-private:
+ private:
     const sf::Color DAY{145, 186, 252};
     const sf::Color NIGHT{28, 40, 80};
     const float light_movement_radius = RENDER_DISTANCE / 1;
@@ -20,7 +20,7 @@ private:
     glm::mat4 m_light_projection{};
     glm::mat4 m_light_view{};
     bool m_is_day = true;
-private:
+ private:
     void fix_shadow(glm::mat4 &shadow_matrix);
 
     void update_angle(float delta);
@@ -30,7 +30,7 @@ private:
     void calculate_view();
 
     void update_sun(const sf::Vector3f &player_position);
-public:
+ public:
     Light();
 
     ~Light();

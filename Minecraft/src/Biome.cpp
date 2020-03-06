@@ -3,14 +3,14 @@
 
 using namespace World;
 
-block_id Biome::generate_block(sf::Vector3i block_pos, int ground_h, int block_global_y) {
-    block_id id;
+BlockType Biome::generate_block(sf::Vector3i block_pos, int ground_h, int block_global_y) {
+    BlockType id;
     if (ground_h < m_water_level && block_global_y >= ground_h && block_global_y < m_water_level) {
-        id = block_id::Water;
+        id = BlockType::Water;
     } else if (block_global_y > ground_h) {
-        id = block_id::Air;
+        id = BlockType::Air;
     } else if (ground_h - 4 < m_water_level && block_global_y > ground_h - 4) {
-        id = block_id::Sand;
+        id = BlockType::Sand;
     } else {
         if (block_global_y == ground_h) {
             if (glm::linearRand(0, m_tree_frequency) == 1) {
@@ -22,7 +22,7 @@ block_id Biome::generate_block(sf::Vector3i block_pos, int ground_h, int block_g
         } else if (block_global_y > ground_h - 5) {
             id = m_below_block_type;
         } else {
-            id = block_id::Stone;
+            id = BlockType::Stone;
         }
     }
 

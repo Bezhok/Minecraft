@@ -1,6 +1,5 @@
 #include "game_constants.h"
 
-
 const int DEFAULT_WINDOW_WIDTH = 800;
 const int DEFAULT_WINDOW_HEIGTH = 600;
 

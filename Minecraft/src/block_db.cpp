@@ -5,77 +5,77 @@ using std::vector;
 using namespace World;
 
 DB::AtlasDb DB::s_atlas_db;
-std::vector<block_id> DB::s_loaded_blocks;
+std::vector<BlockType> DB::s_loaded_blocks;
 
-void World::DB::init_xyz(block_id id, const sf::Vector2i &pos) {
+void World::DB::init_xyz(BlockType id, const sf::Vector2i &pos) {
     for (int i = 0; i < static_cast<int>(Side::SIDES_COUNT); ++i) {
         s_atlas_db(id, static_cast<Side>(i)) = pos;
     }
 }
 
-void DB::init_xz(block_id id, const sf::Vector2i &pos) {
+void DB::init_xz(BlockType id, const sf::Vector2i &pos) {
     s_atlas_db(id, Side::negative_x) =
     s_atlas_db(id, Side::positive_x) =
     s_atlas_db(id, Side::negative_z) =
     s_atlas_db(id, Side::positive_z) = pos;
 }
 
-void DB::init_y(block_id id, const sf::Vector2i &pos) {
+void DB::init_y(BlockType id, const sf::Vector2i &pos) {
     s_atlas_db(id, Side::positive_y) =
     s_atlas_db(id, Side::negative_y) = pos;
 }
 
-void DB::init_n_y(block_id id, const sf::Vector2i &pos) {
+void DB::init_n_y(BlockType id, const sf::Vector2i &pos) {
     s_atlas_db(id, Side::negative_y) = pos;
 }
 
-void DB::init_p_y(block_id id, const sf::Vector2i &pos) {
+void DB::init_p_y(BlockType id, const sf::Vector2i &pos) {
     s_atlas_db(id, Side::positive_y) = pos;
 }
 
-void DB::load_block(block_id id) {
+void DB::load_block(BlockType id) {
     s_loaded_blocks.push_back(id);
 }
 
 void DB::load_blocks() {
-    block_id id = block_id::Grass;
+    BlockType id = BlockType::Grass;
     load_block(id); //front
     init_xz(id, {3, 0});
     init_n_y(id, {2, 0});
     init_p_y(id, {0, 0});
 
-    id = block_id::Stone;
+    id = BlockType::Stone;
     load_block(id);
     init_xyz(id, {1, 0});
 
-    id = block_id::Dirt;
+    id = BlockType::Dirt;
     load_block(id);
     init_xyz(id, {2, 0});
 
-    id = block_id::Oak;
+    id = BlockType::Oak;
     load_block(id);
     init_xz(id, {4, 1});
     init_y(id, {5, 1});
 
-    id = block_id::Oak_leafage;
+    id = BlockType::Oak_leafage;
     load_block(id);
     init_xyz(id, {5, 3});//4,3
 
-    id = block_id::Water;
+    id = BlockType::Water;
     load_block(id);
     init_xyz(id, {15, 15});//{ 13, 12 }
 
-    id = block_id::Sand;
+    id = BlockType::Sand;
     load_block(id);
     init_xyz(id, {2, 1});
 
-    id = block_id::Cactus;
+    id = BlockType::Cactus;
     load_block(id);
     init_xz(id, {6, 4});
     init_n_y(id, {7, 4});
     init_p_y(id, {5, 4});
 
-    id = block_id::Oak_wood;
+    id = BlockType::Oak_wood;
     load_block(id);
     init_xyz(id, {4, 0});
 }

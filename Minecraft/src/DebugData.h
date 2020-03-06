@@ -3,7 +3,7 @@
 #include "pch.h"
 
 class DebugData {
-private:
+ private:
     float fps = 0;
     float frame_time = 0;
     int start_time = 0;
@@ -12,7 +12,7 @@ private:
     sf::Clock update_frequency_timer;
     sf::Clock timer;
 
-public:
+ public:
     float get_fps() { return fps; };
 
     float get_frame_time() { return frame_time; };

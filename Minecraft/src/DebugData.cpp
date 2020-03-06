@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "DebugData.h"
 
-
 void DebugData::start() {
     start_time = end_time;
 

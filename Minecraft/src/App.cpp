@@ -18,7 +18,6 @@ using std::fabs;
 using std::sqrt;
 using namespace World;
 
-
 App::App(sf::RenderWindow &window)
     : m_window{window} {
     m_font.loadFromFile("resources/arial.ttf");

@@ -3,7 +3,7 @@
 #include <cstdint>
 
 namespace World {
-    enum class block_id : uint8_t {
+    enum class BlockType : uint8_t {
         Air = 0,
         Glass,
         Water,
@@ -15,7 +15,6 @@ namespace World {
         Oak,
         Oak_leafage,
         Cactus,
-
         Oak_wood,
 
         concrete_black,
@@ -26,9 +25,7 @@ namespace World {
         concrete_green,
 
         transparent_type,
-
         EMPTY_TYPE,
-
         BLOCK_ID_COUNT
     };
 }

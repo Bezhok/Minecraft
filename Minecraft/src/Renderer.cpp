@@ -125,9 +125,9 @@ bool Renderer::should_update_shadows() {
 void Renderer::draw_meshes(const sf::Vector2u &window_size, Player &player, set_of_chunks &chunks4rendering,
                            bool should_update_shadow) {
     sf::Vector3i player_pos__chunk = {
-            Converter::coord2chunk_coord(player.get_position().x),
-            Converter::coord2chunk_coord(player.get_position().y),
-            Converter::coord2chunk_coord(player.get_position().z)
+        Converter::coord2chunk_coord(player.get_position().x),
+        Converter::coord2chunk_coord(player.get_position().y),
+        Converter::coord2chunk_coord(player.get_position().z)
     };
     if (should_update_shadow) {
         glViewport(0, 0, SHADOW_SIZE, SHADOW_SIZE);
@@ -271,18 +271,18 @@ glm::fvec3 Renderer::calc_global_pos(const sf::Vector3i &chunk_pos, const sf::Ve
     //fixes white lines between chunks
     auto delta = chunk_pos - player_pos__chunk /*+ sf::Vector3i{2, 2, 2}*/;
 
-    return { chunk_pos.x * BLOCKS_IN_CHUNK,// - delta.x / 1000.f,
+    return {chunk_pos.x * BLOCKS_IN_CHUNK,// - delta.x / 1000.f,
             chunk_pos.y * BLOCKS_IN_CHUNK,// - delta.y / 1000.f,
-            chunk_pos.z * BLOCKS_IN_CHUNK };// - delta.z / 1000.f};
+            chunk_pos.z * BLOCKS_IN_CHUNK};// - delta.z / 1000.f};
 }
 
 void Renderer::draw_wrapper(const sf::Vector3i &pos) {
     sf::Shader::bind(&m_wrapper_shader);
 
     auto pvm = glm::translate(m_projection_view, glm::vec3{
-            Converter::coord2chunk_coord(pos.x) * BLOCKS_IN_CHUNK,
-            Converter::coord2chunk_coord(pos.y) * BLOCKS_IN_CHUNK,
-            Converter::coord2chunk_coord(pos.z) * BLOCKS_IN_CHUNK,
+        Converter::coord2chunk_coord(pos.x) * BLOCKS_IN_CHUNK,
+        Converter::coord2chunk_coord(pos.y) * BLOCKS_IN_CHUNK,
+        Converter::coord2chunk_coord(pos.z) * BLOCKS_IN_CHUNK,
     });
 
     m_wrapper_shader.setUniform("pvm", sf::Glsl::Mat4(glm::value_ptr(pvm)));
@@ -300,7 +300,7 @@ bool Renderer::is_chunk_visible(const glm::mat4 &pvm) {
     norm_coords.y /= norm_coords.w;
 
     return norm_coords.z > -1 * SPHERE_DIAMETER
-           && fabsf(norm_coords.x) < 1 + SPHERE_DIAMETER / fabsf(norm_coords.w)
-           && fabsf(norm_coords.y) < 1 + SPHERE_DIAMETER / fabsf(norm_coords.w);
+        && fabsf(norm_coords.x) < 1 + SPHERE_DIAMETER / fabsf(norm_coords.w)
+        && fabsf(norm_coords.y) < 1 + SPHERE_DIAMETER / fabsf(norm_coords.w);
 }
 

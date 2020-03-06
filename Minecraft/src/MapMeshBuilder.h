@@ -11,7 +11,7 @@ namespace World {
     class Chunk;
 
     class MapMeshBuilder {
-    private:
+     private:
         Map *m_map = nullptr;
         Player *m_player = nullptr;
         sf::Window *m_window = nullptr;
@@ -26,11 +26,11 @@ namespace World {
         bool m_is_new_chunk = false;
         int m_visible_columns_count = 0;
         const float SPHERE_DIAMETER = sqrtf(3.f * BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK);
-    public:
+     public:
         sf::Mutex m_mutex__chunks4vbo_generation, m_mutex__chunks4rendering;
         phmap::parallel_node_hash_set<World::Chunk *> m_chunks4rendering;
 
-    private:
+     private:
         void add_chunks_range2vertices_generation(RenderRange &range);
 
         void unload_columns(RenderRange &range);
@@ -39,7 +39,7 @@ namespace World {
 
         void update_edited_chunk();
 
-    public:
+     public:
         void wait();
 
         void generate_vertices();

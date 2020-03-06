@@ -2,7 +2,6 @@
 
 #include "pch.h"
 
-
 class Player;
 
 class Light;
@@ -17,7 +16,7 @@ namespace World {
 
 class Renderer {
     using set_of_chunks = phmap::parallel_node_hash_set<World::Chunk *>;
-private:
+ private:
     std::queue<const sf::Drawable *> m_SFML;
 
     sf::Shader m_shader_program;
@@ -38,7 +37,7 @@ private:
     GLuint m_light_pvm_location, m_pvm_location, m_shadow_pvm_location, m_water_model_location, m_water_pvm_location;
 
     float m_fog_density = 0.f;
-private:
+ private:
     void draw_wrapper(const sf::Vector3i &pos);
 
     bool is_chunk_visible(const glm::mat4 &pvm);
@@ -72,7 +71,7 @@ private:
     void draw_meshes(const sf::Vector2u &window_size, Player &player, set_of_chunks &chunks4rendering,
                      bool should_update_shadow);
 
-public:
+ public:
     /* init open gl settings */
     Renderer();
 

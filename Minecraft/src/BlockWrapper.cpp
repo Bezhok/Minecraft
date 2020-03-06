@@ -8,9 +8,9 @@ void BlockWrapper::draw() {
     glLineWidth(6);
 
     sf::Vector3i bpos = {
-            Converter::coord2block_coord_in_chunk(m_pos.x),
-            Converter::coord2block_coord_in_chunk(m_pos.y),
-            Converter::coord2block_coord_in_chunk(m_pos.z)
+        Converter::coord2block_coord_in_chunk(m_pos.x),
+        Converter::coord2block_coord_in_chunk(m_pos.y),
+        Converter::coord2block_coord_in_chunk(m_pos.z)
     };
 
     update_vertices(bpos);
@@ -23,7 +23,7 @@ void BlockWrapper::draw() {
     update_buffers();
 
     glBindVertexArray(m_buffers.VAO);
-    glDrawArrays(GL_LINE_STRIP, 0, m_vertices.size()/3);
+    glDrawArrays(GL_LINE_STRIP, 0, m_vertices.size() / 3);
     glBindVertexArray(0);
 
     glLineWidth(1);
@@ -53,29 +53,29 @@ void BlockWrapper::update_vertices(sf::Vector3i &bpos) {
     float m = 0.02f;
     float p = 1 + m;
     m_vertices = {
-            bpos.x - m, bpos.y + p, bpos.z - m,
-            bpos.x + p, bpos.y + p, bpos.z - m,
-            bpos.x + p, bpos.y + p, bpos.z + p,
-            bpos.x - m, bpos.y + p, bpos.z + p,
-            bpos.x - m, bpos.y + p, bpos.z - m,
+        bpos.x - m, bpos.y + p, bpos.z - m,
+        bpos.x + p, bpos.y + p, bpos.z - m,
+        bpos.x + p, bpos.y + p, bpos.z + p,
+        bpos.x - m, bpos.y + p, bpos.z + p,
+        bpos.x - m, bpos.y + p, bpos.z - m,
 
-            bpos.x - m, bpos.y - m, bpos.z - m,
-            bpos.x + p, bpos.y - m, bpos.z - m,
-            bpos.x + p, bpos.y - m, bpos.z + p,
-            bpos.x - m, bpos.y - m, bpos.z + p,
-            bpos.x - m, bpos.y - m, bpos.z - m,
+        bpos.x - m, bpos.y - m, bpos.z - m,
+        bpos.x + p, bpos.y - m, bpos.z - m,
+        bpos.x + p, bpos.y - m, bpos.z + p,
+        bpos.x - m, bpos.y - m, bpos.z + p,
+        bpos.x - m, bpos.y - m, bpos.z - m,
 
-            bpos.x + p, bpos.y - m, bpos.z - m,
-            bpos.x + p, bpos.y + p, bpos.z - m,
-            bpos.x + p, bpos.y + p, bpos.z + p,
-            bpos.x + p, bpos.y - m, bpos.z + p,
-            bpos.x + p, bpos.y - m, bpos.z - m,
+        bpos.x + p, bpos.y - m, bpos.z - m,
+        bpos.x + p, bpos.y + p, bpos.z - m,
+        bpos.x + p, bpos.y + p, bpos.z + p,
+        bpos.x + p, bpos.y - m, bpos.z + p,
+        bpos.x + p, bpos.y - m, bpos.z - m,
 
-            bpos.x - m, bpos.y - m, bpos.z - m,
-            bpos.x - m, bpos.y + p, bpos.z - m,
-            bpos.x - m, bpos.y + p, bpos.z + p,
-            bpos.x - m, bpos.y - m, bpos.z + p,
-            bpos.x - m, bpos.y - m, bpos.z - m
+        bpos.x - m, bpos.y - m, bpos.z - m,
+        bpos.x - m, bpos.y + p, bpos.z - m,
+        bpos.x - m, bpos.y + p, bpos.z + p,
+        bpos.x - m, bpos.y - m, bpos.z + p,
+        bpos.x - m, bpos.y - m, bpos.z - m
     };
 }
 

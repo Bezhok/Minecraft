@@ -1,5 +1,5 @@
 #include "InputManager.h"
-#include "Directions.h"
+#include "Direction.h"
 #include "EventType.h"
 #include "InputEvent.h"
 
@@ -25,7 +25,7 @@ void InputManager::handle_mouse_movement(sf::Event &event) {
 
 void InputManager::handle_movement(sf::Event &event) {
     InputEvent input_event;
-    Directions dir = Directions::NONE;
+    Direction dir = Direction::NONE;
     input_event.type = EventType::MOVEMENT;
     switch (event.type) {
         case sf::Event::KeyPressed: {
@@ -39,7 +39,7 @@ void InputManager::handle_movement(sf::Event &event) {
             break;
         }
     }
-    if (dir != Directions::NONE) {
+    if (dir != Direction::NONE) {
         input_event.direction = dir;
         notify(&input_event);
     }
@@ -90,15 +90,15 @@ void InputManager::handle_mouse(sf::Event &event) {
     }
 }
 
-Directions InputManager::get_direction(sf::Keyboard::Key key) {
+Direction InputManager::get_direction(sf::Keyboard::Key key) {
     switch (key) {
-        case sf::Keyboard::W:return Directions::FORWARD;
-        case sf::Keyboard::A:return Directions::LEFT;
-        case sf::Keyboard::S:return Directions::BACK;
-        case sf::Keyboard::D:return Directions::RIGHT;
-        case sf::Keyboard::Space:return Directions::UP;
-        case sf::Keyboard::LShift:return Directions::DOWN;
-        default:return Directions::NONE;
+        case sf::Keyboard::W:return Direction::FORWARD;
+        case sf::Keyboard::A:return Direction::LEFT;
+        case sf::Keyboard::S:return Direction::BACK;
+        case sf::Keyboard::D:return Direction::RIGHT;
+        case sf::Keyboard::Space:return Direction::UP;
+        case sf::Keyboard::LShift:return Direction::DOWN;
+        default:return Direction::NONE;
     }
 }
 

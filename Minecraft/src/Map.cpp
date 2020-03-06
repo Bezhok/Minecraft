@@ -7,7 +7,6 @@
 
 using namespace World;
 
-
 Map::Map() : m_should_be_updated_neighbours(6) {
     m_terrain_generator = std::make_unique<TerrainGenerator>(this);
 
@@ -44,7 +43,7 @@ void Map::recalculate_pos(sf::Vector3i &pos_rel2chunk, sf::Vector3i &chunk_pos) 
     }
 }
 
-void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y, block_id type) {
+void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y, BlockType type) {
     Chunk &chunk = column[chunk_y];
     auto chunk_pos = chunk.get_pos();
 
@@ -57,10 +56,10 @@ void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y,
         if (chunk_pos.y < 0 || chunk_pos.y >= CHUNKS_IN_WORLD_HEIGHT)
             return;
 
-        column[chunk_pos.y].set_block_type(pos_in_chunk.x, Converter::coord2block_coord_in_chunk(pos_in_chunk.y), pos_in_chunk.z,
-                                       type);
-    }
-    else {
+        column[chunk_pos.y]
+            .set_block_type(pos_in_chunk.x, Converter::coord2block_coord_in_chunk(pos_in_chunk.y), pos_in_chunk.z,
+                            type);
+    } else {
         recalculate_pos(pos_in_chunk, chunk_pos);
 
         if (chunk_pos.x < 0 || chunk_pos.z < 0 || chunk_pos.y < 0 || chunk_pos.y >= CHUNKS_IN_WORLD_HEIGHT)
@@ -69,10 +68,10 @@ void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y,
         Chunk &temp_chunk = get_chunk_or_generate(chunk_pos.x, chunk_pos.y, chunk_pos.z);
 
         temp_chunk.set_block_type(
-                Converter::coord2block_coord_in_chunk(pos_in_chunk.x),
-                Converter::coord2block_coord_in_chunk(pos_in_chunk.y),
-                Converter::coord2block_coord_in_chunk(pos_in_chunk.z),
-                type
+            Converter::coord2block_coord_in_chunk(pos_in_chunk.x),
+            Converter::coord2block_coord_in_chunk(pos_in_chunk.y),
+            Converter::coord2block_coord_in_chunk(pos_in_chunk.z),
+            type
         );
 
         if (temp_chunk.is_rendering()) {
@@ -81,19 +80,19 @@ void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y,
     }
 }
 
-block_id Map::get_type(int x, int y, int z) {
+BlockType Map::get_type(int x, int y, int z) {
     int chunk_x = x / BLOCKS_IN_CHUNK,
-            chunk_y = y / BLOCKS_IN_CHUNK,
-            chunk_z = z / BLOCKS_IN_CHUNK;
+        chunk_y = y / BLOCKS_IN_CHUNK,
+        chunk_z = z / BLOCKS_IN_CHUNK;
 
-    if (y < 0 || chunk_y >= CHUNKS_IN_WORLD_HEIGHT || x < 0 || z < 0) return block_id::EMPTY_TYPE;
+    if (y < 0 || chunk_y >= CHUNKS_IN_WORLD_HEIGHT || x < 0 || z < 0) return BlockType::EMPTY_TYPE;
 
     return get_chunk_or_generate(chunk_x, chunk_y, chunk_z).get_block_type(x % BLOCKS_IN_CHUNK, y % BLOCKS_IN_CHUNK,
                                                                            z % BLOCKS_IN_CHUNK);
 }
 
 bool Map::is_solid(int x, int y, int z) {
-    return Chunk::is_block_type_solid(get_type(x,y,z));
+    return Chunk::is_block_type_solid(get_type(x, y, z));
 }
 
 bool Map::is_opaque(int x, int y, int z) {
@@ -101,14 +100,14 @@ bool Map::is_opaque(int x, int y, int z) {
 }
 
 bool Map::is_air(int x, int y, int z) {
-    return get_type(x,y,z) == block_id::Air;
+    return get_type(x, y, z) == BlockType::Air;
 }
 
 bool Map::is_water(int x, int y, int z) {
-    return get_type(x,y,z) == block_id::Water;
+    return get_type(x, y, z) == BlockType::Water;
 }
 
-bool Map::create_block(int x, int y, int z, block_id id) {
+bool Map::create_block(int x, int y, int z, BlockType id) {
     if (!m_should_redraw_chunk) {
         sf::Vector3i chunk_pos = {x / BLOCKS_IN_CHUNK, y / BLOCKS_IN_CHUNK, z / BLOCKS_IN_CHUNK};
         sf::Vector3i block_in_chunk_pos = {x % BLOCKS_IN_CHUNK, y % BLOCKS_IN_CHUNK, z % BLOCKS_IN_CHUNK};
@@ -117,7 +116,7 @@ bool Map::create_block(int x, int y, int z, block_id id) {
 
         Chunk &chunk = get_chunk_or_generate(chunk_pos.x, chunk_pos.y, chunk_pos.z);
         auto old_id = chunk.get_block_type(block_in_chunk_pos.x, block_in_chunk_pos.y, block_in_chunk_pos.z);
-        if (old_id == block_id::Air || old_id == block_id::Water) {
+        if (old_id == BlockType::Air || old_id == BlockType::Water) {
             m_edited_block_type = id;
             m_edited_block_pos = block_in_chunk_pos;
             m_edited_chunk = &chunk;
@@ -169,15 +168,15 @@ bool Map::delete_block(int x, int y, int z) {
         Chunk &chunk = get_chunk_or_generate(chunk_pos.x, chunk_pos.y, chunk_pos.z);
         auto old_id = chunk.get_block_type(block_in_chunk_pos.x, block_in_chunk_pos.y, block_in_chunk_pos.z);
 
-        if (old_id == block_id::Air || old_id == block_id::Water) {
+        if (old_id == BlockType::Air || old_id == BlockType::Water) {
             return false;
         } else {
             find_neighbours(chunk_pos, block_in_chunk_pos, x, y, z);
             m_edited_block_pos = {block_in_chunk_pos.x, block_in_chunk_pos.y, block_in_chunk_pos.z};
             m_edited_chunk = &chunk;
-            m_edited_block_type = block_id::Air;
+            m_edited_block_type = BlockType::Air;
             chunk.set_block_type(block_in_chunk_pos.x, block_in_chunk_pos.y, block_in_chunk_pos.z,
-                                 block_id::Air);//block_id::transperent_type
+                                 BlockType::Air);//block_id::transperent_type
 
             play_sound(Sounds::SoundsNames::wood4);
             m_should_redraw_chunk = true;

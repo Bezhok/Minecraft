@@ -1,5 +1,5 @@
 #pragma once
 
-enum class Directions {
+enum class Direction {
     UP, DOWN, LEFT, RIGHT, FORWARD, BACK, NONE
 };

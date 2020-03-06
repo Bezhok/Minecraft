@@ -4,7 +4,6 @@
 #include "game_constants.h"
 #include "Chunk.h"
 
-
 namespace World {
     class Map;
     class Biome;
@@ -12,7 +11,7 @@ namespace World {
 
 namespace World {
     class TerrainGenerator {
-    private:
+     private:
         using Column = std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT>;
 
         Map *m_map;
@@ -21,9 +20,9 @@ namespace World {
 
         int m_offset = 0;
         int m_water_level = 0;
-    private:
+     private:
         void generate_structures(Column &column, int chunk_y, Biome *biome);
-    public:
+     public:
         float get_noise(int x, int y) { return m_noise.GetNoise(static_cast<float>(x), static_cast<float>(y)); };
 
         float get_noise(float x, float y) { return m_noise.GetNoise(x, y); };
