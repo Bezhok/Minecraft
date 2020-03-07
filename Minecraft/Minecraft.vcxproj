@@ -168,6 +168,7 @@
     <ClCompile Include="src\game_constants.cpp" />
     <ClCompile Include="src\InputEvent.cpp" />
     <ClCompile Include="src\InputManager.cpp" />
+    <ClCompile Include="src\Inventory.cpp" />
     <ClCompile Include="src\Light.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Map.cpp" />
@@ -182,11 +183,14 @@
     <ClCompile Include="src\TerrainGenerator.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\BlockType.h" />
     <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Direction.h" />
     <ClInclude Include="src\Directions.h" />
     <ClInclude Include="src\EventType.h" />
     <ClInclude Include="src\InputEvent.h" />
     <ClInclude Include="src\InputManager.h" />
+    <ClInclude Include="src\Inventory.h" />
     <ClInclude Include="src\MenuElement.h" />
     <ClInclude Include="src\Observer.h" />
     <ClInclude Include="src\RenderRange.h" />

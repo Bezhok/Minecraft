@@ -27,9 +27,13 @@ void Player::init(Map *map) {
         m_is_moving[item] = false;
         m_direction_speed[item] = 0.0;
     }
+
+    m_cam.init(&m_pos, m_map);
+
+    acceleration = 2.5 * m_speed;// DEFAULT_PLAYER_SPEED m_speed;
 }
 
-void Player::update(double dtime) {
+void Player::control_world_border() {
     if (m_pos.y < -10) {
         m_pos.y = -9;
         //death
@@ -40,98 +44,80 @@ void Player::update(double dtime) {
     } else if (m_pos.y > BLOCKS_IN_CHUNK * CHUNKS_IN_WORLD_HEIGHT + 5) {
         m_pos.y = BLOCKS_IN_CHUNK * CHUNKS_IN_WORLD_HEIGHT + 4;
     }
+}
 
-    static double acceleration = 2.5 * m_speed;// DEFAULT_PLAYER_SPEED m_speed;
+double Player::get_overclocking_moving(Direction key, float dtime) {
+    double dmoving = m_speed * dtime;
 
-    auto get_oveclocking_moving = [&](Direction key) -> double {
-      double dmoving = m_speed * dtime;
+    if (m_direction_speed[key] < m_speed) {
+        dmoving = m_direction_speed[key];
 
-      if (m_direction_speed[key] < m_speed) {
-          dmoving = m_direction_speed[key];
+        m_direction_speed[key] += acceleration * dtime;
 
-          m_direction_speed[key] += acceleration * dtime;
-
-          dmoving += m_direction_speed[key];
-          dmoving *= dtime / 2;
-      } else {
-          m_direction_speed[key] = m_speed + 0.001;
-      }
-
-      return dmoving;
-    };
-
-    auto get_braking_moving = [&](Direction key) -> double {
-      double dmoving = 0.f;
-      if (m_direction_speed[key] > 0) {
-          dmoving = m_direction_speed[key];
-
-          m_direction_speed[key] -= acceleration * dtime;
-
-          dmoving += m_direction_speed[key];
-          dmoving *= dtime / 2;
-      } else {
-          m_direction_speed[key] = 0.0;
-      }
-
-      return dmoving;
-    };
-
-    auto get_moving = [&](Direction key) -> double {
-      if (m_is_moving[key]) {
-          return get_oveclocking_moving(key);
-      } else {
-          return get_braking_moving(key);
-      }
-    };
-
-    m_dpos.x = 0.0;
-    m_dpos.y = 0.0;
-    m_dpos.z = 0.0;
-
-    // forward
-    double dmoving = get_moving(Direction::FORWARD);
-    m_dpos.x += -sinf(m_camera_angle.x / 180 * PI) * dmoving;
-    m_dpos.z += -cosf(m_camera_angle.x / 180 * PI) * dmoving;
-
-    // back
-    dmoving = get_moving(Direction::BACK);
-    m_dpos.x += +sinf(m_camera_angle.x / 180 * PI) * dmoving;
-    m_dpos.z += +cosf(m_camera_angle.x / 180 * PI) * dmoving;
-
-    // left
-    dmoving = get_moving(Direction::LEFT);
-    m_dpos.x += +sinf((m_camera_angle.x - 90) / 180 * PI) * dmoving;
-    m_dpos.z += +cosf((m_camera_angle.x - 90) / 180 * PI) * dmoving;
-
-    //rigth
-    dmoving = get_moving(Direction::RIGHT);
-    m_dpos.x += +sinf((m_camera_angle.x + 90) / 180 * PI) * dmoving;
-    m_dpos.z += +cosf((m_camera_angle.x + 90) / 180 * PI) * dmoving;
-
-    // up(jump)
-    if (m_flying) {
-        dmoving = get_moving(Direction::UP);
-
-        m_dpos.y += dmoving;
-        m_on_ground = false;
-    } else if (m_is_moving[Direction::UP]) {
-        if (m_is_in_water) {
-            m_dpos.y += 3.0 * dtime;
-            m_on_ground = false;
-            m_direction_speed[Direction::UP] = 1.5;
-        } else if (m_on_ground) {
-            m_on_ground = false;
-            m_direction_speed[Direction::UP] = 9.5;
-        }
+        dmoving += m_direction_speed[key];
+        dmoving *= dtime / 2;
+    } else {
+        m_direction_speed[key] = m_speed + 0.001;
     }
+
+    return dmoving;
+}
+
+double Player::get_braking_moving(Direction key, float dtime) {
+    double dmoving = 0.f;
+    if (m_direction_speed[key] > 0) {
+        dmoving = m_direction_speed[key];
+
+        m_direction_speed[key] -= acceleration * dtime;
+
+        dmoving += m_direction_speed[key];
+        dmoving *= dtime / 2;
+    } else {
+        m_direction_speed[key] = 0.0;
+    }
+
+    return dmoving;
+}
+
+double Player::get_moving(Direction key, float dtime) {
+    if (m_is_moving[key]) {
+        return get_overclocking_moving(key, dtime);
+    } else {
+        return get_braking_moving(key, dtime);
+    }
+}
+
+void Player::process_flight(double dtime) {
+    double dmoving = 0.0;
+
+    dmoving = get_moving(Direction::UP, dtime);
+
+    m_dpos.y += dmoving;
+    m_on_ground = false;
 
     // lshift
-    dmoving = get_moving(Direction::DOWN);
-    if (m_flying) {
-        m_dpos.y -= dmoving;
-    }
+    dmoving = get_moving(Direction::DOWN, dtime);
 
-    if (!m_flying) {
+    m_dpos.y -= dmoving;
+
+}
+
+void Player::process_movingY(double dtime) {
+    // up(jump)
+    if (m_flying) {
+        process_flight(dtime);
+    } else {
+        if (m_is_moving[Direction::UP]) {
+            if (m_is_in_water) {
+                m_dpos.y += 3.0 * dtime;
+                m_on_ground = false;
+                m_direction_speed[Direction::UP] = 1.5;
+            } else if (m_on_ground) {
+                m_on_ground = false;
+                m_direction_speed[Direction::UP] = 9.5;
+            }
+        }
+
         if (!m_on_ground) {
             double s = m_direction_speed[Direction::UP];
 
@@ -154,7 +140,43 @@ void Player::update(double dtime) {
 
         }
     }
+
     m_on_ground = false; //reset
+}
+
+void Player::process_movingXZ(double dtime) {
+    float angleX = m_cam.m_angle.x;
+    // forward
+    double dmoving = get_moving(Direction::FORWARD, dtime);
+    float temp = glm::radians(angleX);
+    m_dpos.x += -sinf(temp) * dmoving;
+    m_dpos.z += -cosf(temp) * dmoving;
+
+    // back
+    dmoving = get_moving(Direction::BACK, dtime);
+    m_dpos.x += +sinf(temp) * dmoving;
+    m_dpos.z += +cosf(temp) * dmoving;
+
+    // left
+    temp = glm::radians(angleX - 90);
+    dmoving = get_moving(Direction::LEFT, dtime);
+    m_dpos.x += +sinf(temp) * dmoving;
+    m_dpos.z += +cosf(temp) * dmoving;
+
+    //rigth
+    temp = glm::radians(angleX + 90);
+    dmoving = get_moving(Direction::RIGHT, dtime);
+    m_dpos.x += +sinf(temp) * dmoving;
+    m_dpos.z += +cosf(temp) * dmoving;
+}
+
+void Player::update(double dtime) {
+    control_world_border();
+
+    m_dpos = sf::Vector3<double>();
+
+    process_movingXZ(dtime);
+    process_movingY(dtime);
 
     m_pos.y += m_dpos.y;
     collision(0, m_dpos.y, 0);
@@ -182,76 +204,32 @@ void Player::flight_off() {
     }
 }
 
-sf::Vector3i Player::determine_look_at_block(sf::Vector3i *prev_pos /*= nullptr*/) {
-    float x = m_pos.x,
-        y = m_pos.y + 0.8f,
-        z = m_pos.z;
-
-    float prev_x = x,
-        prev_y = y,
-        prev_z = z;
-
-    auto dist = [&]() -> float {
-      return std::sqrt((m_pos.x - x) * (m_pos.x - x) + (m_pos.y - y) * (m_pos.y - y) + (m_pos.z - z) * (m_pos.z - z));
-    };
-    while (dist() < 6) {
-        x += -sinf(m_camera_angle.x / 180 * PI) / 80.F;
-        y += tanf(m_camera_angle.y / 180 * PI) / 80.F;
-        z += -cosf(m_camera_angle.x / 180 * PI) / 80.F;
-
-        if (!m_map
-            ->is_air(Converter::coord2block_coord(x), Converter::coord2block_coord(y), Converter::coord2block_coord(z))
-            &&
-                !m_map->is_water(Converter::coord2block_coord(x),
-                                 Converter::coord2block_coord(y),
-                                 Converter::coord2block_coord(z)) &&
-            Converter::coord2block_coord(y) >= 0
-            && Converter::coord2block_coord(y) < BLOCKS_IN_CHUNK * CHUNKS_IN_WORLD_HEIGHT
-            ) {
-            if (prev_pos != nullptr) {
-                *prev_pos = {
-                    Converter::coord2block_coord(prev_x),
-                    Converter::coord2block_coord(prev_y),
-                    Converter::coord2block_coord(prev_z)
-                };
+void Player::iterate_throw_near_blocks(std::function<bool(int x, int y, int z)> &&fun) {
+    auto start = Converter::coord2block_coord(m_pos - m_size);
+    auto end = m_pos + m_size;
+    for (int x = start.x; x < end.x; x++) {
+        for (int y = start.y; y < end.y; y++) {
+            for (int z = start.z; z < end.z; z++) {
+                // bool - should continue
+                if (!fun(x, y, z)) return;
             }
-
-            return {
-                Converter::coord2block_coord(x),
-                Converter::coord2block_coord(y),
-                Converter::coord2block_coord(z)
-            };
         }
-
-        prev_x = x;
-        prev_y = y;
-        prev_z = z;
     }
-
-    return {-1, -1, -1};
 }
 
 void Player::put_block() {
     sf::Vector3i prev_pos;
-    sf::Vector3i pos = determine_look_at_block(&prev_pos);
+    sf::Vector3i pos = m_cam.determine_look_at_block(&prev_pos);
 
     if (pos.y != -1) {
         bool able_create = true;
         // is we in this block
-        for (int matrix_x = Converter::coord2block_coord(m_pos.x - m_size.x); matrix_x < m_pos.x + m_size.x;
-             matrix_x++) {
-            for (int matrix_y = Converter::coord2block_coord(m_pos.y - m_size.y); matrix_y < m_pos.y + m_size.y;
-                 matrix_y++) {
-                for (int matrix_z = Converter::coord2block_coord(m_pos.z - m_size.z);
-                     matrix_z < m_pos.z + m_size.z; matrix_z++) {
-
-                    if (matrix_x == prev_pos.x && matrix_y == prev_pos.y && matrix_z == prev_pos.z) {
-                        able_create = false;
-                        break;
-                    }
-                }
-            }
-        }
+        iterate_throw_near_blocks([&](int x, int y, int z) -> bool {
+          if (x == prev_pos.x && y == prev_pos.y && z == prev_pos.z) {
+              able_create = false;
+              return false;
+          }
+        });
 
         if (able_create) {
             m_map->create_block(
@@ -263,125 +241,97 @@ void Player::put_block() {
             return;
         }
     }
-
 }
 
 void Player::delete_block() {
-    sf::Vector3i pos = determine_look_at_block();
+    sf::Vector3i pos = m_cam.determine_look_at_block();
     if (pos.y != -1) {
         m_map->delete_block(pos.x, pos.y, pos.z);
     }
-
 }
 
-glm::mat4 Player::calc_projection_view(sf::Vector2u &window_size) {
-    glm::mat4 projection = glm::perspective(glm::radians(60.0f), (GLfloat) window_size.x / (GLfloat) window_size.y,
-                                            0.1f, RENDER_DISTANCE);
-    glm::mat4 view = glm::lookAt(
-        glm::vec3(
-            get_position().x,
-            get_position().y + 0.8f,//m_size.y
-            get_position().z
-        ),
-        glm::vec3(
-            get_position().x - sin(m_camera_angle.x / 180.0f * PI),
-            get_position().y + 0.8f + tan(m_camera_angle.y / 180.0f * PI),
-            get_position().z - cos(m_camera_angle.x / 180.0f * PI)
-        ),
-        glm::vec3(0.0f, 1.0f, 0.0f)
-    );
-
-    return projection * view;
+void Player::push_out(sf::Vector3i from, sf::Vector3f d) {
+    if (d.x > 0) m_pos.x = from.x - m_size.x;
+    if (d.x < 0) m_pos.x = from.x + 1 + m_size.x;
+    if (d.y > 0) m_pos.y = from.y - m_size.y;
+    if (d.y < 0) {
+        m_pos.y = from.y + 1 + m_size.y;
+        m_on_ground = true;
+        m_direction_speed[Direction::UP] = 0.f;
+    }
+    if (d.z > 0) m_pos.z = from.z - m_size.z;
+    if (d.z < 0) m_pos.z = from.z + 1 + m_size.z;
 }
 
 void Player::collision(float dx, float dy, float dz) {
     m_is_in_water = false;
-
     //for  blocks in player's area
-    for (int y = Converter::coord2block_coord(m_pos.y - m_size.y); y < m_pos.y + m_size.y; y++) {
+    iterate_throw_near_blocks([&](int x, int y, int z) -> bool {
+      if (m_map->is_solid(x, y, z)) { //if collided with block
+          push_out({x, y, z}, {dx, dy, dz});
+      }
+      if (m_map->is_water(x, y, z)) {
+          m_is_in_water = true;
+      }
+      m_is_under_water = m_map->is_water(x, y, z);
 
-        for (int x = Converter::coord2block_coord(m_pos.x - m_size.x); x < m_pos.x + m_size.x; x++) {
-            for (int z = Converter::coord2block_coord(m_pos.z - m_size.z); z < m_pos.z + m_size.z; z++) {
-                if (m_map->is_solid(x, y, z)) { //if collided with block
-                    if (dx > 0) m_pos.x = x - m_size.x;
-                    if (dx < 0) m_pos.x = x + 1 + m_size.x;
-                    if (dy > 0) m_pos.y = y - m_size.y;
-                    if (dy < 0) {
-                        m_pos.y = y + 1 + m_size.y;
-                        m_on_ground = true;
-                        m_direction_speed[Direction::UP] = 0.f;
-                    }
-                    if (dz > 0) m_pos.z = z - m_size.z;
-                    if (dz < 0) m_pos.z = z + 1 + m_size.z;
-                }
-
-                if (m_map->is_water(x, y, z)) {
-                    m_is_in_water = true;
-                }
-
-                m_is_under_water = m_map->is_water(x, y, z);
-            }
-        }
-    }
+      return true;
+    });
 }
 
 void Player::on_notify(const InputEvent *event) {
-    static float start_direction_speed = m_speed / 10;
-
     switch (event->type) {
-        case EventType::MOVEMENT: {
-            if (event->is_begin) {
-                m_is_moving[event->direction] = true;
-                m_direction_speed[event->direction] = start_direction_speed;
-            } else if (event->is_end) {
-                m_is_moving[event->direction] = false;
-            }
+        case EventType::MOVEMENT:switch_movement_state(event->direction, event->is_begin);
             break;
-        }
         case EventType::CREATE: put_block();
             break;
         case EventType::REMOVE: delete_block();
             break;
-        case EventType::CHANGE_INV_ITEM: {
-            static int curr_block_index = 0;
-            // todo
-            if (curr_block_index + event->delta.x >= (int) m_inventory.size()) {
-                m_curr_block = m_inventory[0].first;
-                curr_block_index = 0;
-            } else if (curr_block_index + event->delta.x < 0) {
-                m_curr_block = m_inventory.back().first;
-                curr_block_index = m_inventory.size() - 1;
-            } else {
-                m_curr_block = m_inventory[curr_block_index + event->delta.x].first;
-                curr_block_index += event->delta.x;
-            }
-            m_curr_block = m_inventory[curr_block_index].first;
-        }
+        case EventType::CHANGE_INV_ITEM:change_item(event->delta.x);
             break;
-        case EventType::CAMERA_ROTATION: {
-            m_camera_angle.x += event->delta.x;
-            m_camera_angle.y += event->delta.y;
-            if (m_camera_angle.y < -89) { m_camera_angle.y = -89; }
-            if (m_camera_angle.y > 89) { m_camera_angle.y = 89; }
-
-            if (m_camera_angle.x > 361) {
-                m_camera_angle.x -= 360;
-            }
-
-            if (m_camera_angle.x < -361) {
-                m_camera_angle.x += 360;
-            }
-
+        case EventType::CAMERA_ROTATION:m_cam.rotate(event->delta);
             break;
-        }
-        case EventType::RSHIFT_RELEASED: {
-            if (m_god) {
-                if (m_flying)
-                    flight_off();
-                else
-                    flight_on();
-            }
+        case EventType::RSHIFT_RELEASED:switch_flight_state();
             break;
-        }
     };
+}
+
+void Player::switch_movement_state(Direction direction, bool is_begin) {
+    static float start_direction_speed = m_speed / 10;
+    if (is_begin) {
+        m_is_moving[direction] = true;
+        m_direction_speed[direction] = start_direction_speed;
+    } else {
+        m_is_moving[direction] = false;
+    }
+}
+
+void Player::switch_flight_state() {
+    if (m_god) {
+        if (m_flying) {
+            flight_off();
+        } else {
+            flight_on();
+        }
+    }
+}
+
+void Player::change_item(int delta) {
+    static int curr_block_index = 0;
+    // todo
+    if (curr_block_index + delta >= (int) m_inventory.size()) {
+        m_curr_block = m_inventory[0].first;
+        curr_block_index = 0;
+    } else if (curr_block_index + delta < 0) {
+        m_curr_block = m_inventory.back().first;
+        curr_block_index = m_inventory.size() - 1;
+    } else {
+        m_curr_block = m_inventory[curr_block_index + delta].first;
+        curr_block_index += delta;
+    }
+    m_curr_block = m_inventory[curr_block_index].first;
+}
+
+const Camera &Player::get_cam() {
+    return m_cam;
 }

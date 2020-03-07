@@ -150,7 +150,7 @@ void Renderer::finish_render(sf::RenderWindow &window, Player &player, set_of_ch
     glClearColor(color.x, color.y, color.z, 1.0f);
 
     auto window_size = window.getSize();
-    m_projection_view = player.calc_projection_view(window_size);
+    m_projection_view = player.get_cam().calc_projection_view(window_size);
     m_light_pv = m_light->get_light_projection_view();
 
     glEnable(GL_DEPTH_TEST);
@@ -160,7 +160,7 @@ void Renderer::finish_render(sf::RenderWindow &window, Player &player, set_of_ch
     draw_meshes(window_size, player, chunks4rendering, should_update);
     mutex_chunks4rendering.unlock();
 
-    sf::Vector3i pos = player.determine_look_at_block();
+    sf::Vector3i pos = player.get_cam().determine_look_at_block();
     if (pos.y > 0) {
         draw_wrapper(pos);
     }

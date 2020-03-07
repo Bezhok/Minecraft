@@ -223,7 +223,7 @@ void MapMeshBuilder::add_visible_chunks_in_range2vertices_generation(int i, int 
 
 void MapMeshBuilder::add_chunks_range2vertices_generation(RenderRange &range) {
     auto windows_size = m_window->getSize();
-    glm::mat4 pv = m_player->calc_projection_view(windows_size);
+    glm::mat4 pv = m_player->get_cam().calc_projection_view(windows_size);
 
     static const int VISIBLE_COLUMNS_PER_LOOP = 20;
     m_visible_columns_count = 0;

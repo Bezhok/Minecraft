@@ -8,13 +8,13 @@ namespace World {
 
 namespace Base {
     class Entity {
-     public:
+     protected:
         sf::Vector3f m_pos;
         sf::Vector3f m_rotation;
         sf::Vector3f m_size;
         World::Map *m_map = nullptr;
 
-    public:
+     public:
         /* eponymous */
         const sf::Vector3f &get_position() const { return m_pos; }
     };

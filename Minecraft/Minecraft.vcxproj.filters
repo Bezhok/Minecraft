@@ -61,6 +61,7 @@
     <ClCompile Include="src\InputManager.cpp" />
     <ClCompile Include="src\Observer.cpp" />
     <ClCompile Include="src\Subject.cpp" />
+    <ClCompile Include="src\Inventory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -123,5 +124,8 @@
     <ClInclude Include="src\InputManager.h" />
     <ClInclude Include="src\Observer.h" />
     <ClInclude Include="src\Subject.h" />
+    <ClInclude Include="src\BlockType.h" />
+    <ClInclude Include="src\Direction.h" />
+    <ClInclude Include="src\Inventory.h" />
   </ItemGroup>
 </Project>
