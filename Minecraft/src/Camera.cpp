@@ -10,9 +10,9 @@ glm::mat4 Camera::calc_projection_view(sf::Vector2u &window_size) const {
                                             0.1f, RENDER_DISTANCE);
     glm::mat4 view = glm::lookAt(
         glm::vec3(
-            m_pos->x,
-            m_pos->y + 0.8f,//m_size.y
-            m_pos->z
+            m_pos->x + m_shift.x,
+            m_pos->y + m_shift.y,
+            m_pos->z + m_shift.z
         ),
         glm::vec3(
             m_pos->x - sin(glm::radians(m_angle.x)),
@@ -26,7 +26,7 @@ glm::mat4 Camera::calc_projection_view(sf::Vector2u &window_size) const {
 }
 sf::Vector3i Camera::determine_look_at_block(sf::Vector3i *prev_pos) const {
     sf::Vector3f curr = *m_pos;
-    curr.y += 0.8f;
+    curr += m_shift;
     sf::Vector3f prev = curr;
 
     auto dist = [&]() -> float {
@@ -46,7 +46,10 @@ sf::Vector3i Camera::determine_look_at_block(sf::Vector3i *prev_pos) const {
             && conv.y < BLOCKS_IN_CHUNK * CHUNKS_IN_WORLD_HEIGHT
             ) {
             if (prev_pos != nullptr) {
-                *prev_pos = Converter::coord2block_coord(prev);
+                auto t = Converter::coord2block_coord(prev);
+                prev_pos->x = t.x;
+                prev_pos->y = t.y;
+                prev_pos->z = t.z;
             }
             return conv;
         }
@@ -65,5 +68,9 @@ void Camera::rotate(sf::Vector2f delta) {
     if (m_angle.y > 89) m_angle.y = 89;
     if (m_angle.x > 361) m_angle.x -= 360;
     if (m_angle.x < -361) m_angle.x += 360;
+}
+
+void Camera::set_shift(sf::Vector3f shift) {
+    m_shift = shift;
 }
 

@@ -6,6 +6,9 @@
 #include "Direction.h"
 #include "Observer.h"
 #include "Camera.h"
+#include "Collider.h"
+#include "Movement.h"
+#include "Inventory.h"
 
 namespace World {
     class Map;
@@ -16,18 +19,11 @@ namespace World {
 class Player :
     public Base::Entity, public Observer {
  private:
-    double acceleration;
-    std::vector<std::pair<World::BlockType, int>> m_inventory;
-    World::BlockType m_curr_block;
-    float m_speed = DEFAULT_PLAYER_SPEED;
-    sf::Vector3<double> m_dpos;
-    bool m_on_ground = false;
-    bool m_flying = false;
     bool m_god = false;
-    std::unordered_map<Direction, double> m_direction_speed;
-    std::unordered_map<Direction, bool> m_is_moving;
-
     Camera m_cam;
+    Collider m_collider;
+    Movement m_movement;
+    Inventory m_inventory;
  public:
     const Camera &get_cam();
  public:
@@ -50,26 +46,16 @@ class Player :
     bool m_is_under_water = false;
 
     /* getters */
-    const auto &get_inventory() { return m_inventory; };
-
+    Inventory &get_inventory() { return m_inventory; };
+    bool is_on_ground() const override;
+    void set_is_on_ground(bool is_on_ground) override;
+    bool is_in_water() const override;
     void on_notify(const InputEvent *event) override;
  private:
-    void collision(float dx, float dy, float dz);
-
     void put_block();
-
     void delete_block();
-    void change_item(int delta);
-    void switch_flight_state();
-    void switch_movement_state(Direction direction, bool is_begin);
+    void collision(float dx, float dy, float dz);
     void control_world_border();
-    void iterate_throw_near_blocks(std::function<bool(int, int, int)> &&fun);
-    double get_overclocking_moving(Direction key, float dtime);
-    double get_braking_moving(Direction key, float dtime);
-    double get_moving(Direction key, float dtime);
-    void push_out(sf::Vector3i from, sf::Vector3f d);
-    void process_movingXZ(double dtime);
-    void process_movingY(double dtime);
-    void process_flight(double dtime);
+    void switch_flight_state();
 };
 

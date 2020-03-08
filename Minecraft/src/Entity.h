@@ -15,6 +15,9 @@ namespace Base {
         World::Map *m_map = nullptr;
 
      public:
+        virtual bool is_on_ground() const = 0;
+        virtual void set_is_on_ground(bool is_on_ground) = 0;
+        virtual bool is_in_water() const = 0;
         /* eponymous */
         const sf::Vector3f &get_position() const { return m_pos; }
     };

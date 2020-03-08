@@ -271,9 +271,9 @@ glm::fvec3 Renderer::calc_global_pos(const sf::Vector3i &chunk_pos, const sf::Ve
     //fixes white lines between chunks
     auto delta = chunk_pos - player_pos__chunk /*+ sf::Vector3i{2, 2, 2}*/;
 
-    return {chunk_pos.x * BLOCKS_IN_CHUNK,// - delta.x / 1000.f,
-            chunk_pos.y * BLOCKS_IN_CHUNK,// - delta.y / 1000.f,
-            chunk_pos.z * BLOCKS_IN_CHUNK};// - delta.z / 1000.f};
+    return {chunk_pos.x * BLOCKS_IN_CHUNK- delta.x / 1000.f,
+            chunk_pos.y * BLOCKS_IN_CHUNK- delta.y / 1000.f,
+            chunk_pos.z * BLOCKS_IN_CHUNK - delta.z / 1000.f};
 }
 
 void Renderer::draw_wrapper(const sf::Vector3i &pos) {

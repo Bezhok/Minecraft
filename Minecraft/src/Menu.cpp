@@ -70,7 +70,7 @@ void Menu::update_players_blocks(Player &player) {
     m_side_sprites.clear();
 
     int i = 0;
-    for (auto &e : player.get_inventory()) {
+    for (const auto &e : player.get_inventory().get_hot_bar_items()) {
 
         if (e.first != BlockType::EMPTY_TYPE) {
             m_side_sprites[e.first].setTexture(m_textures[MenuElement::atlas]);

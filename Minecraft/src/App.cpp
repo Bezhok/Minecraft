@@ -7,6 +7,7 @@
 #include "Menu.h"
 #include "MapMeshBuilder.h"
 #include "InputManager.h"
+#include "Inventory.h"
 
 using std::to_string;
 using std::advance;
@@ -37,10 +38,14 @@ App::App(sf::RenderWindow &window)
     sf::Mouse::setPosition(sf::Vector2i(x, y), m_window);
 
     DB::load_blocks();
-    // after !!!
     m_player.init(m_map.get());
     m_player.god_on();
     m_player.flight_on();
+
+    auto &hot_bar = m_player.get_inventory().get_hot_bar_items();
+    for (int i = 0; i < hot_bar.size() && i < World::DB::s_loaded_blocks.size(); ++i) {
+        hot_bar[i] = {World::DB::s_loaded_blocks[i], 1};
+    }
 
     m_menu = std::make_unique<Menu>(m_window);
     m_menu->update_players_blocks(m_player);
@@ -105,7 +110,6 @@ void App::draw_openGL() {
 
 void App::run() {
     handle_events();
-
     m_map_mesh_builder->launch(m_map.get(), &m_player, &m_window);
     while (m_window.isOpen()) {
         m_debug_data.start();
@@ -139,8 +143,9 @@ void App::handle_events() {
 }
 
 void App::input() {
-    if (!m_window.hasFocus())
+    if (!m_window.hasFocus()) {
         m_should_fix_cursor = false;
+    }
 
     sf::Event event;
     while (m_window.pollEvent(event)) {
@@ -152,6 +157,10 @@ void App::input() {
             case sf::Event::Resized:resize(event.size.width, event.size.height);
                 break;
         }
+
+        if (!m_should_fix_cursor)
+            return;
+        
         m_input_manager->handle_input(event);
     }
 }
