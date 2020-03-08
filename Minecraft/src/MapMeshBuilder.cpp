@@ -5,6 +5,8 @@
 #include "Map.h"
 #include "Player.h"
 #include "RenderRange.h"
+#include <atomic>
+#include <thread>
 
 using namespace World;
 using std::copy;
@@ -12,7 +14,7 @@ using std::inserter;
 using std::advance;
 
 MapMeshBuilder::MapMeshBuilder() :
-    m_vertices_generator_thread(&MapMeshBuilder::generate_vertices, this) {
+    m_vertices_generator_thread(&MapMeshBuilder::generate_vertices, this), m_update_edited_chunk_thread(&MapMeshBuilder::update_edited_chunk, this) {
 
 }
 
@@ -20,22 +22,6 @@ void World::MapMeshBuilder::launch(Map *map, Player *player, sf::Window *window)
     m_player = player;
     m_map = map;
     m_window = window;
-
-    /////////////////////////////////////
-    int chunk_x = Converter::coord2chunk_coord(m_player->get_position().x);
-    int chunk_z = Converter::coord2chunk_coord(m_player->get_position().z);
-
-    int start_x = std::max(0, chunk_x - 3);
-    int start_z = std::max(0, chunk_z - 3);
-
-    int end_x = chunk_x + 3;
-    int end_z = chunk_z + 3;
-
-    for (int i = start_x; i < end_x; ++i)
-        for (int j = start_z; j < end_z; ++j) {
-            m_map->get_column_or_generate(i, j);
-        }
-    /////////////////////////////////////////
 
     m_vertices_generator_thread.launch();
 }
@@ -68,11 +54,18 @@ void MapMeshBuilder::generate_vertices() {
 
         unload_columns(range);
         add_chunks_range2vertices_generation(range);
+        bool should_stop = false;
         for (auto it = m_chunks4vertices_generation.begin(); it != m_chunks4vertices_generation.end(); ++it) {
+            //should be condition variable
+            while (chunks4vbo_generation_size > 20) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+
             (*it)->update_vertices();
 
             m_mutex__chunks4vbo_generation.lock();
             m_chunks4vbo_generation.push_back(*it);
+            chunks4vbo_generation_size = m_chunks4vbo_generation.size();
             m_mutex__chunks4vbo_generation.unlock();
         }
         m_chunks4vertices_generation.clear();
@@ -128,12 +121,10 @@ void MapMeshBuilder::update_edited_chunk() {
 }
 
 void MapMeshBuilder::regenerate_edited_chunk_vertices() {
-    static sf::Thread update_edited_chunk_thread(&MapMeshBuilder::update_edited_chunk, this);
-
     if (m_map->is_chunk_edited() && m_is_thread_free && !m_should_update_priority_chunks) {
         m_is_thread_free = false;
 
-        update_edited_chunk_thread.launch();
+        m_update_edited_chunk_thread.launch();
     }
 
     if (m_should_update_priority_chunks) {
@@ -173,6 +164,7 @@ void MapMeshBuilder::add_new_chunks2rendering() {
 
     m_chunks4vbo_generation.clear();
 
+    chunks4vbo_generation_size = 0;
     m_mutex__chunks4rendering.unlock();
     m_mutex__chunks4vbo_generation.unlock();
 }

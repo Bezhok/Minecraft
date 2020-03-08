@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include "pch.h"
 #include "game_constants.h"
 
@@ -16,9 +17,10 @@ namespace World {
         Player *m_player = nullptr;
         sf::Window *m_window = nullptr;
         sf::Thread m_vertices_generator_thread;
-
+        sf::Thread m_update_edited_chunk_thread;
         std::vector<World::Chunk *> m_chunks4vertices_generation;
         std::vector<World::Chunk *> m_chunks4vbo_generation;
+        std::atomic<size_t> chunks4vbo_generation_size;
 
         bool m_is_thread_free = true;
         bool m_should_update_priority_chunks = false;
