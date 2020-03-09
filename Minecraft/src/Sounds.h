@@ -3,7 +3,7 @@
 #include "pch.h"
 
 class Sounds {
- public:
+public:
     enum class SoundsNames {
         wood1,
         wood4

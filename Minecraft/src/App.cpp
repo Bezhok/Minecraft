@@ -20,7 +20,7 @@ using std::sqrt;
 using namespace World;
 
 App::App(sf::RenderWindow &window)
-    : m_window{window} {
+        : m_window{window} {
     m_font.loadFromFile("resources/arial.ttf");
     m_text.setFont(m_font);
     m_text.setCharacterSize(20);
@@ -58,7 +58,7 @@ App::App(sf::RenderWindow &window)
 
 std::string App::debug_text() {
     std::string str =
-        "fps: " +
+            "fps: " +
             to_string(int(m_debug_data.get_fps())) + "\n" +
             "ft: " +
             to_string(int(m_debug_data.get_frame_time())) + "\n" +
@@ -150,11 +150,14 @@ void App::input() {
     sf::Event event;
     while (m_window.pollEvent(event)) {
         switch (event.type) {
-            case sf::Event::Closed:m_window.close();
+            case sf::Event::Closed:
+                m_window.close();
                 break;
-            case sf::Event::KeyPressed:process_key4window(event.key.code);
+            case sf::Event::KeyPressed:
+                process_key4window(event.key.code);
                 break;
-            case sf::Event::Resized:resize(event.size.width, event.size.height);
+            case sf::Event::Resized:
+                resize(event.size.width, event.size.height);
                 break;
         }
 
@@ -175,11 +178,13 @@ void App::resize(uint32_t x, uint32_t y) {
 
 void App::process_key4window(sf::Keyboard::Key code) {
     switch (code) {
-        case sf::Keyboard::Escape:m_window.setMouseCursorVisible(m_should_fix_cursor);
+        case sf::Keyboard::Escape:
+            m_window.setMouseCursorVisible(m_should_fix_cursor);
             m_should_fix_cursor = !m_should_fix_cursor;
             m_input_manager->set_should_fix_cursor(m_should_fix_cursor);
             break;
-        case sf::Keyboard::F3:m_should_display_debug_info = !m_should_display_debug_info;
+        case sf::Keyboard::F3:
+            m_should_display_debug_info = !m_should_display_debug_info;
             break;
     }
 }

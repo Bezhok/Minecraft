@@ -81,19 +81,19 @@ void Player::put_block() {
         bool able_create = true;
         // is we in this block
         m_collider.iterate_throw_near_blocks([&](int x, int y, int z) -> bool {
-          if (x == prev_pos.x && y == prev_pos.y && z == prev_pos.z) {
-              able_create = false;
-              return false;
-          }
-          return true;
+            if (x == prev_pos.x && y == prev_pos.y && z == prev_pos.z) {
+                able_create = false;
+                return false;
+            }
+            return true;
         });
 
         if (able_create) {
             m_map->create_block(
-                prev_pos.x,
-                prev_pos.y,
-                prev_pos.z,
-                m_inventory.get_curr_block()
+                    prev_pos.x,
+                    prev_pos.y,
+                    prev_pos.z,
+                    m_inventory.get_curr_block()
             );
             return;
         }
@@ -111,31 +111,37 @@ void Player::collision(float dx, float dy, float dz) {
     m_is_in_water = false;
     //for  blocks in player's area
     m_collider.iterate_throw_near_blocks([&](int x, int y, int z) -> bool {
-      if (m_map->is_solid(x, y, z)) { //if collided with block
-          m_collider.push_out({x, y, z}, {dx, dy, dz});
-      }
-      if (m_map->is_water(x, y, z)) {
-          m_is_in_water = true;
-      }
-      m_is_under_water = m_map->is_water(x, y + 1, z);
+        if (m_map->is_solid(x, y, z)) { //if collided with block
+            m_collider.push_out({x, y, z}, {dx, dy, dz});
+        }
+        if (m_map->is_water(x, y, z)) {
+            m_is_in_water = true;
+        }
+        m_is_under_water = m_map->is_water(x, y + 1, z);
 
-      return true;
+        return true;
     });
 }
 
 void Player::on_notify(const InputEvent *event) {
     switch (event->type) {
-        case EventType::MOVEMENT: m_movement.switch_movement_state(event->direction, event->is_begin);
+        case EventType::MOVEMENT:
+            m_movement.switch_movement_state(event->direction, event->is_begin);
             break;
-        case EventType::CREATE: put_block();
+        case EventType::CREATE:
+            put_block();
             break;
-        case EventType::REMOVE: delete_block();
+        case EventType::REMOVE:
+            delete_block();
             break;
-        case EventType::CHANGE_INV_ITEM: m_inventory.change_curr_hot_bar_item(event->delta.x);
+        case EventType::CHANGE_INV_ITEM:
+            m_inventory.change_curr_hot_bar_item(event->delta.x);
             break;
-        case EventType::CAMERA_ROTATION: m_cam.rotate(event->delta);
+        case EventType::CAMERA_ROTATION:
+            m_cam.rotate(event->delta);
             break;
-        case EventType::RSHIFT_RELEASED: switch_flight_state();
+        case EventType::RSHIFT_RELEASED:
+            switch_flight_state();
             break;
     };
 }
@@ -153,12 +159,15 @@ void Player::switch_flight_state() {
 const Camera &Player::get_cam() {
     return m_cam;
 }
+
 bool Player::is_on_ground() const {
     return m_collider.is_on_ground();
 }
+
 void Player::set_is_on_ground(bool is_on_ground) {
     m_collider.set_is_on_ground(is_on_ground);
 }
+
 bool Player::is_in_water() const {
     return m_is_in_water;
 }

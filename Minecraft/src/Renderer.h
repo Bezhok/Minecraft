@@ -8,36 +8,27 @@ class Light;
 class BlockWrapper;
 namespace World {
     class Chunk;
-
     class Map;
-
     class ChunkMeshBasic;
 }
 
 class Renderer {
     using set_of_chunks = phmap::parallel_node_hash_set<World::Chunk *>;
- private:
-    std::queue<const sf::Drawable *> m_SFML;
 
-    sf::Shader m_shader_program;
-    sf::Shader m_wrapper_shader;
-    sf::Shader m_shadow_shader;
-    sf::Shader m_water_shader;
+public:
+    /* init open gl settings */
+    Renderer();
 
-    GLuint m_depth_map_FBO;
-    GLuint m_depth_map;
+    ~Renderer();
 
-    sf::Image m_image_atlas;
-    sf::Texture m_texture_atlas;
+    /* add to queue */
+    void draw_SFML(const sf::Drawable &drawable);
 
-    glm::mat4 m_projection_view;
-    glm::mat4 m_light_pv;
-    std::unique_ptr<Light> m_light;
-    std::unique_ptr<BlockWrapper> m_block_wrapper;
-    GLuint m_light_pvm_location, m_pvm_location, m_shadow_pvm_location, m_water_model_location, m_water_pvm_location;
+    /* real "drawing" */
+    void finish_render(sf::RenderWindow &window, Player &player, set_of_chunks &chunks4rendering,
+                       sf::Mutex &mutex_chunks4rendering);
 
-    float m_fog_density = 0.f;
- private:
+private:
     void draw_wrapper(const sf::Vector3i &pos);
 
     bool is_chunk_visible(const glm::mat4 &pvm);
@@ -71,18 +62,26 @@ class Renderer {
     void draw_meshes(const sf::Vector2u &window_size, Player &player, set_of_chunks &chunks4rendering,
                      bool should_update_shadow);
 
- public:
-    /* init open gl settings */
-    Renderer();
 
-    ~Renderer();
+    std::queue<const sf::Drawable *> m_SFML;
 
-    /* add to queue */
-    void draw_SFML(const sf::Drawable &drawable);
+    sf::Shader m_shader_program;
+    sf::Shader m_wrapper_shader;
+    sf::Shader m_shadow_shader;
+    sf::Shader m_water_shader;
 
-    /* real "drawing" */
-    void finish_render(sf::RenderWindow &window, Player &player, set_of_chunks &chunks4rendering,
-                       sf::Mutex &mutex_chunks4rendering);
+    GLuint m_depth_map_FBO;
+    GLuint m_depth_map;
 
+    sf::Image m_image_atlas;
+    sf::Texture m_texture_atlas;
+
+    glm::mat4 m_projection_view;
+    glm::mat4 m_light_pv;
+    std::unique_ptr<Light> m_light;
+    std::unique_ptr<BlockWrapper> m_block_wrapper;
+    GLuint m_light_pvm_location, m_pvm_location, m_shadow_pvm_location, m_water_model_location, m_water_pvm_location;
+
+    float m_fog_density = 0.f;
 };
 

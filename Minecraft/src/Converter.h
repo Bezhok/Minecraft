@@ -4,7 +4,7 @@
 
 namespace World {
     class Converter {
-     public:
+    public:
         template<typename T>
         static int coord2chunk_coord(T c);
 

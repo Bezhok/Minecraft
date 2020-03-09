@@ -3,6 +3,7 @@
 #include "Map.h"
 #include "ChunkMeshBasic.h"
 #include "Chunk.h"
+
 using namespace World;
 
 inline void ChunkMeshBasic::add_byte4(GLfloat x, GLfloat y, GLfloat z, GLfloat w) {

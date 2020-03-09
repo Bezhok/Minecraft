@@ -4,13 +4,13 @@
 
 int main() {
     sf::RenderWindow window(
-        sf::VideoMode(
-            DEFAULT_WINDOW_WIDTH,
-            DEFAULT_WINDOW_HEIGTH
-        ),
-        "Minecraft",
-        sf::Style::Default,
-        sf::ContextSettings(24, 0)
+            sf::VideoMode(
+                    DEFAULT_WINDOW_WIDTH,
+                    DEFAULT_WINDOW_HEIGTH
+            ),
+            "Minecraft",
+            sf::Style::Default,
+            sf::ContextSettings(24, 0)
     );
 
     window.setPosition(window.getPosition() + sf::Vector2i{200, 0});

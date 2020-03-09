@@ -13,80 +13,202 @@
     <Filter Include="World">
       <UniqueIdentifier>{5eddfab8-5a62-46a7-bd36-2dcd326d2a6e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{00732db4-65e8-437a-834c-920d46058195}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Entity">
+      <UniqueIdentifier>{70a6d925-108d-4694-aa48-87a530544e82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Dependicies\includeFull\fast_noise\FastNoise.cpp">
       <Filter>Base</Filter>
     </ClCompile>
     <ClCompile Include="src\App.cpp" />
-    <ClCompile Include="src\Biome.cpp" />
-    <ClCompile Include="src\block_db.cpp" />
-    <ClCompile Include="src\BlockWrapper.cpp" />
-    <ClCompile Include="src\Camera.cpp" />
-    <ClCompile Include="src\Chunk.cpp" />
-    <ClCompile Include="src\ChunkMeshBasic.cpp" />
-    <ClCompile Include="src\Collider.cpp" />
-    <ClCompile Include="src\DebugData.cpp" />
-    <ClCompile Include="src\DesertBiome.cpp" />
-    <ClCompile Include="src\Entity.cpp" />
-    <ClCompile Include="src\game_constants.cpp" />
-    <ClCompile Include="src\InputEvent.cpp" />
-    <ClCompile Include="src\InputManager.cpp" />
-    <ClCompile Include="src\Inventory.cpp" />
-    <ClCompile Include="src\Light.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Map.cpp" />
-    <ClCompile Include="src\MapMeshBuilder.cpp" />
-    <ClCompile Include="src\Movement.cpp" />
-    <ClCompile Include="src\Observer.cpp" />
-    <ClCompile Include="src\PlainsBiome.cpp" />
-    <ClCompile Include="src\Player.cpp" />
-    <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Sounds.cpp" />
-    <ClCompile Include="src\Subject.cpp" />
-    <ClCompile Include="src\TerrainGenerator.cpp" />
     <ClCompile Include="src\UI.cpp" />
+    <ClCompile Include="src\Collider.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ChunkMeshBasic.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Chunk.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Biome.cpp">
+      <Filter>Biome</Filter>
+    </ClCompile>
+    <ClCompile Include="src\BlockWrapper.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Camera.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DesertBiome.cpp">
+      <Filter>Biome</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Light.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\TerrainGenerator.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Movement.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Entity.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputEvent.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Inventory.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\PlainsBiome.cpp">
+      <Filter>Biome</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Player.cpp">
+      <Filter>Entity</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Subject.cpp">
+      <Filter>Supporting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Observer.cpp">
+      <Filter>Supporting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Renderer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MapMeshBuilder.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InputManager.cpp">
+      <Filter>Supporting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DebugData.cpp">
+      <Filter>Supporting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\block_db.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="src\game_constants.cpp">
+      <Filter>Supporting</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Map.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\block_types.h">
       <Filter>World</Filter>
     </ClInclude>
-    <ClInclude Include="src\Directions.h" />
     <ClInclude Include="src\App.h" />
-    <ClInclude Include="src\Biome.h" />
-    <ClInclude Include="src\block_db.h" />
-    <ClInclude Include="src\BlockType.h" />
-    <ClInclude Include="src\BlockWrapper.h" />
-    <ClInclude Include="src\Buffers.h" />
-    <ClInclude Include="src\Camera.h" />
-    <ClInclude Include="src\Chunk.h" />
-    <ClInclude Include="src\ChunkMeshBasic.h" />
-    <ClInclude Include="src\Collider.h" />
-    <ClInclude Include="src\Converter.h" />
-    <ClInclude Include="src\DebugData.h" />
-    <ClInclude Include="src\DesertBiome.h" />
-    <ClInclude Include="src\Direction.h" />
-    <ClInclude Include="src\Entity.h" />
-    <ClInclude Include="src\EventType.h" />
-    <ClInclude Include="src\game_constants.h" />
-    <ClInclude Include="src\InputEvent.h" />
-    <ClInclude Include="src\InputManager.h" />
-    <ClInclude Include="src\Inventory.h" />
-    <ClInclude Include="src\Light.h" />
-    <ClInclude Include="src\Map.h" />
-    <ClInclude Include="src\MapMeshBuilder.h" />
-    <ClInclude Include="src\Maths.h" />
-    <ClInclude Include="src\Movement.h" />
-    <ClInclude Include="src\Observer.h" />
-    <ClInclude Include="src\pch.h" />
-    <ClInclude Include="src\PlainsBiome.h" />
-    <ClInclude Include="src\Player.h" />
-    <ClInclude Include="src\Renderer.h" />
-    <ClInclude Include="src\RenderRange.h" />
-    <ClInclude Include="src\Side.h" />
     <ClInclude Include="src\Sounds.h" />
-    <ClInclude Include="src\Subject.h" />
-    <ClInclude Include="src\TerrainGenerator.h" />
     <ClInclude Include="src\UI.h" />
+    <ClInclude Include="src\Collider.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ChunkMeshBasic.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Chunk.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Biome.h">
+      <Filter>Biome</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BlockWrapper.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Buffers.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Camera.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Converter.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DesertBiome.h">
+      <Filter>Biome</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Light.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\TerrainGenerator.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Movement.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Entity.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputEvent.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Inventory.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\PlainsBiome.h">
+      <Filter>Biome</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Player.h">
+      <Filter>Entity</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Subject.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Observer.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Maths.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Renderer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RenderRange.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\MapMeshBuilder.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="src\EventType.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\InputManager.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Directions.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Direction.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DebugData.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\BlockType.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\block_db.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pch.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Side.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\game_constants.h">
+      <Filter>Supporting</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Map.h">
+      <Filter>World</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

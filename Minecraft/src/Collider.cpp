@@ -35,6 +35,7 @@ void Collider::init(sf::Vector3f *pos, sf::Vector3f *size) {
 bool Collider::is_on_ground() const {
     return m_is_on_ground;
 }
+
 void Collider::set_is_on_ground(bool is_on_ground) {
     m_is_on_ground = is_on_ground;
 }

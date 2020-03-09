@@ -13,22 +13,7 @@ namespace World {
 }
 
 class App {
- private:
-    sf::Text m_text;
-    sf::Font m_font;
-    DebugData m_debug_data;
-    Player m_player;
-    sf::RenderWindow &m_window;
-
-    std::unique_ptr<UI> m_menu;
-    std::unique_ptr<Renderer> m_renderer;
-    std::shared_ptr<World::Map> m_map;
-    std::unique_ptr<World::MapMeshBuilder> m_map_mesh_builder;
-    std::unique_ptr<InputManager> m_input_manager;
-
-    bool m_should_display_debug_info = true;
-    bool m_should_fix_cursor = true;
- public:
+public:
     /* init some objects */
     explicit App(sf::RenderWindow &window);
 
@@ -36,7 +21,8 @@ class App {
     void run();
 
     ~App();
- private:
+
+private:
     /* input and camera */
     void handle_events();
 
@@ -58,5 +44,20 @@ class App {
     void resize(uint32_t x, uint32_t y);
 
     void draw_under_water_filter();
+
+    sf::Text m_text;
+    sf::Font m_font;
+    DebugData m_debug_data;
+    Player m_player;
+    sf::RenderWindow &m_window;
+
+    std::unique_ptr<UI> m_menu;
+    std::unique_ptr<Renderer> m_renderer;
+    std::shared_ptr<World::Map> m_map;
+    std::unique_ptr<World::MapMeshBuilder> m_map_mesh_builder;
+    std::unique_ptr<InputManager> m_input_manager;
+
+    bool m_should_display_debug_info = true;
+    bool m_should_fix_cursor = true;
 };
 

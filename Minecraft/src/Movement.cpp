@@ -132,6 +132,7 @@ void Movement::switch_movement_state(Direction direction, bool is_begin) {
         m_is_moving[direction] = false;
     }
 }
+
 void Movement::init(Entity *entity) {
     m_entity = entity;
     m_speed = DEFAULT_PLAYER_SPEED;
@@ -139,32 +140,39 @@ void Movement::init(Entity *entity) {
     acceleration = 2.5 * m_speed;
 
     const Direction buffer[] =
-        {Direction::RIGHT, Direction::LEFT, Direction::BACK, Direction::FORWARD, Direction::UP, Direction::DOWN};
+            {Direction::RIGHT, Direction::LEFT, Direction::BACK, Direction::FORWARD, Direction::UP, Direction::DOWN};
 
     for (const auto &item : buffer) {
         m_is_moving[item] = false;
         m_direction_speed[item] = 0.0;
     }
 }
+
 const sf::Vector3<double> &Movement::get_dpos() const {
     return m_dpos;
 }
+
 void Movement::set_dpos(sf::Vector3<double> dpos) {
     m_dpos = dpos;
 }
+
 bool Movement::is_flying() const {
     return m_flying;
 }
+
 float Movement::get_speed() const {
     return m_speed;
 }
+
 void Movement::set_speed(float speed) {
     m_speed = speed;
     acceleration = 2.5 * m_speed;
 }
+
 void Movement::set_flying(bool flying) {
     m_flying = flying;
 }
+
 void Movement::reset_speedY() {
     m_direction_speed[Direction::UP] = 0;
 }

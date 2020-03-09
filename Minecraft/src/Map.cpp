@@ -57,8 +57,8 @@ void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y,
             return;
 
         column[chunk_pos.y]
-            .set_block_type(pos_in_chunk.x, Converter::coord2block_coord_in_chunk(pos_in_chunk.y), pos_in_chunk.z,
-                            type);
+                .set_block_type(pos_in_chunk.x, Converter::coord2block_coord_in_chunk(pos_in_chunk.y), pos_in_chunk.z,
+                                type);
     } else {
         recalculate_pos(pos_in_chunk, chunk_pos);
 
@@ -68,10 +68,10 @@ void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y,
         Chunk &temp_chunk = get_chunk_or_generate(chunk_pos.x, chunk_pos.y, chunk_pos.z);
 
         temp_chunk.set_block_type(
-            Converter::coord2block_coord_in_chunk(pos_in_chunk.x),
-            Converter::coord2block_coord_in_chunk(pos_in_chunk.y),
-            Converter::coord2block_coord_in_chunk(pos_in_chunk.z),
-            type
+                Converter::coord2block_coord_in_chunk(pos_in_chunk.x),
+                Converter::coord2block_coord_in_chunk(pos_in_chunk.y),
+                Converter::coord2block_coord_in_chunk(pos_in_chunk.z),
+                type
         );
 
         if (temp_chunk.is_rendering()) {
@@ -82,8 +82,8 @@ void Map::set_block_type(sf::Vector3i pos_in_chunk, Column &column, int chunk_y,
 
 BlockType Map::get_type(int x, int y, int z) {
     int chunk_x = x / BLOCKS_IN_CHUNK,
-        chunk_y = y / BLOCKS_IN_CHUNK,
-        chunk_z = z / BLOCKS_IN_CHUNK;
+            chunk_y = y / BLOCKS_IN_CHUNK,
+            chunk_z = z / BLOCKS_IN_CHUNK;
 
     if (y < 0 || chunk_y >= CHUNKS_IN_WORLD_HEIGHT || x < 0 || z < 0) return BlockType::EMPTY_TYPE;
 

@@ -14,8 +14,8 @@ using std::inserter;
 using std::advance;
 
 MapMeshBuilder::MapMeshBuilder() :
-    m_vertices_generator_thread(&MapMeshBuilder::generate_vertices, this),
-    m_update_edited_chunk_thread(&MapMeshBuilder::update_edited_chunk, this) {
+        m_vertices_generator_thread(&MapMeshBuilder::generate_vertices, this),
+        m_update_edited_chunk_thread(&MapMeshBuilder::update_edited_chunk, this) {
 
 }
 
@@ -155,9 +155,9 @@ void MapMeshBuilder::add_new_chunks2rendering() {
     m_mutex__chunks4rendering.lock();
 
     copy(
-        m_chunks4vbo_generation.begin(),
-        m_chunks4vbo_generation.end(),
-        inserter(m_chunks4rendering, m_chunks4rendering.end())
+            m_chunks4vbo_generation.begin(),
+            m_chunks4vbo_generation.end(),
+            inserter(m_chunks4rendering, m_chunks4rendering.end())
     );
 
     for (Chunk *chunk : m_chunks4vbo_generation) {
@@ -189,17 +189,17 @@ void MapMeshBuilder::add_visible_chunks_in_range2vertices_generation(int i, int 
         for (int j = 0; j < CHUNKS_IN_WORLD_HEIGHT; ++j) {
             float chunk_center = BLOCKS_IN_CHUNK / 2.f - 1.f;
             glm::vec4 norm_coords = pv * glm::vec4(
-                i * BLOCKS_IN_CHUNK + chunk_center,
-                j * BLOCKS_IN_CHUNK + chunk_center,
-                k * BLOCKS_IN_CHUNK + chunk_center,
-                1.F);
+                    i * BLOCKS_IN_CHUNK + chunk_center,
+                    j * BLOCKS_IN_CHUNK + chunk_center,
+                    k * BLOCKS_IN_CHUNK + chunk_center,
+                    1.F);
 
             norm_coords.x /= norm_coords.w;
             norm_coords.y /= norm_coords.w;
 
             bool is_chunk_visible = norm_coords.z > -1 * SPHERE_DIAMETER
-                && fabsf(norm_coords.x) < 1 + 1 * SPHERE_DIAMETER / fabsf(norm_coords.w)
-                && fabsf(norm_coords.y) < 1 + 1 * SPHERE_DIAMETER / fabsf(norm_coords.w);
+                                    && fabsf(norm_coords.x) < 1 + 1 * SPHERE_DIAMETER / fabsf(norm_coords.w)
+                                    && fabsf(norm_coords.y) < 1 + 1 * SPHERE_DIAMETER / fabsf(norm_coords.w);
 
             bool is_chunk_near = abs(range.chunk_x - i) <= 4 && abs(range.chunk_z - k) <= 4;
             if (is_chunk_visible || is_chunk_near) {
@@ -224,10 +224,10 @@ void MapMeshBuilder::add_chunks_range2vertices_generation(RenderRange &range) {
     m_visible_columns_count = 0;
 
     int loc_start_x = range.chunk_x, loc_start_z = range.chunk_z,
-        loc_end_x = range.chunk_x, loc_end_z = range.chunk_z;
+            loc_end_x = range.chunk_x, loc_end_z = range.chunk_z;
 
     while (loc_start_x > range.start_x && loc_start_z > range.start_z &&
-        loc_end_x < range.end_x && loc_end_z < range.end_z) {
+           loc_end_x < range.end_x && loc_end_z < range.end_z) {
 
         int i = loc_start_x;
         int k = loc_start_z;

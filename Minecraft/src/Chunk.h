@@ -11,41 +11,17 @@ namespace World {
     enum class BlockType : uint8_t;
 
     class ChunkLayer {
-     public:
+    public:
         bool is_all_solid() { return solid_block_count == BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK; };
+
         void update(BlockType type);
-     private:
+
+    private:
         int solid_block_count = 0;
     };
 
     class Chunk {
-     private:
-        sf::Vector3i m_pos = {-1, -1, -1};
-        std::array<BlockType, BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK> m_blocks;
-        std::array<ChunkLayer, BLOCKS_IN_CHUNK> m_layers;
-
-        bool m_is_blocked_vertices_generation = false;
-        bool m_is_rendering = false;
-        bool m_is_init = false;
-        World::Map *m_map = nullptr;
-
-     public:
-        ChunkMeshBasic m_blocks_mesh;
-        ChunkMeshBasic m_water_mesh;
-
-     private:
-        void generate_vertices();
-
-        bool is_layer_solid(sf::Vector3i pos, int y);
-
-        bool is_empty();
-
-        inline void generate_cactus_vertices(GLfloat x, GLfloat y, GLfloat z, BlockType id);
-
-        inline void generate_water_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, BlockType id);
-
-        inline void generate_block_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, BlockType id);
-     public:
+    public:
         /* for Block mesh basic */
         bool should_make_layer(int y);
 
@@ -84,5 +60,28 @@ namespace World {
         enum BlockType get_block_type(int x, int y, int z);
 
         void set_block_type(int x, int y, int z, enum BlockType type);
+
+        ChunkMeshBasic m_blocks_mesh;
+        ChunkMeshBasic m_water_mesh;
+    private:
+        void generate_vertices();
+
+        bool is_layer_solid(sf::Vector3i pos, int y);
+
+        bool is_empty();
+
+        inline void generate_cactus_vertices(GLfloat x, GLfloat y, GLfloat z, BlockType id);
+
+        inline void generate_water_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, BlockType id);
+
+        inline void generate_block_vertices(int i, int j, int k, GLfloat x, GLfloat y, GLfloat z, BlockType id);
+
+        sf::Vector3i m_pos = {-1, -1, -1};
+        std::array<BlockType, BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK * BLOCKS_IN_CHUNK> m_blocks;
+        std::array<ChunkLayer, BLOCKS_IN_CHUNK> m_layers;
+        bool m_is_blocked_vertices_generation = false;
+        bool m_is_rendering = false;
+        bool m_is_init = false;
+        World::Map *m_map = nullptr;
     };
 }

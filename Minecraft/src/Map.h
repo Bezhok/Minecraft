@@ -14,25 +14,9 @@ namespace World {
     enum class BlockType : uint8_t;
 
     class Map {
-     public:
+    public:
         using Column = std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT>;
-     private:
-        phmap::parallel_node_hash_map<size_t, Column> m_map;
-        std::atomic<bool> m_should_redraw_chunk = false;
-        std::unique_ptr<TerrainGenerator> m_terrain_generator;
-        BlockType m_edited_block_type;
-        sf::Vector3i m_edited_block_pos;
-        Chunk *m_edited_chunk = nullptr;
-        Sounds m_sounds;
-     private:
-        void play_sound(Sounds::SoundsNames name);
 
-        void
-        find_neighbours(const sf::Vector3i &chunk_pos, const sf::Vector3i &block_in_chunk_pos, int x, int y, int z);
-
-        void recalculate_pos(sf::Vector3i &pos_rel2chunk, sf::Vector3i &chunk_pos);
-
-     public:
         size_t get_size() { return m_map.size(); };
 
         void generate_chunk_terrain(Column &, int, int, int);
@@ -66,7 +50,7 @@ namespace World {
 
         // glm hash function
         inline void hash_combine(size_t &seed, size_t hash) {
-            hash += 0x9e3779b9 + (seed << 6) + (seed >> 2);
+            hash += 0x9e3779b9 + (seed << 6u) + (seed >> 2u);
             seed ^= hash;
         }
 
@@ -95,6 +79,22 @@ namespace World {
         void set_block_type(sf::Vector3i pos_in_chunk, Map::Column &column, int chunk_y, BlockType type);
 
         inline BlockType get_type(int x, int y, int z);
+
+    private:
+        void play_sound(Sounds::SoundsNames name);
+
+        void
+        find_neighbours(const sf::Vector3i &chunk_pos, const sf::Vector3i &block_in_chunk_pos, int x, int y, int z);
+
+        void recalculate_pos(sf::Vector3i &pos_rel2chunk, sf::Vector3i &chunk_pos);
+
+        phmap::parallel_node_hash_map<size_t, Column> m_map;
+        std::atomic<bool> m_should_redraw_chunk = false;
+        std::unique_ptr<TerrainGenerator> m_terrain_generator;
+        BlockType m_edited_block_type;
+        sf::Vector3i m_edited_block_pos;
+        Chunk *m_edited_chunk = nullptr;
+        Sounds m_sounds;
     };
 }
 

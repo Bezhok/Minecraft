@@ -5,28 +5,30 @@
 
 namespace World {
     enum class BlockType : uint8_t;
-
     class Chunk;
-
     class Map;
 
     class ChunkMeshBasic {
-     private:
-        const GLfloat BS = 1;
+    public:
+        /* Main */
+        explicit ChunkMeshBasic(Chunk *c) : chunk(c) {};
 
-        bool m_is_vertices_created = false;
-        GLfloat *m_vertices = nullptr;
+        ~ChunkMeshBasic();
 
-        //vertices count in current time
-        int m_i = 0;
+        void update_vao();
 
-        // vertices count before updating
-        int m_old_i = 0;
+        void update_vertices();
 
-        Buffers m_buffers;
-        Chunk *chunk = nullptr;
+        void free_buffers(Map *map);
 
-     private:
+        void draw();
+
+        int get_final_points_count() { return m_old_i / 6; };
+
+        /* debug */
+        int get_current_faces_count() { return m_i / 36; };
+
+    private:
         inline void bind_texture_second_order(const sf::Vector2i &t_p);
 
         inline void bind_texture_first_order(const sf::Vector2i &t_p);
@@ -46,6 +48,7 @@ namespace World {
         inline void add_byte4(GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 
         friend class Chunk;
+
         /* only for Chunk */
         void generate_vertices4positive_x(GLfloat x, GLfloat y, GLfloat z, BlockType id);
 
@@ -58,23 +61,18 @@ namespace World {
         void generate_vertices4negative_z(GLfloat x, GLfloat y, GLfloat z, BlockType id);
 
         void generate_vertices4positive_z(GLfloat x, GLfloat y, GLfloat z, BlockType id);
-     public:
-        /* Main */
-        explicit ChunkMeshBasic(Chunk *c) : chunk(c) {};
 
-        ~ChunkMeshBasic();
+        const GLfloat BS = 1;
+        bool m_is_vertices_created = false;
+        GLfloat *m_vertices = nullptr;
 
-        void update_vao();
+        //vertices count in current time
+        int m_i = 0;
 
-        void update_vertices();
+        // vertices count before updating
+        int m_old_i = 0;
+        Buffers m_buffers;
+        Chunk *chunk = nullptr;
 
-        void free_buffers(Map *map);
-
-        void draw();
-
-        int get_final_points_count() { return m_old_i / 6; };
-
-        /* debug */
-        int get_current_faces_count() { return m_i / 36; };
     };
 }

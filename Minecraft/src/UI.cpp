@@ -9,14 +9,14 @@
 using namespace World;
 
 UI::UI(sf::RenderWindow &window)
-    : m_window{window} {
+        : m_window{window} {
     //tool bar
     m_textures[UIElement::tool_bar].loadFromFile("resources/textures/gui/tool_bar.png");
     m_sprites[UIElement::tool_bar].setTexture(m_textures[UIElement::tool_bar]);
 
     m_sprites[UIElement::tool_bar].setPosition(
-        float(m_window.getSize().x / 2 - int(m_textures[UIElement::tool_bar].getSize().x) / 2),
-        float(m_window.getSize().y - int(m_textures[UIElement::tool_bar].getSize().y))
+            float(m_window.getSize().x / 2 - int(m_textures[UIElement::tool_bar].getSize().x) / 2),
+            float(m_window.getSize().y - int(m_textures[UIElement::tool_bar].getSize().y))
     );
 
     // curr tool
@@ -24,8 +24,8 @@ UI::UI(sf::RenderWindow &window)
     m_sprites[UIElement::curr_tool].setTexture(m_textures[UIElement::curr_tool]);
 
     m_sprites[UIElement::curr_tool].setPosition(
-        float(m_sprites[UIElement::tool_bar].getPosition().x - 2),
-        float(m_window.getSize().y - m_textures[UIElement::curr_tool].getSize().y + 2)
+            float(m_sprites[UIElement::tool_bar].getPosition().x - 2),
+            float(m_window.getSize().y - m_textures[UIElement::curr_tool].getSize().y + 2)
     );
 
     //cross
@@ -33,8 +33,8 @@ UI::UI(sf::RenderWindow &window)
     m_sprites[UIElement::cross].setTexture(m_textures[UIElement::cross]);
 
     m_sprites[UIElement::cross].setPosition(
-        float(m_window.getSize().x / 2 - int(m_textures[UIElement::cross].getSize().x / 2)),
-        float(m_window.getSize().y / 2 - int(m_textures[UIElement::cross].getSize().y / 2))
+            float(m_window.getSize().x / 2 - int(m_textures[UIElement::cross].getSize().x / 2)),
+            float(m_window.getSize().y / 2 - int(m_textures[UIElement::cross].getSize().y / 2))
     );
 
     //atlas
@@ -48,8 +48,8 @@ void UI::update() {
     // tool bar
     sf::Vector2f bar_old_pos = m_sprites[UIElement::tool_bar].getPosition();
     sf::Vector2f bar_new_pos = {
-        float(m_window.getSize().x / 2 - int(m_textures[UIElement::tool_bar].getSize().x) / 2),
-        float(m_window.getSize().y - int(m_textures[UIElement::tool_bar].getSize().y))
+            float(m_window.getSize().x / 2 - int(m_textures[UIElement::tool_bar].getSize().x) / 2),
+            float(m_window.getSize().y - int(m_textures[UIElement::tool_bar].getSize().y))
     };
     m_sprites[UIElement::tool_bar].setPosition(bar_new_pos);
 
@@ -61,8 +61,8 @@ void UI::update() {
     }
 
     m_sprites[UIElement::cross].setPosition(
-        float(m_window.getSize().x / 2 - int(m_textures[UIElement::cross].getSize().x / 2)),
-        float(m_window.getSize().y / 2 - int(m_textures[UIElement::cross].getSize().y / 2))
+            float(m_window.getSize().x / 2 - int(m_textures[UIElement::cross].getSize().x / 2)),
+            float(m_window.getSize().y / 2 - int(m_textures[UIElement::cross].getSize().y / 2))
     );
 }
 
@@ -78,10 +78,10 @@ void UI::update_players_blocks(Player &player) {
 
             sf::Vector2i &p = DB::s_atlas_db(e.first, Side::positive_x);
             sprite.setTextureRect(sf::IntRect(
-                p.x * BLOCK_RESOLUTION,
-                p.y * BLOCK_RESOLUTION,
-                BLOCK_RESOLUTION,
-                BLOCK_RESOLUTION
+                    p.x * BLOCK_RESOLUTION,
+                    p.y * BLOCK_RESOLUTION,
+                    BLOCK_RESOLUTION,
+                    BLOCK_RESOLUTION
             ));
 
             sf::Vector2f pos = m_sprites[UIElement::tool_bar].getPosition();

@@ -3,16 +3,7 @@
 #include "pch.h"
 
 class DebugData {
- private:
-    float fps = 0;
-    float frame_time = 0;
-    int start_time = 0;
-    int end_time = 0;
-    int update_frequency_time = 0;
-    sf::Clock update_frequency_timer;
-    sf::Clock timer;
-
- public:
+public:
     float get_fps() { return fps; };
 
     float get_frame_time() { return frame_time; };
@@ -22,4 +13,13 @@ class DebugData {
 
     /* update data if need */
     void count();
+
+private:
+    float fps = 0;
+    float frame_time = 0;
+    int start_time = 0;
+    int end_time = 0;
+    int update_frequency_time = 0;
+    sf::Clock update_frequency_timer;
+    sf::Clock timer;
 };

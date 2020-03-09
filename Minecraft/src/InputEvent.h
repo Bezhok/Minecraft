@@ -1,10 +1,11 @@
 #pragma once
+
 #include "Subject.h"
 #include "Direction.h"
 #include "EventType.h"
 
 class InputEvent : public Subject {
- public:
+public:
     Direction direction = Direction::NONE;
     EventType type;
     sf::Vector2f delta;

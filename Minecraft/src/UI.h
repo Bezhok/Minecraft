@@ -11,13 +11,7 @@ namespace World {
 }
 
 class UI : public Observer {
- private:
-    sf::RenderWindow &m_window;
-    std::unordered_map<UIElement, sf::Sprite> m_sprites;
-    std::vector<sf::Sprite> m_hot_bar_sprites;
-    std::unordered_map<UIElement, sf::Texture> m_textures;
-
- public:
+public:
     /* init MenuElements */
     UI(sf::RenderWindow &window);
 
@@ -33,7 +27,13 @@ class UI : public Observer {
     const auto &get_spites() { return m_sprites; };
 
     const auto &get_top_spites() { return m_hot_bar_sprites; };
- private:
+private:
     void on_notify(const InputEvent *event) override;
+
     void change_inventory_item(int deltaX);
+
+    sf::RenderWindow &m_window;
+    std::unordered_map<UIElement, sf::Sprite> m_sprites;
+    std::vector<sf::Sprite> m_hot_bar_sprites;
+    std::unordered_map<UIElement, sf::Texture> m_textures;
 };

@@ -4,6 +4,7 @@
 #include "Chunk.h"
 #include "ChunkMeshBasic.h"
 #include "Converter.h"
+
 using namespace World;
 
 void Chunk::init(const sf::Vector3i &pos, World::Map *map) {
@@ -153,9 +154,9 @@ bool Chunk::is_empty() {
 bool Chunk::is_air__in_chunk(int x, int y, int z) {
     if (y < 0 || x < 0 || z < 0 || y >= BLOCKS_IN_CHUNK || x >= BLOCKS_IN_CHUNK || z >= BLOCKS_IN_CHUNK) {
         return m_map->is_air(
-            x + Converter::chunk_coord2block_coord(m_pos.x),
-            y + Converter::chunk_coord2block_coord(m_pos.y),
-            z + Converter::chunk_coord2block_coord(m_pos.z)
+                x + Converter::chunk_coord2block_coord(m_pos.x),
+                y + Converter::chunk_coord2block_coord(m_pos.y),
+                z + Converter::chunk_coord2block_coord(m_pos.z)
         );
     }
 
@@ -165,9 +166,9 @@ bool Chunk::is_air__in_chunk(int x, int y, int z) {
 bool Chunk::is_opaque__in_chunk(int x, int y, int z) {
     if (y < 0 || x < 0 || z < 0 || y >= BLOCKS_IN_CHUNK || x >= BLOCKS_IN_CHUNK || z >= BLOCKS_IN_CHUNK) {
         return m_map->is_opaque(
-            x + Converter::chunk_coord2block_coord(m_pos.x),
-            y + Converter::chunk_coord2block_coord(m_pos.y),
-            z + Converter::chunk_coord2block_coord(m_pos.z)
+                x + Converter::chunk_coord2block_coord(m_pos.x),
+                y + Converter::chunk_coord2block_coord(m_pos.y),
+                z + Converter::chunk_coord2block_coord(m_pos.z)
         );
     }
 
@@ -177,9 +178,9 @@ bool Chunk::is_opaque__in_chunk(int x, int y, int z) {
 bool Chunk::is_water__in_chunk(int x, int y, int z) {
     if (y < 0 || x < 0 || z < 0 || y >= BLOCKS_IN_CHUNK || x >= BLOCKS_IN_CHUNK || z >= BLOCKS_IN_CHUNK) {
         return m_map->is_water(
-            x + Converter::chunk_coord2block_coord(m_pos.x),
-            y + Converter::chunk_coord2block_coord(m_pos.y),
-            z + Converter::chunk_coord2block_coord(m_pos.z)
+                x + Converter::chunk_coord2block_coord(m_pos.x),
+                y + Converter::chunk_coord2block_coord(m_pos.y),
+                z + Converter::chunk_coord2block_coord(m_pos.z)
         );
     }
 
@@ -194,23 +195,23 @@ Chunk::~Chunk() = default;
 
 bool Chunk::should_make_layer(int y) {
     auto is_all_solid_check_range = [&](sf::Vector3i &pos, int y) {
-      //check error value
-      if (y == -1) {
-          return is_layer_solid(pos + sf::Vector3i{0, -1, 0}, BLOCKS_IN_CHUNK - 1);
-      } else if (y == BLOCKS_IN_CHUNK) {
-          return is_layer_solid(pos + sf::Vector3i{0, 1, 0}, 0);
-      } else {
-          return is_layer_solid(pos, y);
-      }
+        //check error value
+        if (y == -1) {
+            return is_layer_solid(pos + sf::Vector3i{0, -1, 0}, BLOCKS_IN_CHUNK - 1);
+        } else if (y == BLOCKS_IN_CHUNK) {
+            return is_layer_solid(pos + sf::Vector3i{0, 1, 0}, 0);
+        } else {
+            return is_layer_solid(pos, y);
+        }
     };
 
     return !is_all_solid_check_range(m_pos, y) ||
-        !is_all_solid_check_range(m_pos, y - 1) ||
-        !is_all_solid_check_range(m_pos, y + 1) ||
-        !is_layer_solid(m_pos + sf::Vector3i{1, 0, 0}, y) ||
-        !is_layer_solid(m_pos + sf::Vector3i{-1, 0, 0}, y) ||
-        !is_layer_solid(m_pos + sf::Vector3i{0, 0, 1}, y) ||
-        !is_layer_solid(m_pos + sf::Vector3i{0, 0, -1}, y);
+           !is_all_solid_check_range(m_pos, y - 1) ||
+           !is_all_solid_check_range(m_pos, y + 1) ||
+           !is_layer_solid(m_pos + sf::Vector3i{1, 0, 0}, y) ||
+           !is_layer_solid(m_pos + sf::Vector3i{-1, 0, 0}, y) ||
+           !is_layer_solid(m_pos + sf::Vector3i{0, 0, 1}, y) ||
+           !is_layer_solid(m_pos + sf::Vector3i{0, 0, -1}, y);
 
 }
 

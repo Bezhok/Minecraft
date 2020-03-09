@@ -5,7 +5,12 @@
 
 class InputEvent;
 class Subject {
- protected:
+public:
+    void add(Observer *observer) { m_observers.insert(observer); };
+
+    void remove(Observer *observer) { m_observers.erase(observer); };
+
+protected:
     std::unordered_set<Observer *> m_observers;
 
     void notify(InputEvent *event) {
@@ -13,9 +18,6 @@ class Subject {
             observer->on_notify(event);
         }
     }
- public:
-    void add(Observer *observer) { m_observers.insert(observer); };
-    void remove(Observer *observer) { m_observers.erase(observer); };
 };
 
 

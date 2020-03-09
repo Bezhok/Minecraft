@@ -86,8 +86,8 @@ void TerrainGenerator::generate_structures(Column &column, int chunk_y, Biome *b
     // tree generation
     for (auto &pos : biome->get_tree_positions()) {
         biome->generate_tree([&](sf::Vector3i loc_pos, BlockType type) {
-          sf::Vector3i full_pos = pos + loc_pos;
-          m_map->set_block_type(full_pos, column, chunk_y, type);
+            sf::Vector3i full_pos = pos + loc_pos;
+            m_map->set_block_type(full_pos, column, chunk_y, type);
         });
     }
     biome->clear();

@@ -92,19 +92,27 @@ void InputManager::handle_mouse(sf::Event &event) {
 
 Direction InputManager::get_direction(sf::Keyboard::Key key) {
     switch (key) {
-        case sf::Keyboard::W:return Direction::FORWARD;
-        case sf::Keyboard::A:return Direction::LEFT;
-        case sf::Keyboard::S:return Direction::BACK;
-        case sf::Keyboard::D:return Direction::RIGHT;
-        case sf::Keyboard::Space:return Direction::UP;
-        case sf::Keyboard::LShift:return Direction::DOWN;
-        default:return Direction::NONE;
+        case sf::Keyboard::W:
+            return Direction::FORWARD;
+        case sf::Keyboard::A:
+            return Direction::LEFT;
+        case sf::Keyboard::S:
+            return Direction::BACK;
+        case sf::Keyboard::D:
+            return Direction::RIGHT;
+        case sf::Keyboard::Space:
+            return Direction::UP;
+        case sf::Keyboard::LShift:
+            return Direction::DOWN;
+        default:
+            return Direction::NONE;
     }
 }
 
 InputManager::InputManager(sf::RenderWindow &window) : m_window(window) {
 
 }
+
 void InputManager::set_should_fix_cursor(bool should_fix_cursor) {
     m_should_fix_cursor = should_fix_cursor;
 }
