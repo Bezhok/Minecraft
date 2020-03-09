@@ -4,7 +4,7 @@
 #include "Map.h"
 #include "App.h"
 #include "block_db.h"
-#include "Menu.h"
+#include "UI.h"
 #include "MapMeshBuilder.h"
 #include "InputManager.h"
 #include "Inventory.h"
@@ -47,7 +47,7 @@ App::App(sf::RenderWindow &window)
         hot_bar[i] = {World::DB::s_loaded_blocks[i], 1};
     }
 
-    m_menu = std::make_unique<Menu>(m_window);
+    m_menu = std::make_unique<UI>(m_window);
     m_menu->update_players_blocks(m_player);
 
     m_input_manager->add(&m_player);
@@ -99,7 +99,7 @@ void App::draw_SFML() {
     }
 
     for (auto &e : m_menu->get_top_spites()) {
-        m_renderer->draw_SFML(e.second);
+        m_renderer->draw_SFML(e);
     }
 }
 

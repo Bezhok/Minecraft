@@ -94,6 +94,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)/Dependicies/includeFull;$(SolutionDir)Dependicies/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;_MBSC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glew32s.lib;opengl32.lib;openal32.lib;freetype.lib;winmm.lib;gdi32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;ws2_32.lib;glew32s.lib;opengl32.lib;openal32.lib;freetype.lib;winmm.lib;gdi32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;ws2_32.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;sfml-audio-s-d.lib;sfml-network-s-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -109,6 +110,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)/Dependicies/includeFull;$(SolutionDir)Dependicies/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>SFML_STATIC;GLEW_STATIC;_MBSC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glew32s.lib;opengl32.lib;openal32.lib;freetype.lib;winmm.lib;gdi32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;ws2_32.lib;glew32s.lib;opengl32.lib;openal32.lib;freetype.lib;winmm.lib;gdi32.lib;flac.lib;vorbisenc.lib;vorbisfile.lib;vorbis.lib;ogg.lib;ws2_32.lib;sfml-graphics-s-d.lib;sfml-window-s-d.lib;sfml-system-s-d.lib;sfml-audio-s-d.lib;sfml-network-s-d.lib;%(AdditionalDependencies);%(AdditionalDependencies)</AdditionalDependencies>
@@ -126,6 +128,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)/Dependicies/includeFull;$(SolutionDir)Dependicies/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -145,6 +148,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)/Dependicies/includeFull;$(SolutionDir)Dependicies/include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GLEW_STATIC;SFML_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -174,7 +178,6 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\MapMeshBuilder.cpp" />
-    <ClCompile Include="src\Menu.cpp" />
     <ClCompile Include="src\Movement.cpp" />
     <ClCompile Include="src\Observer.cpp" />
     <ClCompile Include="src\PlainsBiome.cpp" />
@@ -183,6 +186,7 @@
     <ClCompile Include="src\Sounds.cpp" />
     <ClCompile Include="src\Subject.cpp" />
     <ClCompile Include="src\TerrainGenerator.cpp" />
+    <ClCompile Include="src\UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
@@ -211,8 +215,6 @@
     <ClInclude Include="src\Map.h" />
     <ClInclude Include="src\MapMeshBuilder.h" />
     <ClInclude Include="src\Maths.h" />
-    <ClInclude Include="src\Menu.h" />
-    <ClInclude Include="src\MenuElement.h" />
     <ClInclude Include="src\Movement.h" />
     <ClInclude Include="src\Observer.h" />
     <ClInclude Include="src\pch.h" />
@@ -224,6 +226,7 @@
     <ClInclude Include="src\Sounds.h" />
     <ClInclude Include="src\Subject.h" />
     <ClInclude Include="src\TerrainGenerator.h" />
+    <ClInclude Include="src\UI.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

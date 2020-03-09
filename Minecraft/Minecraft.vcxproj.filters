@@ -37,7 +37,6 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\MapMeshBuilder.cpp" />
-    <ClCompile Include="src\Menu.cpp" />
     <ClCompile Include="src\Movement.cpp" />
     <ClCompile Include="src\Observer.cpp" />
     <ClCompile Include="src\PlainsBiome.cpp" />
@@ -46,6 +45,7 @@
     <ClCompile Include="src\Sounds.cpp" />
     <ClCompile Include="src\Subject.cpp" />
     <ClCompile Include="src\TerrainGenerator.cpp" />
+    <ClCompile Include="src\UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\block_types.h">
@@ -76,8 +76,6 @@
     <ClInclude Include="src\Map.h" />
     <ClInclude Include="src\MapMeshBuilder.h" />
     <ClInclude Include="src\Maths.h" />
-    <ClInclude Include="src\Menu.h" />
-    <ClInclude Include="src\MenuElement.h" />
     <ClInclude Include="src\Movement.h" />
     <ClInclude Include="src\Observer.h" />
     <ClInclude Include="src\pch.h" />
@@ -89,5 +87,6 @@
     <ClInclude Include="src\Sounds.h" />
     <ClInclude Include="src\Subject.h" />
     <ClInclude Include="src\TerrainGenerator.h" />
+    <ClInclude Include="src\UI.h" />
   </ItemGroup>
 </Project>

@@ -5,7 +5,7 @@
 #include "Player.h"
 #include "InputManager.h"
 
-class Menu;
+class UI;
 class Renderer;
 namespace World {
     class MapMeshBuilder;
@@ -20,7 +20,7 @@ class App {
     Player m_player;
     sf::RenderWindow &m_window;
 
-    std::unique_ptr<Menu> m_menu;
+    std::unique_ptr<UI> m_menu;
     std::unique_ptr<Renderer> m_renderer;
     std::shared_ptr<World::Map> m_map;
     std::unique_ptr<World::MapMeshBuilder> m_map_mesh_builder;

@@ -1,10 +1,11 @@
 #include "Inventory.h"
 #include "BlockType.h"
+#include "game_constants.h"
 
 Inventory::Inventory() {
     int size = 9;
-    m_hot_bar_items.resize(size, {World::BlockType::EMPTY_TYPE, 0});
-    m_main_items.resize(3*size, {World::BlockType::EMPTY_TYPE, 0});
+    m_hot_bar_items.resize(HOTBAR_INV_SIZE, {World::BlockType::EMPTY_TYPE, 0});
+    m_main_items.resize(MAIN_INV_SIZE, {World::BlockType::EMPTY_TYPE, 0});
 }
 
 World::BlockType Inventory::get_curr_block() const {

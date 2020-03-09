@@ -6,6 +6,7 @@
 namespace Base {
     class Entity;
 }
+// really bad movement realisation
 class Movement {
  private:
     float m_speed = DEFAULT_PLAYER_SPEED;

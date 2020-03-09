@@ -1,5 +1,5 @@
 #pragma once
-enum class MenuElement {
+enum class UIElement {
     tool_bar,
     curr_tool,
     cross,

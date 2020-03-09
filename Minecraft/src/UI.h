@@ -1,26 +1,27 @@
 #pragma once
 
 #include "pch.h"
-#include "MenuElement.h"
+#include "UIElement.h"
 #include "Observer.h"
+#include <optional>
 
 class Player;
 namespace World {
     enum class BlockType : uint8_t;
 }
 
-class Menu : public Observer {
+class UI : public Observer {
  private:
     sf::RenderWindow &m_window;
-    std::unordered_map<MenuElement, sf::Sprite> m_sprites;
-    std::unordered_map<World::BlockType, sf::Sprite> m_side_sprites; // tool bar items
-    std::unordered_map<MenuElement, sf::Texture> m_textures;
+    std::unordered_map<UIElement, sf::Sprite> m_sprites;
+    std::vector<sf::Sprite> m_hot_bar_sprites;
+    std::unordered_map<UIElement, sf::Texture> m_textures;
 
  public:
     /* init MenuElements */
-    Menu(sf::RenderWindow &window);
+    UI(sf::RenderWindow &window);
 
-    ~Menu();
+    ~UI();
 
     /* should be called when resized */
     void update();
@@ -31,7 +32,7 @@ class Menu : public Observer {
     /* access */
     const auto &get_spites() { return m_sprites; };
 
-    const auto &get_top_spites() { return m_side_sprites; };
+    const auto &get_top_spites() { return m_hot_bar_sprites; };
  private:
     void on_notify(const InputEvent *event) override;
     void change_inventory_item(int deltaX);

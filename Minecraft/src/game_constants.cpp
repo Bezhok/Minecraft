@@ -12,4 +12,7 @@ const float DEFAULT_PLAYER_SPEED = 1.3 * 4.317f; //in coordinates
 const int BLOCK_RESOLUTION = 16;
 const char PATH2ATLAS[] = "resources\\natlas.png";
 
+const int HOTBAR_INV_SIZE = 9;
+const int MAIN_INV_SIZE = HOTBAR_INV_SIZE*3;
+
 int vertices_wasnt_free = 0;
