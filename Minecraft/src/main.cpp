@@ -15,6 +15,7 @@ int main() {
 
     window.setPosition(window.getPosition() + sf::Vector2i{200, 0});
     window.setKeyRepeatEnabled(false);
+    //window.setVerticalSyncEnabled(true);
 
     sf::ContextSettings settings = window.getSettings();
 

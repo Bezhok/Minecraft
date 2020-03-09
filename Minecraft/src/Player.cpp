@@ -16,8 +16,8 @@ void Player::init(Map *map) {
 
     m_movement.init(this);
     m_cam.init(&m_pos, m_map);
-    m_cam.set_shift({0, 0.8f*m_size.y, 0});
-    
+    m_cam.set_shift({0, 0.8f * m_size.y, 0});
+
     m_collider.init(&m_pos, &m_size);
 }
 

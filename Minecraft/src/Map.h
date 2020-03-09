@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include "pch.h"
 #include "game_constants.h"
 #include "Buffers.h"
@@ -17,7 +18,7 @@ namespace World {
         using Column = std::array<Chunk, CHUNKS_IN_WORLD_HEIGHT>;
      private:
         phmap::parallel_node_hash_map<size_t, Column> m_map;
-        bool m_should_redraw_chunk = false;
+        std::atomic<bool> m_should_redraw_chunk = false;
         std::unique_ptr<TerrainGenerator> m_terrain_generator;
         BlockType m_edited_block_type;
         sf::Vector3i m_edited_block_pos;

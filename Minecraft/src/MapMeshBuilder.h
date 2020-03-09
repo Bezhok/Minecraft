@@ -6,6 +6,7 @@
 
 struct RenderRange;
 class Player;
+// TODO framerate can cause on chunks generation espexially block removal
 namespace World {
     class Map;
 
@@ -22,7 +23,7 @@ namespace World {
         std::vector<World::Chunk *> m_chunks4vbo_generation;
         std::atomic<size_t> chunks4vbo_generation_size;
 
-        bool m_is_thread_free = true;
+        std::atomic<bool> m_is_thread_free = true;
         bool m_should_update_priority_chunks = false;
         std::vector<Chunk *> m_priority4_rendering;
         bool m_is_new_chunk = false;

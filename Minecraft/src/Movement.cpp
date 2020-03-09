@@ -127,7 +127,7 @@ void Movement::switch_movement_state(Direction direction, bool is_begin) {
         m_is_moving[direction] = true;
 
         if (direction != Direction::UP)
-        m_direction_speed[direction] = start_direction_speed;
+            m_direction_speed[direction] = start_direction_speed;
     } else {
         m_is_moving[direction] = false;
     }

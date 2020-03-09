@@ -160,7 +160,7 @@ void App::input() {
 
         if (!m_should_fix_cursor)
             return;
-        
+
         m_input_manager->handle_input(event);
     }
 }

@@ -14,7 +14,8 @@ using std::inserter;
 using std::advance;
 
 MapMeshBuilder::MapMeshBuilder() :
-    m_vertices_generator_thread(&MapMeshBuilder::generate_vertices, this), m_update_edited_chunk_thread(&MapMeshBuilder::update_edited_chunk, this) {
+    m_vertices_generator_thread(&MapMeshBuilder::generate_vertices, this),
+    m_update_edited_chunk_thread(&MapMeshBuilder::update_edited_chunk, this) {
 
 }
 
@@ -58,7 +59,7 @@ void MapMeshBuilder::generate_vertices() {
         for (auto it = m_chunks4vertices_generation.begin(); it != m_chunks4vertices_generation.end(); ++it) {
             //should be condition variable
             while (chunks4vbo_generation_size > 20) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::microseconds(100));
             }
 
             (*it)->update_vertices();
@@ -101,19 +102,21 @@ void MapMeshBuilder::update_edited_chunk() {
             m_is_new_chunk = true;
         }
         edited_chunk->update_vertices();
+
         m_priority4_rendering.push_back(edited_chunk);
     }
 
-    m_mutex__chunks4rendering.lock();
     for (sf::Vector3i &pos : m_map->m_should_be_updated_neighbours) {
         Chunk &chunk = m_map->get_chunk_or_generate(pos.x, pos.y, pos.z);
 
         if (chunk.is_rendering()) {
             chunk.update_vertices();
+
+            m_mutex__chunks4rendering.lock();
             m_priority4_rendering.push_back(&chunk);
+            m_mutex__chunks4rendering.unlock();
         }
     }
-    m_mutex__chunks4rendering.unlock();
 
     m_should_update_priority_chunks = true;
 
