@@ -9,14 +9,6 @@
 #include "InputManager.h"
 #include "Inventory.h"
 
-using std::to_string;
-using std::advance;
-using std::make_shared;
-using std::make_unique;
-using std::copy;
-using std::inserter;
-using std::fabs;
-using std::sqrt;
 using namespace World;
 
 App::App(sf::RenderWindow &window)
@@ -33,6 +25,8 @@ App::App(sf::RenderWindow &window)
 
     m_should_display_debug_info = false;
     m_window.setMouseCursorVisible(false);
+    m_window.setActive(true);
+
     int x = m_window.getSize().x / 2;
     int y = m_window.getSize().y / 2;
     sf::Mouse::setPosition(sf::Vector2i(x, y), m_window);
@@ -59,18 +53,18 @@ App::App(sf::RenderWindow &window)
 std::string App::debug_text() {
     std::string str =
             "fps: " +
-            to_string(int(m_debug_data.get_fps())) + "\n" +
+            std::to_string(int(m_debug_data.get_fps())) + "\n" +
             "ft: " +
-            to_string(int(m_debug_data.get_frame_time())) + "\n" +
+            std::to_string(int(m_debug_data.get_frame_time())) + "\n" +
             "x, y, z: " +
-            to_string(m_player.get_position().x) + " " +
-            to_string(m_player.get_position().y) + " " +
-            to_string(m_player.get_position().z) + "\n" +
-            to_string(m_map_mesh_builder->get_chunks4rendering_size()) + " " +
-            to_string(m_map->get_size()) + " " +
-            to_string(m_map_mesh_builder->get_chunks4vertices_generation_size()) + " " +
+            std::to_string(m_player.get_position().x) + " " +
+            std::to_string(m_player.get_position().y) + " " +
+            std::to_string(m_player.get_position().z) + "\n" +
+            std::to_string(m_map_mesh_builder->get_chunks4rendering_size()) + " " +
+            std::to_string(m_map->get_size()) + " " +
+            std::to_string(m_map_mesh_builder->get_chunks4vertices_generation_size()) + " " +
             "- chunks rendering, map size, updates, global buffer\n" +
-            to_string(vertices_wasnt_free) + " - chunks which veticies memory is not freed";
+            std::to_string(vertices_wasnt_free) + " - chunks which veticies memory is not freed";
 
     return str;
 }

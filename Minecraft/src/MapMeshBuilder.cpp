@@ -9,9 +9,6 @@
 #include <thread>
 
 using namespace World;
-using std::copy;
-using std::inserter;
-using std::advance;
 
 MapMeshBuilder::MapMeshBuilder() :
         m_vertices_generator_thread(&MapMeshBuilder::generate_vertices, this),

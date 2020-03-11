@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "block_db.h"
 
-using std::vector;
 using namespace World;
 
 DB::AtlasDb DB::s_atlas_db;
