@@ -1,7 +1,7 @@
 # Minecraft clone
 Using: c++, openGL 3+, sfml, glm, parallel_hash_map, FastNoise
 
-[Download x64 version](https://github.com/Chekistchek/Minecraft/releases/download/v0.1-alpha/x64.zip)
+[openglCraftx64.zip](https://github.com/Bezhok/Minecraft/files/4319649/openglCraftx64.zip)
 
 # Controls
 | Key | Description |
@@ -20,6 +20,4 @@ Using: c++, openGL 3+, sfml, glm, parallel_hash_map, FastNoise
 - ability to change sun position
 
 # Screenshots
-![1 png](https://user-images.githubusercontent.com/30340548/63799842-930b5380-c915-11e9-8e3a-41c3d26ef291.jpg)
-![3 png](https://user-images.githubusercontent.com/30340548/63799843-930b5380-c915-11e9-8f62-9985b77eba8c.jpg)
-![2](https://user-images.githubusercontent.com/30340548/63799844-93a3ea00-c915-11e9-9261-257a1265205b.png)
+![Annotation 2020-03-11 201549](https://user-images.githubusercontent.com/30340548/76444560-3107cc80-63d5-11ea-8ebf-39e131599d82.png)
